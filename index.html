@@ -1515,8 +1515,12 @@ function showDataNotice(msg, sticky) {
   showDataNotice._t = setTimeout(() => n.classList.remove('show'), sticky ? 15000 : 6000);
 }
 
+function hasDataSource_() {
+  return !!(localStorage.getItem(LS.webapp) || localStorage.getItem(LS.sheetId));
+}
+
 async function refreshData(silent) {
-  if (!localStorage.getItem(LS.sheetId)) return false;
+  if (!hasDataSource_()) return false;
   try {
     await fetchAllSheets();
     applyLiveData();
@@ -1535,7 +1539,7 @@ async function refreshData(silent) {
 async function manualRefresh() {
   const btn = document.getElementById('refreshBtn');
   btn.classList.add('pulsing');
-  if (!localStorage.getItem(LS.sheetId)) {
+  if (!hasDataSource_()) {
     showDataNotice(fetchErrorMessage(new Error('NO_ID')), true);
   } else {
     const ok = await refreshData(false);
