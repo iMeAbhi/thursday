@@ -1,0 +1,1831 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>FinanceOS</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="icon-192.svg">
+<link rel="apple-touch-icon" href="icon-192.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Google+Sans+Display:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   FinanceOS — Material You 3 tonal system seeded from #4f8ef7
+   ============================================================ */
+:root,
+html[data-theme="light"] {
+  --bg: #f8f9ff;
+  --bg2: #f8f9ff;
+  --surface: rgba(255,255,255,0.72);
+  --surface-high: rgba(255,255,255,0.88);
+  --primary: #2d6bc6;
+  --primary-cont: #d6e3ff;
+  --on-prim-cont: #001945;
+  --green: #1a7f4b;
+  --green-cont: #b7f0d4;
+  --red: #ba1a1a;
+  --red-cont: #ffdad6;
+  --gold: #7a5900;
+  --gold-cont: #ffdea8;
+  --purple: #6750a4;
+  --purple-cont: #eaddff;
+  --outline: rgba(0,0,0,0.08);
+  --outline-strong: rgba(0,0,0,0.14);
+  --text: #1a1c22;
+  --text-2: rgba(26,28,34,0.62);
+  --text-3: rgba(26,28,34,0.42);
+  --shadow: 0 1px 3px rgba(20,30,60,0.10);
+  --nav-bg: rgba(248,249,255,0.82);
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --dur: 280ms;
+}
+html[data-theme="dark"] {
+  --bg: #000000;
+  --bg2: #0a0a0a;
+  --surface: rgba(255,255,255,0.055);
+  --surface-high: rgba(255,255,255,0.09);
+  --primary: #adc6ff;
+  --primary-cont: #1050a4;
+  --on-prim-cont: #d6e3ff;
+  --green: #72dba4;
+  --green-cont: rgba(114,219,164,0.12);
+  --red: #ffb4ab;
+  --red-cont: rgba(186,26,26,0.18);
+  --gold: #ffb95d;
+  --gold-cont: rgba(255,185,93,0.10);
+  --purple: #d0bcff;
+  --purple-cont: rgba(103,80,164,0.22);
+  --outline: rgba(255,255,255,0.07);
+  --outline-strong: rgba(255,255,255,0.12);
+  --text: #e7e9f2;
+  --text-2: rgba(231,233,242,0.62);
+  --text-3: rgba(231,233,242,0.40);
+  --shadow: 0 1px 2px rgba(0,0,0,0.6);
+  --nav-bg: rgba(0,0,0,0.82);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Google Sans', Roboto, system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+  overscroll-behavior-y: contain;
+}
+.display { font-family: 'Google Sans Display', 'Google Sans', sans-serif; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+input { font-family: inherit; }
+
+/* ---------- Top bar ---------- */
+.topbar {
+  position: sticky; top: 0; z-index: 50;
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 18px;
+  padding-top: calc(12px + env(safe-area-inset-top, 0px));
+  background: var(--nav-bg);
+  -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  backdrop-filter: blur(24px) saturate(1.8);
+  border-bottom: 1px solid var(--outline);
+  transition: background var(--dur) var(--ease);
+}
+.wordmark {
+  font-family: 'Google Sans Display', sans-serif;
+  font-size: 19px; font-weight: 500; letter-spacing: -0.2px;
+  margin-right: auto;
+}
+.wordmark span { color: var(--primary); }
+.offline-chip {
+  display: none; align-items: center; gap: 5px;
+  font-size: 11.5px; font-weight: 500;
+  padding: 5px 10px; border-radius: 100px;
+  background: var(--gold-cont); color: var(--gold);
+  border: 1px solid var(--outline);
+}
+.offline-chip.show { display: inline-flex; }
+.theme-pill {
+  min-width: 44px; min-height: 44px;
+  height: 44px; padding: 0 6px;
+  display: flex; align-items: center; justify-content: center; gap: 2px;
+  border-radius: 100px;
+  background: var(--surface-high);
+  border: 1px solid var(--outline);
+  transition: all var(--dur) var(--ease);
+}
+.theme-pill .tp-opt {
+  width: 32px; height: 32px; border-radius: 100px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; opacity: 0.45; transition: all var(--dur) var(--ease);
+}
+.theme-pill .tp-opt.active { background: var(--primary-cont); opacity: 1; }
+.iconbtn {
+  min-width: 44px; min-height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 100px; font-size: 18px;
+  transition: background var(--dur) var(--ease);
+}
+.iconbtn:active { background: var(--surface-high); }
+.avatar {
+  width: 38px; height: 38px; min-width: 38px;
+  border-radius: 100px;
+  background: linear-gradient(140deg, var(--primary-cont), var(--purple-cont));
+  color: var(--text);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700;
+  border: 1px solid var(--outline-strong);
+}
+
+/* ---------- Layout / screens ---------- */
+main {
+  max-width: 560px; margin: 0 auto;
+  padding: 18px 16px 110px;
+  overflow-x: hidden;
+}
+.screen { display: none; }
+.screen.active { display: block; animation: slideIn var(--dur) var(--ease); }
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(26px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.screen.slide-left { animation: slideInL var(--dur) var(--ease); }
+@keyframes slideInL {
+  from { opacity: 0; transform: translateX(-26px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.page-title {
+  font-family: 'Google Sans Display', sans-serif;
+  font-size: 26px; font-weight: 500; letter-spacing: -0.3px;
+}
+.page-sub { font-size: 13.5px; color: var(--text-2); margin: 4px 0 18px; }
+
+/* ---------- Cards (Liquid Glass) ---------- */
+.card {
+  background: var(--surface);
+  -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  backdrop-filter: blur(24px) saturate(1.8);
+  border: 1px solid var(--outline);
+  border-radius: 24px;
+  padding: 20px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow);
+  transition: background var(--dur) var(--ease), border var(--dur) var(--ease);
+}
+.eyebrow {
+  font-size: 11px; font-weight: 700; letter-spacing: 1.6px;
+  text-transform: uppercase; color: var(--text-2);
+}
+
+/* ---------- Hero cards ---------- */
+.hero-networth {
+  background: linear-gradient(140deg, var(--primary-cont), var(--purple-cont));
+  border: 1px solid var(--outline-strong);
+  border-radius: 32px;
+  padding: 24px 22px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow);
+}
+.hero-networth .eyebrow { color: var(--on-prim-cont); opacity: 0.75; }
+html[data-theme="dark"] .hero-networth .eyebrow { color: var(--text-2); opacity: 1; }
+.networth-num {
+  font-family: 'Google Sans Display', sans-serif;
+  font-size: 42px; font-weight: 400; letter-spacing: -1px;
+  margin: 6px 0 10px; color: var(--on-prim-cont);
+}
+html[data-theme="dark"] .networth-num { color: #e7ecff; }
+.delta-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 13px; font-weight: 600;
+  padding: 6px 13px; border-radius: 100px;
+  background: var(--green-cont); color: var(--green);
+  border: 1px solid var(--outline);
+}
+html[data-theme="light"] .delta-chip { background: rgba(183,240,212,0.85); }
+.subchip-row { display: flex; gap: 8px; margin-top: 16px; }
+.subchip {
+  flex: 1; min-height: 56px;
+  background: var(--surface-high);
+  -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  backdrop-filter: blur(24px) saturate(1.8);
+  border: 1px solid var(--outline);
+  border-radius: 16px;
+  padding: 9px 11px;
+}
+.subchip .sc-label { font-size: 10.5px; font-weight: 600; letter-spacing: 0.6px; text-transform: uppercase; color: var(--text-2); }
+.subchip .sc-val { font-size: 15.5px; font-weight: 600; margin-top: 2px; }
+.sc-green { color: var(--green); } .sc-red { color: var(--red); } .sc-prim { color: var(--primary); }
+
+/* ---------- Donut ---------- */
+.donut-wrap { display: flex; align-items: center; gap: 22px; margin-top: 14px; }
+.donut { width: 132px; height: 132px; min-width: 132px; transform: rotate(-90deg); }
+.donut circle { fill: none; stroke-width: 4.4; stroke-linecap: butt; transition: stroke var(--dur) var(--ease); }
+.legend { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+.legend-row { display: flex; align-items: center; gap: 10px; font-size: 13.5px; }
+.legend-dot { width: 10px; height: 10px; border-radius: 100px; }
+.legend-row .ln { flex: 1; color: var(--text); }
+.legend-row .lp { font-weight: 600; color: var(--text-2); }
+
+/* ---------- Progress bars ---------- */
+.bar {
+  height: 8px; border-radius: 100px;
+  background: var(--outline-strong);
+  overflow: hidden;
+}
+.bar > i {
+  display: block; height: 100%; border-radius: 100px;
+  transition: width 600ms var(--ease);
+}
+.bar-thin { height: 4px; }
+.fill-gold { background: linear-gradient(90deg, var(--gold), var(--gold)); opacity: 0.95; }
+.fill-green { background: var(--green); }
+.fill-red { background: var(--red); }
+.fill-prim { background: var(--primary); }
+
+/* ---------- Tonal chips ---------- */
+.tchip {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11.5px; font-weight: 700; letter-spacing: 0.4px;
+  padding: 4px 11px; border-radius: 100px;
+}
+.tchip.amber { background: var(--gold-cont); color: var(--gold); }
+.tchip.green { background: var(--green-cont); color: var(--green); }
+.tchip.red   { background: var(--red-cont); color: var(--red); }
+.tchip.prim  { background: var(--primary-cont); color: var(--on-prim-cont); }
+html[data-theme="dark"] .tchip.prim { background: rgba(173,198,255,0.14); color: var(--primary); }
+
+/* ---------- Debt screen ---------- */
+.hero-debt {
+  background: linear-gradient(140deg, var(--red-cont), var(--purple-cont));
+  border: 1px solid var(--outline-strong);
+  border-radius: 32px;
+  padding: 24px 22px; margin-bottom: 18px;
+  box-shadow: var(--shadow);
+}
+.debt-num {
+  font-family: 'Google Sans Display', sans-serif;
+  font-size: 38px; font-weight: 400; letter-spacing: -1px;
+  color: var(--red); margin: 6px 0 14px;
+}
+.freedom-box {
+  display: inline-flex; flex-direction: column; align-items: center;
+  background: var(--surface-high);
+  -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  backdrop-filter: blur(24px) saturate(1.8);
+  border: 1px solid var(--outline);
+  border-radius: 16px;
+  padding: 10px 20px; margin-bottom: 16px;
+}
+.freedom-box b { font-family: 'Google Sans Display', sans-serif; font-size: 30px; font-weight: 500; line-height: 1.1; }
+.freedom-box span { font-size: 11.5px; color: var(--text-2); }
+.section-label {
+  font-size: 12px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase;
+  color: var(--text-2); margin: 20px 4px 10px;
+}
+.loan-row { display: flex; align-items: center; gap: 14px; }
+.loan-icon {
+  width: 46px; height: 46px; min-width: 46px; border-radius: 12px;
+  background: var(--primary-cont); color: var(--on-prim-cont);
+  display: flex; align-items: center; justify-content: center; font-size: 20px;
+}
+html[data-theme="dark"] .loan-icon { color: var(--primary); background: rgba(173,198,255,0.14); }
+.cc-scroll {
+  display: flex; gap: 10px; overflow-x: auto; padding: 2px 2px 10px;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+.cc-scroll::-webkit-scrollbar { display: none; }
+.cc-chip {
+  min-width: 150px; width: 150px;
+  background: var(--surface);
+  -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  backdrop-filter: blur(24px) saturate(1.8);
+  border: 1px solid var(--outline);
+  border-radius: 16px;
+  padding: 14px;
+  box-shadow: var(--shadow);
+}
+.cc-chip.danger { border-color: var(--red); background: var(--red-cont); }
+.cc-chip .cc-name { font-size: 12.5px; font-weight: 600; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cc-chip .cc-util { font-family: 'Google Sans Display', sans-serif; font-size: 26px; font-weight: 500; margin: 4px 0 8px; }
+.cc-chip .cc-due { font-size: 11.5px; color: var(--text-2); margin-top: 8px; }
+.cc-chip .cc-due.urgent { color: var(--red); font-weight: 700; }
+.u-green { color: var(--green); } .u-gold { color: var(--gold); } .u-red { color: var(--red); }
+
+/* ---------- Investments ---------- */
+.banner {
+  display: flex; align-items: center; gap: 12px;
+  border-radius: 16px; padding: 13px 16px; margin-bottom: 14px;
+  font-size: 13.5px; font-weight: 500;
+  border: 1px solid var(--outline);
+  -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  backdrop-filter: blur(24px) saturate(1.8);
+}
+.banner.gold { background: var(--gold-cont); color: var(--gold); }
+.banner.green { background: var(--green-cont); color: var(--green); }
+.banner.red { background: var(--red-cont); color: var(--red); }
+.inv-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 15px 2px;
+  border-bottom: 1px solid var(--outline);
+}
+.inv-row:last-of-type { border-bottom: none; }
+.inv-row .iv-main { flex: 1; min-width: 0; }
+.inv-row .iv-name { font-size: 14.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.inv-row .iv-sub { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+.inv-row .iv-right { text-align: right; }
+.inv-row .iv-val { font-size: 15px; font-weight: 600; }
+.inv-row.muted .iv-name, .inv-row.muted .iv-val { color: var(--text-3); }
+.inv-total {
+  display: flex; justify-content: space-between; gap: 8px;
+  padding-top: 15px; margin-top: 2px;
+  border-top: 1.5px solid var(--outline-strong);
+  font-size: 12.5px;
+}
+.inv-total div { text-align: center; }
+.inv-total .t-label { color: var(--text-2); font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; }
+.inv-total .t-val { font-weight: 700; font-size: 14.5px; margin-top: 3px; }
+
+/* ---------- AI Advisor ---------- */
+.hero-ai {
+  background: linear-gradient(140deg, var(--purple-cont), var(--primary-cont));
+  border: 1px solid var(--outline-strong);
+  border-radius: 32px; padding: 22px; margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+.ai-top { display: flex; align-items: center; gap: 13px; margin-bottom: 16px; }
+.ai-iconbox {
+  width: 46px; height: 46px; min-width: 46px; border-radius: 14px;
+  background: linear-gradient(140deg, var(--purple), var(--primary));
+  display: flex; align-items: center; justify-content: center; font-size: 21px;
+}
+.ai-title { font-family: 'Google Sans Display', sans-serif; font-size: 18px; font-weight: 500; }
+.ai-sub { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+.advice-bubble {
+  background: var(--surface-high);
+  -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  backdrop-filter: blur(24px) saturate(1.8);
+  border: 1px solid var(--outline);
+  border-radius: 16px;
+  padding: 16px; margin-bottom: 16px;
+}
+.advice-line { font-size: 13.8px; line-height: 1.55; padding: 6px 0; }
+.advice-line + .advice-line { border-top: 1px solid var(--outline); }
+.ai-refresh-btn {
+  width: 100%; min-height: 50px;
+  border-radius: 100px;
+  background: linear-gradient(90deg, var(--purple), var(--primary));
+  color: #fff; font-size: 15px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+html[data-theme="dark"] .ai-refresh-btn { color: #0a0a14; }
+.ai-refresh-btn:active { transform: scale(0.98); }
+.ai-refresh-btn:disabled { opacity: 0.6; cursor: default; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.45; } }
+.pulsing { animation: pulse 1.3s ease-in-out infinite; }
+.chat-area { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.chat-bubble {
+  max-width: 84%; padding: 11px 15px; border-radius: 16px;
+  font-size: 13.8px; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word;
+  border: 1px solid var(--outline);
+}
+.chat-bubble.user {
+  align-self: flex-end;
+  background: var(--primary-cont); color: var(--on-prim-cont);
+  border-bottom-right-radius: 8px;
+}
+html[data-theme="dark"] .chat-bubble.user { color: var(--on-prim-cont); }
+.chat-bubble.ai {
+  align-self: flex-start;
+  background: var(--surface-high);
+  -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  backdrop-filter: blur(24px) saturate(1.8);
+  border-bottom-left-radius: 8px;
+}
+.chat-input-row { display: flex; gap: 8px; }
+.chat-input-row input {
+  flex: 1; min-height: 48px;
+  background: var(--surface-high);
+  -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  backdrop-filter: blur(24px) saturate(1.8);
+  border: 1px solid var(--outline-strong);
+  border-radius: 100px;
+  padding: 0 18px; font-size: 14px; color: var(--text);
+  outline: none;
+}
+.chat-input-row input:focus { border-color: var(--primary); }
+.chat-send {
+  width: 48px; min-width: 48px; height: 48px;
+  border-radius: 100px;
+  background: var(--primary); color: var(--bg);
+  font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+}
+html[data-theme="light"] .chat-send { color: #fff; }
+
+/* ---------- Alerts ---------- */
+.alert-row {
+  display: flex; align-items: center; gap: 13px;
+  background: var(--surface);
+  -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  backdrop-filter: blur(24px) saturate(1.8);
+  border: 1px solid var(--outline);
+  border-radius: 16px;
+  padding: 14px 16px; margin-bottom: 10px;
+  box-shadow: var(--shadow);
+}
+.alert-row.sev-red { background: var(--red-cont); border-color: var(--red); }
+.alert-row.sev-gold { background: var(--gold-cont); }
+.alert-row.sev-prim { background: var(--primary-cont); }
+html[data-theme="dark"] .alert-row.sev-prim { background: rgba(173,198,255,0.10); }
+.alert-icon {
+  width: 44px; height: 44px; min-width: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; font-size: 19px;
+  background: var(--surface-high); border: 1px solid var(--outline);
+}
+.alert-main { flex: 1; min-width: 0; }
+.alert-name { font-size: 14.5px; font-weight: 600; }
+.alert-sub { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+.alert-right { text-align: right; }
+.alert-amt { font-size: 15px; font-weight: 700; }
+.days-chip {
+  display: inline-block; margin-top: 4px;
+  font-size: 11px; font-weight: 700;
+  padding: 3px 9px; border-radius: 100px;
+  background: var(--surface-high); border: 1px solid var(--outline);
+  color: var(--text-2);
+}
+.days-chip.red { background: var(--red-cont); color: var(--red); border-color: var(--red); }
+.days-chip.gold { background: var(--gold-cont); color: var(--gold); }
+
+/* ---------- Tax ---------- */
+.regime-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.regime-card {
+  background: var(--surface);
+  -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  backdrop-filter: blur(24px) saturate(1.8);
+  border: 1px solid var(--outline);
+  border-radius: 24px;
+  padding: 18px 16px;
+  box-shadow: var(--shadow);
+}
+.regime-card.winner { background: var(--green-cont); border-color: var(--green); }
+.regime-card .r-name { font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-2); }
+.regime-card .r-amt { font-family: 'Google Sans Display', sans-serif; font-size: 24px; font-weight: 500; margin-top: 8px; }
+.regime-card .r-save { font-size: 12px; font-weight: 700; color: var(--green); margin-top: 5px; }
+.tax-row { display: flex; justify-content: space-between; gap: 12px; padding: 10px 2px; font-size: 13.8px; border-bottom: 1px solid var(--outline); }
+.tax-row:last-child { border-bottom: none; }
+.tax-row .tr-label { color: var(--text-2); }
+.tax-row.total { font-weight: 700; }
+.tax-row.total .tr-label, .tax-row.total .tr-val { color: var(--green); font-size: 15px; }
+
+/* ---------- Bottom nav ---------- */
+.bottomnav {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+  display: flex; justify-content: space-around;
+  padding: 8px 4px calc(10px + env(safe-area-inset-bottom, 0px));
+  background: var(--nav-bg);
+  -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  backdrop-filter: blur(24px) saturate(1.8);
+  border-top: 1px solid var(--outline);
+}
+.navbtn {
+  flex: 1; max-width: 88px;
+  min-height: 54px;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  font-size: 10px; font-weight: 600; color: var(--text-2);
+  transition: color var(--dur) var(--ease);
+  position: relative;
+}
+.navbtn .nicon {
+  font-size: 18px; line-height: 1;
+  padding: 4px 16px; border-radius: 100px;
+  transition: background var(--dur) var(--ease);
+}
+.navbtn.active { color: var(--text); }
+.navbtn.active .nicon { background: var(--primary-cont); }
+html[data-theme="dark"] .navbtn.active .nicon { background: rgba(173,198,255,0.18); }
+
+/* ---------- Setup wizard ---------- */
+.wizard {
+  position: fixed; inset: 0; z-index: 100;
+  background: var(--bg);
+  display: none; flex-direction: column; align-items: center; justify-content: center;
+  padding: 28px;
+  text-align: center;
+}
+.wizard.show { display: flex; }
+.wizard-card {
+  width: 100%; max-width: 420px;
+  background: var(--surface);
+  -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  backdrop-filter: blur(24px) saturate(1.8);
+  border: 1px solid var(--outline);
+  border-radius: 32px;
+  padding: 32px 26px;
+  box-shadow: var(--shadow);
+}
+.wizard-step { display: none; }
+.wizard-step.active { display: block; animation: slideIn var(--dur) var(--ease); }
+.wiz-icon {
+  width: 76px; height: 76px; margin: 0 auto 18px; border-radius: 24px;
+  background: linear-gradient(140deg, var(--primary-cont), var(--purple-cont));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Google Sans Display', sans-serif; font-size: 38px; font-weight: 700; color: var(--primary);
+}
+.wiz-progress { font-size: 11.5px; font-weight: 700; letter-spacing: 1.4px; color: var(--text-2); margin-bottom: 8px; }
+.wiz-title { font-family: 'Google Sans Display', sans-serif; font-size: 23px; font-weight: 500; margin-bottom: 6px; }
+.wiz-sub { font-size: 13.5px; color: var(--text-2); margin-bottom: 22px; line-height: 1.5; }
+.wiz-input {
+  width: 100%; min-height: 50px;
+  background: var(--surface-high);
+  border: 1px solid var(--outline-strong);
+  border-radius: 16px;
+  padding: 0 16px; font-size: 14px; color: var(--text);
+  outline: none; margin-bottom: 8px;
+}
+.wiz-input:focus { border-color: var(--primary); }
+.wiz-helper { font-size: 12px; color: var(--text-3); margin-bottom: 20px; line-height: 1.5; }
+.wiz-helper a { color: var(--primary); text-decoration: none; font-weight: 600; }
+.wiz-btn {
+  width: 100%; min-height: 50px;
+  border-radius: 100px;
+  background: var(--primary); color: #fff;
+  font-size: 15px; font-weight: 600;
+  transition: transform var(--dur) var(--ease);
+}
+html[data-theme="dark"] .wiz-btn { color: #001945; }
+.wiz-btn:active { transform: scale(0.98); }
+.wiz-skip { display: block; margin: 14px auto 0; font-size: 13px; color: var(--text-2); min-height: 44px; }
+.wiz-summary {
+  text-align: left; font-size: 13.5px; line-height: 2;
+  background: var(--surface-high); border: 1px solid var(--outline);
+  border-radius: 16px; padding: 14px 18px; margin-bottom: 20px;
+}
+
+/* ---------- Pull to refresh ---------- */
+.ptr {
+  position: fixed; top: calc(64px + env(safe-area-inset-top, 0px));
+  left: 50%; transform: translate(-50%, -56px); z-index: 60;
+  width: 40px; height: 40px; border-radius: 100px;
+  background: var(--surface-high);
+  -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  backdrop-filter: blur(24px) saturate(1.8);
+  border: 1px solid var(--outline-strong);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px; box-shadow: var(--shadow);
+  transition: transform 200ms var(--ease);
+}
+.ptr.spin { animation: spinAnim 0.9s linear infinite; }
+@keyframes spinAnim { to { transform: translate(-50%, 14px) rotate(360deg); } }
+
+.notice {
+  font-size: 13px; font-weight: 500; line-height: 1.5;
+  color: var(--gold); background: var(--gold-cont);
+  border: 1px solid var(--outline); border-radius: 16px;
+  padding: 11px 16px; margin: 0 0 14px;
+  -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  backdrop-filter: blur(24px) saturate(1.8);
+  display: none;
+}
+.notice.show { display: block; animation: slideIn var(--dur) var(--ease); }
+</style>
+</head>
+<body>
+
+<!-- ================= SETUP WIZARD ================= -->
+<div class="wizard" id="wizard">
+  <div class="wizard-card">
+
+    <div class="wizard-step active" id="wstep1">
+      <div class="wiz-icon">F</div>
+      <div class="wiz-progress">STEP 1 / 3</div>
+      <div class="wiz-title">Welcome to FinanceOS</div>
+      <div class="wiz-sub">Let's connect your data</div>
+      <input class="wiz-input" id="wizSheetId" type="text" autocomplete="off"
+             placeholder="Sheet ID — or private Web App link"
+             oninput="toggleTokenField()">
+      <input class="wiz-input" id="wizToken" type="text" autocomplete="off" style="display:none"
+             placeholder="App access token (CONFIG cell B8)">
+      <div class="wiz-helper" id="wizSheetWarn" style="display:none;color:var(--red)"></div>
+      <div class="wiz-helper">Simple mode: the long code in your Sheet's <b>address bar</b> URL, between <b>/d/</b> and <b>/edit</b> (not the 2PACX publish link).<br>
+      🔒 Private mode: paste your <b>Web App link</b> (starts with script.google.com) and the token from CONFIG cell B8 — see README section "Lock down your Sheet".</div>
+      <button class="wiz-btn" onclick="wizardNext(2)">Next</button>
+      <button class="wiz-skip" onclick="wizardSkip()">Skip for now — explore with sample data</button>
+    </div>
+
+    <div class="wizard-step" id="wstep2">
+      <div class="wiz-icon">✨</div>
+      <div class="wiz-progress">STEP 2 / 3</div>
+      <div class="wiz-title">Add your Gemini AI key</div>
+      <div class="wiz-sub">Free — powers your personal AI advisor</div>
+      <input class="wiz-input" id="wizGeminiKey" type="text" autocomplete="off"
+             placeholder="Paste your Gemini API key">
+      <div class="wiz-helper"><a href="https://aistudio.google.com" target="_blank" rel="noopener">Get a free key →</a> at aistudio.google.com (sign in, tap "Get API key")</div>
+      <button class="wiz-btn" onclick="wizardNext(3)">Next</button>
+      <button class="wiz-skip" onclick="wizardNext(3)">Skip — add it later in Settings</button>
+    </div>
+
+    <div class="wizard-step" id="wstep3">
+      <div class="wiz-icon">🎉</div>
+      <div class="wiz-progress">STEP 3 / 3</div>
+      <div class="wiz-title">You're all set, AB 🎉</div>
+      <div class="wiz-sub">Here's what was saved on this phone (and only this phone):</div>
+      <div class="wiz-summary" id="wizSummary"></div>
+      <button class="wiz-btn" onclick="wizardFinish()">Open Dashboard</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ================= TOP BAR ================= -->
+<header class="topbar">
+  <div class="wordmark">Finance<span>OS</span></div>
+  <span class="offline-chip" id="offlineChip">● Offline</span>
+  <button class="theme-pill" id="themeToggle" aria-label="Toggle theme" onclick="toggleTheme()">
+    <span class="tp-opt" id="tpLight">☀️</span>
+    <span class="tp-opt" id="tpDark">🌑</span>
+  </button>
+  <button class="iconbtn" aria-label="Refresh data" id="refreshBtn" onclick="manualRefresh()">⟳</button>
+  <button class="iconbtn" aria-label="Settings" onclick="openSettings()">⚙️</button>
+  <div class="avatar">AB</div>
+</header>
+
+<div class="ptr" id="ptr" style="display:none">⟳</div>
+
+<main id="main">
+<div class="notice" id="dataNotice">Could not load live data — showing sample data</div>
+
+<!-- ================= 1. HOME ================= -->
+<section class="screen active" id="screen-home">
+  <h1 class="page-title" id="greeting">Good morning, AB</h1>
+  <p class="page-sub" id="homeSub">Today · All figures live</p>
+
+  <div class="hero-networth">
+    <div class="eyebrow">Net Worth</div>
+    <div class="networth-num display" id="netWorthNum">₹14,82,340</div>
+    <span class="delta-chip" id="netWorthDelta">↑ +₹23,410 this month</span>
+    <div class="subchip-row">
+      <div class="subchip"><div class="sc-label">Assets</div><div class="sc-val sc-green" id="chipAssets">₹21.4L</div></div>
+      <div class="subchip"><div class="sc-label">Liabilities</div><div class="sc-val sc-red" id="chipLiab">₹6.9L</div></div>
+      <div class="subchip"><div class="sc-label">Liquid</div><div class="sc-val sc-prim" id="chipLiquid">₹1.8L</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="eyebrow">Asset Allocation</div>
+    <div class="donut-wrap">
+      <svg class="donut" viewBox="0 0 36 36" aria-label="Asset allocation donut chart">
+        <circle cx="18" cy="18" r="15.9155" stroke="var(--outline-strong)" stroke-width="4.4" fill="none"></circle>
+        <circle id="segEquity" cx="18" cy="18" r="15.9155" stroke="var(--primary)" stroke-dasharray="45 55" stroke-dashoffset="0"></circle>
+        <circle id="segFixed"  cx="18" cy="18" r="15.9155" stroke="var(--green)"   stroke-dasharray="27 73" stroke-dashoffset="-45"></circle>
+        <circle id="segGold"   cx="18" cy="18" r="15.9155" stroke="var(--gold)"    stroke-dasharray="18 82" stroke-dashoffset="-72"></circle>
+        <circle id="segCash"   cx="18" cy="18" r="15.9155" stroke="var(--purple)"  stroke-dasharray="10 90" stroke-dashoffset="-90"></circle>
+      </svg>
+      <div class="legend">
+        <div class="legend-row"><span class="legend-dot" style="background:var(--primary)"></span><span class="ln">Equity</span><span class="lp" id="lpEquity">45%</span></div>
+        <div class="legend-row"><span class="legend-dot" style="background:var(--green)"></span><span class="ln">Fixed</span><span class="lp" id="lpFixed">27%</span></div>
+        <div class="legend-row"><span class="legend-dot" style="background:var(--gold)"></span><span class="ln">Gold</span><span class="lp" id="lpGold">18%</span></div>
+        <div class="legend-row"><span class="legend-dot" style="background:var(--purple)"></span><span class="ln">Cash</span><span class="lp" id="lpCash">10%</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div>
+        <div class="eyebrow">Emergency Fund</div>
+        <div class="display" style="font-size:24px;font-weight:500;color:var(--gold);margin-top:5px" id="efAmount">₹1,82,000</div>
+      </div>
+      <span class="tchip amber" id="efChip">VULNERABLE</span>
+    </div>
+    <div class="bar"><i class="fill-gold" id="efBar" style="width:51%"></i></div>
+    <p style="font-size:12.5px;color:var(--text-2);margin-top:9px" id="efSub">51% of 6× monthly obligations · Need ₹1.78L more</p>
+  </div>
+</section>
+
+<!-- ================= 2. DEBT ================= -->
+<section class="screen" id="screen-debt">
+  <h1 class="page-title">Debt Freedom</h1>
+  <p class="page-sub" id="debtSub">38% cleared — past the hardest stretch. Keep going.</p>
+
+  <div class="hero-debt">
+    <div class="eyebrow">Total Outstanding</div>
+    <div class="debt-num display" id="debtTotal">₹6,92,400</div>
+    <div class="freedom-box"><b class="display" id="debtMonths">18</b><span>months to freedom</span></div>
+    <div class="bar"><i class="fill-green" id="debtBar" style="width:38%"></i></div>
+    <p style="font-size:12.5px;color:var(--text-2);margin-top:9px" id="debtFreedomDate">Freedom date · December 2027</p>
+  </div>
+
+  <div class="section-label">Loan</div>
+  <div class="card">
+    <div class="loan-row" style="margin-bottom:13px">
+      <div class="loan-icon">🏦</div>
+      <div style="flex:1">
+        <div style="font-size:14.5px;font-weight:600" id="loanName">IndMoney Personal Loan</div>
+        <div style="font-size:12px;color:var(--text-2);margin-top:2px" id="loanSub">EMI ₹12,400 · 14% p.a.</div>
+      </div>
+      <div style="text-align:right;font-size:13px;font-weight:700;color:var(--red)"><span id="loanRemaining">₹4.8L</span><div style="font-size:10.5px;font-weight:500;color:var(--text-2)">remaining</div></div>
+    </div>
+    <div class="bar"><i class="fill-prim" id="loanBar" style="width:38%"></i></div>
+  </div>
+
+  <div class="section-label">Credit Cards</div>
+  <div class="cc-scroll" id="ccScroll">
+    <!-- populated by JS -->
+  </div>
+</section>
+
+<!-- ================= 3. INVESTMENTS ================= -->
+<section class="screen" id="screen-invest">
+  <h1 class="page-title">Investments</h1>
+  <p class="page-sub">Your portfolio at a glance</p>
+
+  <div class="banner gold" id="ppfBanner">⚠️&nbsp; PPF Account is dormant · Pay ₹500 to reactivate · 7.1% tax-free</div>
+
+  <div class="card" id="invCard">
+    <div class="inv-row">
+      <div class="iv-main"><div class="iv-name">Parag Parikh Flexi Cap</div><div class="iv-sub">SIP ₹5,000/mo</div></div>
+      <div class="iv-right"><div class="iv-val">₹2,14,300</div><span class="tchip green" style="margin-top:4px">+31.2%</span></div>
+    </div>
+    <div class="inv-row">
+      <div class="iv-main"><div class="iv-name">Mirae Asset Large Cap</div><div class="iv-sub">Lumpsum MF</div></div>
+      <div class="iv-right"><div class="iv-val">₹98,400</div><span class="tchip green" style="margin-top:4px">+18.7%</span></div>
+    </div>
+    <div class="inv-row">
+      <div class="iv-main"><div class="iv-name">Gold SIP + Physical</div><div class="iv-sub">14.2g · ₹7,240/g</div></div>
+      <div class="iv-right"><div class="iv-val">₹1,02,800</div><span class="tchip green" style="margin-top:4px">+24.1%</span></div>
+    </div>
+    <div class="inv-row">
+      <div class="iv-main"><div class="iv-name">Recurring Deposit</div><div class="iv-sub">Matures 8 months</div></div>
+      <div class="iv-right"><div class="iv-val">₹84,000</div><span class="tchip green" style="margin-top:4px">+7.2%</span></div>
+    </div>
+    <div class="inv-row muted">
+      <div class="iv-main"><div class="iv-name">PPF Account</div><div class="iv-sub" style="color:var(--gold)">Dormant</div></div>
+      <div class="iv-right"><div class="iv-val">₹42,000</div><span class="tchip amber" style="margin-top:4px">7.1%</span></div>
+    </div>
+    <div class="inv-total">
+      <div><div class="t-label">Invested</div><div class="t-val">₹4,49,400</div></div>
+      <div><div class="t-label">Current</div><div class="t-val">₹5,41,500</div></div>
+      <div><div class="t-label">Overall</div><div class="t-val" style="color:var(--green)">+20.5%</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 4. AI ADVISOR ================= -->
+<section class="screen" id="screen-ai">
+  <h1 class="page-title">AI Advisor</h1>
+  <p class="page-sub">Gemini · reads your actual Sheet data</p>
+
+  <div class="hero-ai">
+    <div class="ai-top">
+      <div class="ai-iconbox">✨</div>
+      <div>
+        <div class="ai-title display" id="aiBriefTitle">June Briefing</div>
+        <div class="ai-sub" id="aiLastAnalysed">Last analysed · 1 June 2026</div>
+      </div>
+    </div>
+    <div class="advice-bubble" id="adviceBubble">
+      <div class="advice-line">🚨 Urgent: Bajaj card due in 2 days. Pay ₹18,400 now to protect CIBIL score.</div>
+      <div class="advice-line">📋 This month: Hold Bajaj usage under ₹7,500 after payment to stay below 30% utilisation.</div>
+      <div class="advice-line">💡 Smart move: Reactivate PPF with ₹500. Continues 80C benefit with zero effort.</div>
+      <div class="advice-line">📊 Health score 61/100 · Debt ratio improving. Emergency fund is the weak point.</div>
+    </div>
+    <button class="ai-refresh-btn" id="aiRefreshBtn" onclick="refreshAdvice()">✨ Refresh with Live Data</button>
+  </div>
+
+  <div class="chat-area" id="chatArea"></div>
+  <div class="chat-input-row">
+    <input type="text" id="chatInput" placeholder="Ask a follow-up question…"
+           onkeydown="if(event.key==='Enter')sendChat()">
+    <button class="chat-send" aria-label="Send" onclick="sendChat()">➤</button>
+  </div>
+</section>
+
+<!-- ================= 5. ALERTS ================= -->
+<section class="screen" id="screen-alerts">
+  <h1 class="page-title">Upcoming</h1>
+  <p class="page-sub" id="alertsSub">5 payments · ₹48,200 total this month</p>
+
+  <div class="banner red" id="alertsBanner">🚨&nbsp; A payment is due within 3 days — act now</div>
+
+  <div id="alertsList"><!-- populated by JS --></div>
+</section>
+
+<!-- ================= 6. TAX ================= -->
+<section class="screen" id="screen-tax">
+  <h1 class="page-title">Tax Optimizer</h1>
+  <p class="page-sub">FY 2025-26</p>
+
+  <div class="banner green" id="taxBanner">🏆&nbsp; New Regime saves you ₹54,600 this financial year</div>
+
+  <div class="regime-grid">
+    <div class="regime-card" id="oldRegimeCard">
+      <div class="r-name">Old Regime</div>
+      <div class="r-amt display" style="color:var(--red)" id="taxOldAmt">₹1,08,200</div>
+      <div class="r-save" id="taxOldSave" style="display:none"></div>
+    </div>
+    <div class="regime-card winner" id="newRegimeCard">
+      <div class="r-name">New Regime</div>
+      <div class="r-amt display" style="color:var(--green)" id="taxNewAmt">₹53,600</div>
+      <div class="r-save" id="taxNewSave">Save ₹54,600</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="eyebrow" style="margin-bottom:8px">New Regime Breakdown</div>
+    <div id="taxBreakdown">
+    <div class="tax-row"><span class="tr-label">Gross Salary</span><span class="tr-val">₹13,20,000</span></div>
+    <div class="tax-row"><span class="tr-label">Standard Deduction</span><span class="tr-val">−₹75,000</span></div>
+    <div class="tax-row"><span class="tr-label">Taxable Income</span><span class="tr-val">₹12,45,000</span></div>
+    <div class="tax-row"><span class="tr-label">₹4–8L @ 5%</span><span class="tr-val">₹20,000</span></div>
+    <div class="tax-row"><span class="tr-label">₹8–12L @ 10%</span><span class="tr-val">₹40,000</span></div>
+    <div class="tax-row"><span class="tr-label">₹12–12.45L @ 15%</span><span class="tr-val">₹6,750</span></div>
+    <div class="tax-row"><span class="tr-label">Health &amp; Education Cess 4%</span><span class="tr-val">₹2,670</span></div>
+    <div class="tax-row total"><span class="tr-label">Total Tax</span><span class="tr-val">₹53,600</span></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ================= BOTTOM NAV ================= -->
+<nav class="bottomnav">
+  <button class="navbtn active" data-screen="home"   onclick="goScreen('home')"><span class="nicon">🏠</span>Home</button>
+  <button class="navbtn" data-screen="debt"   onclick="goScreen('debt')"><span class="nicon">💳</span>Debt</button>
+  <button class="navbtn" data-screen="invest" onclick="goScreen('invest')"><span class="nicon">📈</span>Invest</button>
+  <button class="navbtn" data-screen="ai"     onclick="goScreen('ai')"><span class="nicon">✨</span>AI</button>
+  <button class="navbtn" data-screen="alerts" onclick="goScreen('alerts')"><span class="nicon">⏰</span>Alerts</button>
+  <button class="navbtn" data-screen="tax"    onclick="goScreen('tax')"><span class="nicon">🧾</span>Tax</button>
+</nav>
+
+<script>
+/* ============================================================
+   FinanceOS app logic
+   ============================================================ */
+'use strict';
+
+const LS = {
+  theme: 'fos_theme',
+  sheetId: 'fos_sheet_id',
+  geminiKey: 'fos_gemini_key',
+  cachedData: 'fos_cached_data',
+  webapp: 'fos_webapp_url',
+  appToken: 'fos_app_token'
+};
+
+const SHEET_TABS = ['CONFIG','ACCOUNTS','EQUITY_MF','GOLD','FIXED_INCOME','LIABILITIES','NET_WORTH','TAX'];
+
+const GEMINI_SYSTEM_PROMPT =
+`You are a personal finance advisor for AB, an Indian professional.
+Analyse the financial data provided and give specific, actionable advice.
+Always use ₹ and Indian number formatting (lakhs/crores).
+Reference actual numbers from the data — never give generic advice.
+Format your response with exactly 4 lines starting with these emojis:
+🚨 for urgent actions, 📋 for this month priorities, 💡 for one smart move,
+📊 for health score out of 100 with one reason.
+Be direct. Maximum 2 sentences per line.`;
+
+let chatHistory = [];   // Gemini multi-turn: [{role:'user'|'model', parts:[{text}]}]
+let sheetData = {};     // tabName -> parsed rows
+
+/* ---------- Indian number formatting ---------- */
+function fmtINR(n) {
+  n = Math.round(Number(n) || 0);
+  const neg = n < 0; n = Math.abs(n);
+  let s = String(n);
+  if (s.length > 3) {
+    const last3 = s.slice(-3);
+    let rest = s.slice(0, -3);
+    rest = rest.replace(/\B(?=(\d{2})+(?!\d))/g, ',');
+    s = rest + ',' + last3;
+  }
+  return (neg ? '−₹' : '₹') + s;
+}
+function fmtCompact(n) {
+  n = Number(n) || 0;
+  const neg = n < 0; n = Math.abs(n);
+  let out;
+  if (n >= 1e7) out = '₹' + (n / 1e7).toFixed(1).replace(/\.0$/, '') + 'Cr';
+  else if (n >= 1e5) out = '₹' + (n / 1e5).toFixed(1).replace(/\.0$/, '') + 'L';
+  else out = fmtINR(n);
+  return (neg ? '−' : '') + out;
+}
+
+/* ---------- Theme ---------- */
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('tpLight').classList.toggle('active', theme === 'light');
+  document.getElementById('tpDark').classList.toggle('active', theme === 'dark');
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', theme === 'dark' ? '#000000' : '#f8f9ff');
+}
+function toggleTheme() {
+  const cur = document.documentElement.getAttribute('data-theme');
+  const next = cur === 'dark' ? 'light' : 'dark';
+  localStorage.setItem(LS.theme, next);
+  applyTheme(next);
+}
+applyTheme(localStorage.getItem(LS.theme) || 'dark');
+
+/* ---------- Greeting / date ---------- */
+function setGreeting() {
+  const h = new Date().getHours();
+  const part = h < 12 ? 'morning' : (h < 17 ? 'afternoon' : 'evening');
+  document.getElementById('greeting').textContent = 'Good ' + part + ', AB';
+  const opts = { weekday: 'long', day: 'numeric', month: 'long' };
+  document.getElementById('homeSub').textContent =
+    new Date().toLocaleDateString('en-IN', opts) + ' · All figures live';
+}
+setGreeting();
+
+/* ---------- Navigation (slide transitions) ---------- */
+const SCREEN_ORDER = ['home','debt','invest','ai','alerts','tax'];
+let currentScreen = 'home';
+function goScreen(name) {
+  if (name === currentScreen) return;
+  const fromIdx = SCREEN_ORDER.indexOf(currentScreen);
+  const toIdx = SCREEN_ORDER.indexOf(name);
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active', 'slide-left'));
+  const el = document.getElementById('screen-' + name);
+  el.classList.add('active');
+  if (toIdx < fromIdx) el.classList.add('slide-left');
+  document.querySelectorAll('.navbtn').forEach(b =>
+    b.classList.toggle('active', b.dataset.screen === name));
+  currentScreen = name;
+  window.scrollTo({ top: 0 });
+}
+
+/* ---------- Sample data (works on first run, no Sheet needed) ---------- */
+const SAMPLE_CARDS = [
+  { name: 'ICICI Coral',  util: 12, sev: 'green', due: 14, outstanding: 18000 },
+  { name: 'Amex',         util: 44, sev: 'gold',  due: 5,  outstanding: 132000 },
+  { name: 'Bajaj',        util: 71, sev: 'red',   due: 2,  outstanding: 71000 },
+  { name: 'Kotak',        util: 8,  sev: 'green', due: 20, outstanding: 16000 },
+  { name: 'Amazon Pay',   util: 31, sev: 'gold',  due: 9,  outstanding: 24800 },
+  { name: 'Scapia',       util: 0,  sev: 'green', due: null, outstanding: 0 }
+];
+const SAMPLE_ALERTS = [
+  { name: 'Bajaj Card',        sub: 'Credit card due',  amt: 18400, days: 2,  icon: '💳' },
+  { name: 'Amex Card',         sub: 'Credit card due',  amt: 8200,  days: 5,  icon: '💳' },
+  { name: 'Parag Parikh SIP',  sub: 'Monthly deduction',amt: 5000,  days: 9,  icon: '📈' },
+  { name: 'IndMoney EMI',      sub: 'Loan EMI',         amt: 12400, days: 12, icon: '🏦' },
+  { name: 'Recurring Deposit', sub: 'Monthly RD',       amt: 4200,  days: 15, icon: '🏛️' }
+];
+
+function renderCards(cards) {
+  const sevClass = { green: 'u-green', gold: 'u-gold', red: 'u-red' };
+  const fillClass = { green: 'fill-green', gold: 'fill-gold', red: 'fill-red' };
+  document.getElementById('ccScroll').innerHTML = cards.map(c => {
+    const dueText = c.due === null ? 'No dues' :
+      (c.due <= 2 ? `Due in ${c.due}d !` : `Due in ${c.due}d`);
+    const urgent = c.due !== null && c.due <= 2;
+    return `<div class="cc-chip ${c.sev === 'red' ? 'danger' : ''}">
+      <div class="cc-name">${c.name}</div>
+      <div class="cc-util display ${sevClass[c.sev]}">${c.util}%</div>
+      <div class="bar bar-thin"><i class="${fillClass[c.sev]}" style="width:${Math.max(c.util,2)}%"></i></div>
+      <div class="cc-due ${urgent ? 'urgent' : ''}">${dueText}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderAlerts(alerts) {
+  alerts.sort((a, b) => a.days - b.days);
+  const total = alerts.reduce((s, a) => s + a.amt, 0);
+  document.getElementById('alertsSub').textContent =
+    `${alerts.length} payments · ${fmtINR(total)} total this month`;
+
+  const minDays = alerts.length ? alerts[0].days : 99;
+  const banner = document.getElementById('alertsBanner');
+  if (minDays <= 3) {
+    banner.className = 'banner red';
+    banner.innerHTML = '🚨&nbsp; A payment is due within 3 days — act now';
+    banner.style.display = '';
+  } else if (minDays <= 7) {
+    banner.className = 'banner gold';
+    banner.innerHTML = '⚠️&nbsp; A payment is due within 7 days';
+    banner.style.display = '';
+  } else {
+    banner.style.display = 'none';
+  }
+
+  document.getElementById('alertsList').innerHTML = alerts.map(a => {
+    let sev = '', chip = '';
+    if (a.days <= 3) { sev = 'sev-red'; chip = 'red'; }
+    else if (a.days <= 7) { sev = 'sev-gold'; chip = 'gold'; }
+    else if (a.days <= 10) { sev = 'sev-prim'; chip = ''; }
+    return `<div class="alert-row ${sev}">
+      <div class="alert-icon">${a.icon}</div>
+      <div class="alert-main">
+        <div class="alert-name">${a.name}</div>
+        <div class="alert-sub">${a.sub}</div>
+      </div>
+      <div class="alert-right">
+        <div class="alert-amt">${fmtINR(a.amt)}</div>
+        <span class="days-chip ${chip}">${a.days} day${a.days === 1 ? '' : 's'}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+renderCards(SAMPLE_CARDS);
+renderAlerts(SAMPLE_ALERTS.slice());
+
+/* ---------- CSV parsing (handles quoted commas) ---------- */
+function parseCSV(text) {
+  const rows = []; let row = [], cur = '', inQ = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQ) {
+      if (c === '"') {
+        if (text[i + 1] === '"') { cur += '"'; i++; }
+        else inQ = false;
+      } else cur += c;
+    } else {
+      if (c === '"') inQ = true;
+      else if (c === ',') { row.push(cur); cur = ''; }
+      else if (c === '\n') { row.push(cur); rows.push(row); row = []; cur = ''; }
+      else if (c !== '\r') cur += c;
+    }
+  }
+  if (cur !== '' || row.length) { row.push(cur); rows.push(row); }
+  return rows;
+}
+function toNum(v) {
+  if (v == null) return NaN;
+  return parseFloat(String(v).replace(/[₹,\s%]/g, ''));
+}
+
+/* ---------- Sheet fetching ---------- */
+function sheetUrl(tab) {
+  const id = localStorage.getItem(LS.sheetId);
+  return `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tab)}`;
+}
+
+function looksLikePublishId(id) { return /^2PACX/i.test(id || ''); }
+
+/* JSONP fallback — loads the tab via a <script> tag, which works even when
+   fetch() is blocked (file:// pages, Brave Shields, strict ad-blockers). */
+function fetchTabJsonp_(tab) {
+  return new Promise((resolve, reject) => {
+    const id = localStorage.getItem(LS.sheetId);
+    const cbName = 'fosCb_' + tab.replace(/\W/g, '') + '_' + Date.now();
+    const script = document.createElement('script');
+    const timer = setTimeout(() => { cleanup(); reject(new Error('TIMEOUT')); }, 15000);
+    function cleanup() { try { delete window[cbName]; } catch (e) {} script.remove(); clearTimeout(timer); }
+    window[cbName] = (resp) => {
+      cleanup();
+      if (!resp || !resp.table) return reject(new Error('NOT_PUBLIC'));
+      const rows = [];
+      const labels = (resp.table.cols || []).map(c => c.label || '');
+      if (labels.some(l => l)) rows.push(labels);
+      (resp.table.rows || []).forEach(r => {
+        rows.push((r.c || []).map(c =>
+          c == null ? '' : (c.f != null ? String(c.f) : (c.v == null ? '' : String(c.v)))));
+      });
+      resolve(rows);
+    };
+    script.src = 'https://docs.google.com/spreadsheets/d/' + id +
+      '/gviz/tq?tqx=out:json;responseHandler:' + cbName + '&sheet=' + encodeURIComponent(tab);
+    script.onerror = () => { cleanup(); reject(new Error('SCRIPT_FAIL')); };
+    document.head.appendChild(script);
+  });
+}
+
+async function fetchTab_(tab) {
+  try {
+    const r = await fetch(sheetUrl(tab));
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const text = await r.text();
+    // A login/permission page comes back as HTML, not CSV
+    if (/^\s*</.test(text)) throw new Error('NOT_PUBLIC');
+    return { tab, rows: parseCSV(text) };
+  } catch (e) {
+    try { return { tab, rows: await fetchTabJsonp_(tab) }; }
+    catch (e2) { throw (e2.message === 'NOT_PUBLIC' ? e2 : e); }
+  }
+}
+
+/* ----- Private mode: personal Apps Script web app ----- */
+function webAppJsonp_(url) {
+  return new Promise((resolve, reject) => {
+    const cbName = 'fosWa_' + Date.now();
+    const script = document.createElement('script');
+    const timer = setTimeout(() => { cleanup(); reject(new Error('TIMEOUT')); }, 20000);
+    function cleanup() { try { delete window[cbName]; } catch (e) {} script.remove(); clearTimeout(timer); }
+    window[cbName] = (resp) => { cleanup(); resolve(resp); };
+    script.src = url + '&callback=' + cbName;
+    script.onerror = () => { cleanup(); reject(new Error('WEBAPP_FAIL')); };
+    document.head.appendChild(script);
+  });
+}
+
+async function fetchViaWebApp() {
+  const base = localStorage.getItem(LS.webapp);
+  const token = localStorage.getItem(LS.appToken) || '';
+  const url = base + '?token=' + encodeURIComponent(token);
+  let data;
+  try {
+    const r = await fetch(url, { redirect: 'follow' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const text = await r.text();
+    if (/^\s*</.test(text)) throw new Error('WEBAPP_FAIL');
+    data = JSON.parse(text);
+  } catch (e) {
+    data = await webAppJsonp_(url); // CORS/Shields/file:// fallback
+  }
+  if (data && (data.error === 'bad_token' || data.error === 'no_token_set')) throw new Error('BAD_TOKEN');
+  if (!data || !data.tabs) throw new Error('WEBAPP_FAIL');
+  sheetData = data.tabs;
+  try { localStorage.setItem(LS.cachedData, JSON.stringify(data.tabs)); } catch (e) {}
+  return sheetData;
+}
+
+async function fetchAllSheets() {
+  if (localStorage.getItem(LS.webapp)) return fetchViaWebApp();
+  const id = localStorage.getItem(LS.sheetId);
+  if (!id) throw new Error('NO_ID');
+  if (looksLikePublishId(id)) throw new Error('BAD_ID');
+  const results = await Promise.allSettled(SHEET_TABS.map(fetchTab_));
+  const data = {};
+  let ok = 0, notPublic = false;
+  results.forEach(r => {
+    if (r.status === 'fulfilled') { data[r.value.tab] = r.value.rows; ok++; }
+    else if (r.reason && r.reason.message === 'NOT_PUBLIC') notPublic = true;
+  });
+  if (ok === 0) throw new Error(notPublic ? 'NOT_PUBLIC' : 'FETCH_FAIL');
+  sheetData = data;
+  try { localStorage.setItem(LS.cachedData, JSON.stringify(data)); } catch (e) {}
+  return data;
+}
+
+function fetchErrorMessage(e) {
+  switch (e && e.message) {
+    case 'NO_ID':
+      return 'No Sheet ID yet — tap ⚙️ to add it';
+    case 'BAD_ID':
+      return 'That ID is the "Publish to web" link (starts with 2PACX). Tap ⚙️ and paste the ID from the Sheet’s address bar instead — the code between /d/ and /edit';
+    case 'NOT_PUBLIC':
+      return 'Google won’t let the app read the Sheet. In Google Sheets tap Share → under "General access" choose "Anyone with the link" (Viewer), then refresh';
+    case 'BAD_TOKEN':
+      return 'Private mode: the access token doesn’t match. In your Sheet run 💰 FinanceOS → 🔐 Generate App Token, then copy CONFIG cell B8 into ⚙️ Settings here';
+    case 'WEBAPP_FAIL':
+      return 'Private mode: couldn’t reach your web app. Check the script.google.com link in ⚙️ Settings (it must end in /exec)';
+    default:
+      return navigator.onLine
+        ? 'Could not reach Google Sheets. Check: ① Share → "Anyone with the link" (Viewer) is set, ② your ad-blocker / Brave Shields is off for this page'
+        : 'You’re offline — showing last saved data';
+  }
+}
+
+/* Find a row in NET_WORTH by label (col A), return col B as number */
+function nwValue(label) {
+  const rows = sheetData.NET_WORTH || [];
+  for (const r of rows) {
+    if (r[0] && r[0].toLowerCase().includes(label.toLowerCase())) return toNum(r[1]);
+  }
+  return NaN;
+}
+
+function setText(id, v) { const el = document.getElementById(id); if (el) el.textContent = v; }
+
+function applyLiveData() {
+  applyHome_();
+  const loan = applyDebtAndAlerts_();
+  applyInvest_();
+  applyTax_();
+}
+
+/* ----- Home: hero, delta, donut, emergency fund ----- */
+function applyHome_() {
+  const nw = nwValue('NET WORTH');
+  const assets = nwValue('Total Assets');
+  const liabs = nwValue('Total Liabilities');
+  const liquid = nwValue('Total Liquid Cash');
+  if (!isNaN(nw)) {
+    setText('netWorthNum', fmtINR(nw));
+    // Delta vs a baseline stored at the first sync of each month
+    const chip = document.getElementById('netWorthDelta');
+    try {
+      const ym = new Date().toISOString().slice(0, 7);
+      let base = JSON.parse(localStorage.getItem('fos_nw_baseline') || 'null');
+      if (!base || base.ym !== ym) {
+        base = { ym, v: nw };
+        localStorage.setItem('fos_nw_baseline', JSON.stringify(base));
+      }
+      const delta = nw - base.v;
+      if (delta === 0) chip.style.display = 'none';
+      else {
+        chip.style.display = '';
+        chip.textContent = (delta > 0 ? '↑ +' : '↓ −') + fmtINR(Math.abs(delta)) + ' this month';
+        chip.style.background = delta > 0 ? '' : 'var(--red-cont)';
+        chip.style.color = delta > 0 ? '' : 'var(--red)';
+      }
+    } catch (e) {}
+  }
+  if (!isNaN(assets)) setText('chipAssets', fmtCompact(assets));
+  if (!isNaN(liabs)) {
+    setText('chipLiab', fmtCompact(liabs));
+    setText('debtTotal', fmtINR(liabs));
+  }
+  if (!isNaN(liquid)) {
+    setText('chipLiquid', fmtCompact(liquid));
+    setText('efAmount', fmtINR(liquid));
+  }
+  // Donut from the four asset components
+  const eqV = nwValue('Total Equity'), goldV = nwValue('Total Gold'), fixV = nwValue('Total Fixed Income');
+  if (![eqV, goldV, fixV, liquid].some(isNaN)) {
+    const segs = [
+      ['segEquity', 'lpEquity', Math.max(0, eqV)],
+      ['segFixed', 'lpFixed', Math.max(0, fixV)],
+      ['segGold', 'lpGold', Math.max(0, goldV)],
+      ['segCash', 'lpCash', Math.max(0, liquid)]
+    ];
+    const sum = segs.reduce((s, x) => s + x[2], 0);
+    if (sum > 0) {
+      let off = 0;
+      segs.forEach(([cid, lid, v]) => {
+        const pct = v / sum * 100;
+        const c = document.getElementById(cid);
+        c.setAttribute('stroke-dasharray', pct + ' ' + (100 - pct));
+        c.setAttribute('stroke-dashoffset', String(-off));
+        setText(lid, Math.round(pct) + '%');
+        off += pct;
+      });
+    }
+  }
+  // Emergency fund
+  const efTarget = nwValue('Emergency Fund Target');
+  if (!isNaN(liquid) && !isNaN(efTarget) && efTarget > 0) {
+    const pctRaw = liquid / efTarget * 100;
+    const pct = Math.min(100, Math.round(pctRaw));
+    document.getElementById('efBar').style.width = pct + '%';
+    const need = Math.max(0, efTarget - liquid);
+    setText('efSub', `${pct}% of 6× monthly obligations · Need ${fmtCompact(need)} more`);
+    const chip = document.getElementById('efChip');
+    if (pctRaw >= 100) { chip.textContent = 'SAFE'; chip.className = 'tchip green'; }
+    else if (pctRaw >= 50) { chip.textContent = 'VULNERABLE'; chip.className = 'tchip amber'; }
+    else { chip.textContent = 'CRITICAL'; chip.className = 'tchip red'; }
+  }
+}
+
+/* ----- LIABILITIES parsing: cards section, then loans section ----- */
+function parseLiabilities_() {
+  const rows = sheetData.LIABILITIES || [];
+  const cards = [];
+  let loan = null, inLoans = false;
+  for (const r of rows) {
+    const name = (r[0] || '').trim();
+    if (/^card$/i.test(name)) continue;            // cards header
+    if (/^loan$/i.test(name)) { inLoans = true; continue; } // loans header
+    if (!name) continue;                           // blank separator
+    if (!inLoans) {
+      const limit = toNum(r[2]), outst = toNum(r[3]), days = toNum(r[7]);
+      if (isNaN(limit) || limit <= 0) continue;
+      const util = Math.round((outst / limit) * 100);
+      const sev = util >= 60 ? 'red' : (util >= 30 ? 'gold' : 'green');
+      cards.push({ name, util, sev, due: isNaN(days) ? null : days, outstanding: outst });
+    } else if (!loan) {
+      loan = {
+        name, lender: (r[1] || '').trim(),
+        principal: toNum(r[2]), roi: toNum(r[3]), emi: toNum(r[4]), start: (r[5] || '').trim(),
+        tenure: toNum(r[6]), paid: toNum(r[7]), remaining: toNum(r[8]),
+        monthsLeft: toNum(r[9]), freeDate: (r[10] || '').trim()
+      };
+    }
+  }
+  return { cards, loan };
+}
+
+function nextDueDays_(dayOfMonth) {
+  const now = new Date();
+  const todayMid = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  let due = new Date(now.getFullYear(), now.getMonth(), dayOfMonth);
+  if (due < todayMid) due = new Date(now.getFullYear(), now.getMonth() + 1, dayOfMonth);
+  return Math.round((due - todayMid) / 86400000);
+}
+
+/* ----- Debt screen + card chips + alerts ----- */
+function applyDebtAndAlerts_() {
+  if (!sheetData.LIABILITIES) return null;
+  const { cards, loan } = parseLiabilities_();
+  const alerts = [];
+
+  if (loan) {
+    setText('loanName', (loan.lender ? loan.lender + ' ' : '') + loan.name);
+    setText('loanSub', 'EMI ' + fmtINR(loan.emi) + (isNaN(loan.roi) ? '' : ' · ' + loan.roi + '% p.a.'));
+    if (!isNaN(loan.remaining)) setText('loanRemaining', fmtCompact(loan.remaining));
+    const prog = loan.tenure > 0 && !isNaN(loan.paid)
+      ? Math.min(100, Math.round(loan.paid / loan.tenure * 100)) : 0;
+    document.getElementById('loanBar').style.width = prog + '%';
+    document.getElementById('debtBar').style.width = prog + '%';
+    if (!isNaN(loan.monthsLeft)) setText('debtMonths', String(Math.round(loan.monthsLeft)));
+    if (loan.freeDate) setText('debtFreedomDate', 'Freedom date · ' + loan.freeDate);
+    setText('debtSub',
+      prog >= 75 ? prog + '% cleared — the finish line is in sight.' :
+      prog >= 50 ? prog + '% cleared — more behind you than ahead. Keep going.' :
+      prog >= 25 ? prog + '% cleared — past the hardest stretch. Keep going.' :
+                   prog + '% cleared — every EMI from here builds momentum.');
+    // EMI reminder from the loan's start-date day-of-month
+    const d = new Date(loan.start);
+    if (!isNaN(loan.emi) && loan.emi > 0 && !isNaN(d.getTime())) {
+      alerts.push({ name: (loan.lender || 'Loan') + ' EMI', sub: 'Loan EMI', amt: loan.emi, days: nextDueDays_(d.getDate()), icon: '🏦' });
+    }
+  }
+
+  if (cards.length) {
+    renderCards(cards);
+    cards.forEach(c => {
+      if (c.due !== null && c.due >= 0 && c.due <= 31 && c.outstanding > 0) {
+        alerts.push({ name: c.name + ' Card', sub: 'Credit card due', amt: c.outstanding, days: c.due, icon: '💳' });
+      }
+    });
+  }
+
+  // RD reminder from FIXED_INCOME (monthly amount like "4200/mo")
+  (sheetData.FIXED_INCOME || []).forEach((r, i) => {
+    if (i === 0) return;
+    if (!/^RD$/i.test((r[0] || '').trim())) return;
+    const amt = toNum(r[2]);
+    const d = new Date((r[4] || '').trim());
+    const status = (r[10] || '').toUpperCase();
+    if (!isNaN(amt) && amt > 0 && !isNaN(d.getTime()) && status.indexOf('MATURED') === -1) {
+      alerts.push({ name: 'Recurring Deposit', sub: 'Monthly RD', amt, days: nextDueDays_(d.getDate()), icon: '🏛️' });
+    }
+  });
+
+  if (cards.length || loan) renderAlerts(alerts);
+  return loan;
+}
+
+/* ----- Investments screen from EQUITY_MF + GOLD + FIXED_INCOME ----- */
+function applyInvest_() {
+  const eq = sheetData.EQUITY_MF, gold = sheetData.GOLD, fixed = sheetData.FIXED_INCOME;
+  if (!eq && !gold && !fixed) return;
+  const items = [];
+  let invested = 0, current = 0, dormant = false;
+
+  (eq || []).forEach((r, i) => {
+    if (i === 0) return;
+    const name = (r[0] || '').trim();
+    if (!name) return;
+    const inv = toNum(r[6]), cur = toNum(r[7]), ret = toNum(r[8]);
+    if (isNaN(cur) || cur <= 0) return;
+    invested += isNaN(inv) ? cur : inv;
+    current += cur;
+    items.push({ name, sub: (r[1] || '').trim(), val: cur, ret: isNaN(ret) ? null : ret, kind: 'equity' });
+  });
+
+  let gGrams = 0, gInv = 0, gCur = 0, gRate = NaN;
+  (gold || []).forEach((r, i) => {
+    if (i === 0) return;
+    const name = (r[0] || '').trim();
+    if (!name) return;
+    const cur = toNum(r[6]);
+    if (isNaN(cur) || cur <= 0) return;
+    gGrams += toNum(r[1]) || 0;
+    gInv += toNum(r[4]) || 0;
+    gCur += cur;
+    const rate = toNum(r[5]);
+    if (!isNaN(rate)) gRate = rate;
+  });
+  if (gCur > 0) {
+    invested += gInv || gCur;
+    current += gCur;
+    items.push({
+      name: 'Gold',
+      sub: (Math.round(gGrams * 10) / 10) + 'g' + (isNaN(gRate) ? '' : ' · ' + fmtINR(gRate) + '/g'),
+      val: gCur,
+      ret: gInv > 0 ? (gCur - gInv) / gInv * 100 : null,
+      kind: 'equity'
+    });
+  }
+
+  (fixed || []).forEach((r, i) => {
+    if (i === 0) return;
+    const name = (r[0] || '').trim();
+    if (!name) return;
+    const bal = toNum(r[6]);
+    if (isNaN(bal) || bal <= 0) return;
+    const status = (r[10] || '').toUpperCase();
+    const isDormant = status.indexOf('DORMANT') !== -1;
+    if (isDormant) dormant = true;
+    const rate = toNum(r[3]), months = toNum(r[9]);
+    invested += bal;
+    current += bal;
+    items.push({
+      name: name + ((r[1] || '').trim() ? ' · ' + (r[1] || '').trim() : ''),
+      sub: isDormant ? 'Dormant' : (isNaN(months) ? 'Fixed income' : 'Matures ' + Math.round(months) + ' months'),
+      val: bal, ret: isNaN(rate) ? null : rate, kind: 'fixed', muted: isDormant
+    });
+  });
+
+  if (!items.length) return;
+  const rowsHtml = items.map(it => {
+    let chip = '';
+    if (it.ret !== null) {
+      if (it.kind === 'fixed') chip = `<span class="tchip amber" style="margin-top:4px">${it.ret.toFixed(1)}%</span>`;
+      else {
+        const pos = it.ret >= 0;
+        chip = `<span class="tchip ${pos ? 'green' : 'red'}" style="margin-top:4px">${pos ? '+' : ''}${it.ret.toFixed(1)}%</span>`;
+      }
+    }
+    return `<div class="inv-row ${it.muted ? 'muted' : ''}">
+      <div class="iv-main"><div class="iv-name">${escapeHtml(it.name)}</div><div class="iv-sub"${it.muted ? ' style="color:var(--gold)"' : ''}>${escapeHtml(it.sub)}</div></div>
+      <div class="iv-right"><div class="iv-val">${fmtINR(it.val)}</div>${chip}</div>
+    </div>`;
+  }).join('');
+  const overall = invested > 0 ? (current - invested) / invested * 100 : 0;
+  document.getElementById('invCard').innerHTML = rowsHtml + `
+    <div class="inv-total">
+      <div><div class="t-label">Invested</div><div class="t-val">${fmtINR(invested)}</div></div>
+      <div><div class="t-label">Current</div><div class="t-val">${fmtINR(current)}</div></div>
+      <div><div class="t-label">Overall</div><div class="t-val" style="color:var(--${overall >= 0 ? 'green' : 'red'})">${overall >= 0 ? '+' : ''}${overall.toFixed(1)}%</div></div>
+    </div>`;
+  document.getElementById('ppfBanner').style.display = dormant ? '' : 'none';
+}
+
+/* ----- Tax screen from the TAX tab ----- */
+function taxValue_(label) {
+  const rows = sheetData.TAX || [];
+  for (const r of rows) {
+    if ((r[0] || '').toLowerCase().includes(label.toLowerCase())) return r[1];
+  }
+  return null;
+}
+function lakh_(n) { return String(Math.round(n / 1000) / 100).replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, ''); }
+
+function applyTax_() {
+  if (!sheetData.TAX) return;
+  const oldT = toNum(taxValue_('OLD REGIME TOTAL TAX'));
+  const newT = toNum(taxValue_('NEW REGIME TOTAL TAX'));
+  const gross = toNum(taxValue_('Gross CTC'));
+  if (isNaN(oldT) || isNaN(newT)) return;
+  setText('taxOldAmt', fmtINR(oldT));
+  setText('taxNewAmt', fmtINR(newT));
+  const newWins = newT <= oldT;
+  const save = Math.abs(oldT - newT);
+  document.getElementById('newRegimeCard').classList.toggle('winner', newWins);
+  document.getElementById('oldRegimeCard').classList.toggle('winner', !newWins);
+  const newSave = document.getElementById('taxNewSave'), oldSave = document.getElementById('taxOldSave');
+  newSave.style.display = newWins ? '' : 'none';
+  oldSave.style.display = newWins ? 'none' : '';
+  (newWins ? newSave : oldSave).textContent = 'Save ' + fmtINR(save);
+  document.getElementById('taxBanner').innerHTML =
+    '🏆&nbsp; ' + (newWins ? 'New' : 'Old') + ' Regime saves you ' + fmtINR(save) + ' this financial year';
+
+  // New-regime breakdown recomputed from gross (matches the sheet's slab formulas)
+  if (!isNaN(gross) && gross > 0) {
+    const taxable = Math.max(0, gross - 75000);
+    const rows = [
+      ['Gross Salary', fmtINR(gross)],
+      ['Standard Deduction', '−' + fmtINR(75000)],
+      ['Taxable Income', fmtINR(taxable)]
+    ];
+    const slabs = [
+      [400000, 800000, 0.05], [800000, 1200000, 0.10], [1200000, 1600000, 0.15],
+      [1600000, 2000000, 0.20], [2000000, 2400000, 0.25], [2400000, Infinity, 0.30]
+    ];
+    let tax = 0;
+    slabs.forEach(([lo, hi, rate]) => {
+      const amt = Math.max(0, Math.min(taxable, hi) - lo);
+      if (amt > 0) {
+        tax += amt * rate;
+        rows.push(['₹' + lakh_(lo) + '–' + lakh_(Math.min(taxable, hi)) + 'L @ ' + Math.round(rate * 100) + '%', fmtINR(amt * rate)]);
+      }
+    });
+    if (taxable <= 1200000 && tax > 0) { rows.push(['87A Rebate', '−' + fmtINR(tax)]); tax = 0; }
+    rows.push(['Health & Education Cess 4%', fmtINR(tax * 0.04)]);
+    document.getElementById('taxBreakdown').innerHTML =
+      rows.map(r => `<div class="tax-row"><span class="tr-label">${escapeHtml(r[0])}</span><span class="tr-val">${r[1]}</span></div>`).join('') +
+      `<div class="tax-row total"><span class="tr-label">Total Tax</span><span class="tr-val">${fmtINR(newT)}</span></div>`;
+  }
+}
+
+function showDataNotice(msg, sticky) {
+  const n = document.getElementById('dataNotice');
+  n.textContent = msg;
+  n.classList.add('show');
+  clearTimeout(showDataNotice._t);
+  showDataNotice._t = setTimeout(() => n.classList.remove('show'), sticky ? 15000 : 6000);
+}
+
+async function refreshData(silent) {
+  if (!localStorage.getItem(LS.sheetId)) return false;
+  try {
+    await fetchAllSheets();
+    applyLiveData();
+    return true;
+  } catch (e) {
+    // fall back to cached copy
+    try {
+      const cached = localStorage.getItem(LS.cachedData);
+      if (cached) { sheetData = JSON.parse(cached); applyLiveData(); }
+    } catch (e2) {}
+    if (!silent) showDataNotice(fetchErrorMessage(e), true);
+    return false;
+  }
+}
+
+async function manualRefresh() {
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('pulsing');
+  if (!localStorage.getItem(LS.sheetId)) {
+    showDataNotice(fetchErrorMessage(new Error('NO_ID')), true);
+  } else {
+    const ok = await refreshData(false);
+    if (ok) showDataNotice('Live data loaded from your Sheet ✓');
+  }
+  btn.classList.remove('pulsing');
+}
+
+/* ---------- Gemini ---------- */
+function buildContext() {
+  let ctx = 'FINANCIAL DATA FROM GOOGLE SHEET (CSV per tab):\n\n';
+  let any = false;
+  for (const tab of SHEET_TABS) {
+    const rows = sheetData[tab];
+    if (!rows || !rows.length) continue;
+    any = true;
+    ctx += `=== ${tab} ===\n`;
+    ctx += rows.slice(0, 40).map(r => r.join(' | ')).join('\n') + '\n\n';
+  }
+  if (!any) {
+    ctx += `(Live sheet unavailable — using app sample data)
+Net worth ₹14,82,340 (up ₹23,410 this month). Assets ₹21.4L, Liabilities ₹6.92L, Liquid ₹1.82L.
+Emergency fund 51% of 6× monthly obligations target, need ₹1.78L more — VULNERABLE.
+Debt: IndMoney personal loan ₹4.8L remaining at 14% p.a., EMI ₹12,400, 18 months to freedom (Dec 2027), 38% cleared.
+Credit cards: Bajaj ₹71,000 outstanding 71% utilisation DUE IN 2 DAYS (min due ₹18,400); Amex ₹1,32,000 / 44% due 5d; Amazon Pay ₹24,800 / 31% due 9d; ICICI Coral ₹18,000 / 12% due 14d; Kotak ₹16,000 / 8% due 20d; Scapia ₹0.
+Investments: Parag Parikh Flexi Cap ₹2,14,300 (+31.2%, SIP ₹5,000/mo); Mirae Large Cap ₹98,400 (+18.7%); Gold ₹1,02,800 (+24.1%); RD ₹84,000 (+7.2%); PPF ₹42,000 DORMANT (needs ₹500 to reactivate).
+Tax FY2025-26: New regime ₹53,600 vs old ₹1,08,200 — new saves ₹54,600. Gross salary ₹13,20,000.\n`;
+  }
+  return ctx;
+}
+
+async function callGemini(contents) {
+  const key = localStorage.getItem(LS.geminiKey);
+  if (!key) throw new Error('NO_KEY');
+  const res = await fetch(
+    'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' +
+    encodeURIComponent(key),
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: GEMINI_SYSTEM_PROMPT }] },
+        contents,
+        generationConfig: { maxOutputTokens: 500, temperature: 0.4 }
+      })
+    }
+  );
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const data = await res.json();
+  const text = data && data.candidates && data.candidates[0] &&
+    data.candidates[0].content && data.candidates[0].content.parts &&
+    data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text;
+  if (!text) throw new Error('EMPTY');
+  return text.trim();
+}
+
+async function refreshAdvice() {
+  const btn = document.getElementById('aiRefreshBtn');
+  const bubble = document.getElementById('adviceBubble');
+  btn.disabled = true;
+  const oldHtml = bubble.innerHTML;
+  bubble.innerHTML = '<div class="advice-line pulsing">✨ Analysing your finances…</div>';
+  try {
+    // 1-2. fetch all tabs (non-fatal if it fails — falls back to sample context)
+    try { await fetchAllSheets(); applyLiveData(); } catch (e) {}
+    // 3-4. build context, call Gemini
+    const userMsg = buildContext() +
+      '\nGive me my monthly financial briefing in the required 4-line format.';
+    const reply = await callGemini([{ role: 'user', parts: [{ text: userMsg }] }]);
+    chatHistory = [
+      { role: 'user', parts: [{ text: userMsg }] },
+      { role: 'model', parts: [{ text: reply }] }
+    ];
+    // 5. display response
+    const lines = reply.split('\n').map(l => l.trim()).filter(Boolean);
+    bubble.innerHTML = lines.map(l =>
+      `<div class="advice-line">${escapeHtml(l)}</div>`).join('');
+    // 6. timestamp
+    document.getElementById('aiLastAnalysed').textContent = 'Last analysed · Just now';
+    const monthName = new Date().toLocaleDateString('en-IN', { month: 'long' });
+    document.getElementById('aiBriefTitle').textContent = monthName + ' Briefing';
+  } catch (e) {
+    bubble.innerHTML = oldHtml;
+    showDataNotice(e.message === 'NO_KEY'
+      ? 'AI unavailable — add your API key in Settings (⚙️)'
+      : 'AI unavailable — check your API key in Settings');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+async function sendChat() {
+  const input = document.getElementById('chatInput');
+  const q = input.value.trim();
+  if (!q) return;
+  input.value = '';
+  const area = document.getElementById('chatArea');
+  area.insertAdjacentHTML('beforeend',
+    `<div class="chat-bubble user">${escapeHtml(q)}</div>`);
+  const thinkingId = 'th' + Date.now();
+  area.insertAdjacentHTML('beforeend',
+    `<div class="chat-bubble ai pulsing" id="${thinkingId}">Thinking…</div>`);
+  area.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  try {
+    // Ensure context exists for first question
+    let contents;
+    if (chatHistory.length === 0) {
+      try { await fetchAllSheets(); } catch (e) {}
+      const ctxMsg = buildContext() + '\nQuestion: ' + q +
+        '\n(For follow-up questions you may answer naturally — the 4-line format is only for briefings.)';
+      contents = [{ role: 'user', parts: [{ text: ctxMsg }] }];
+      chatHistory.push({ role: 'user', parts: [{ text: ctxMsg }] });
+    } else {
+      chatHistory.push({ role: 'user', parts: [{ text: q }] });
+      contents = chatHistory.slice();
+    }
+    const reply = await callGemini(contents);
+    chatHistory.push({ role: 'model', parts: [{ text: reply }] });
+    const el = document.getElementById(thinkingId);
+    el.classList.remove('pulsing');
+    el.textContent = reply;
+    el.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  } catch (e) {
+    const el = document.getElementById(thinkingId);
+    el.classList.remove('pulsing');
+    el.textContent = e.message === 'NO_KEY'
+      ? 'AI unavailable — add your free Gemini API key in Settings (⚙️).'
+      : 'AI unavailable — check your API key in Settings.';
+  }
+}
+
+/* ---------- Setup wizard ---------- */
+function toggleTokenField() {
+  const v = document.getElementById('wizSheetId').value;
+  document.getElementById('wizToken').style.display =
+    v.includes('script.google.com') ? '' : 'none';
+}
+
+function wizardNext(step) {
+  if (step === 2) {
+    const v = document.getElementById('wizSheetId').value.trim();
+    const warn = document.getElementById('wizSheetWarn');
+    if (v.includes('script.google.com')) {
+      // 🔒 Private mode: web app URL + token, sheet stays Restricted
+      const base = v.split('?')[0];
+      if (!/\/exec\/?$/.test(base)) {
+        warn.textContent = '⚠️ That link doesn\'t end in /exec. Copy the "Web app URL" from Deploy → Manage deployments.';
+        warn.style.display = 'block';
+        return;
+      }
+      const tok = document.getElementById('wizToken').value.trim();
+      if (!tok) {
+        warn.textContent = '⚠️ Private mode needs the access token too — copy it from CONFIG cell B8 in your Sheet.';
+        warn.style.display = 'block';
+        return;
+      }
+      warn.style.display = 'none';
+      localStorage.setItem(LS.webapp, base.replace(/\/$/, ''));
+      localStorage.setItem(LS.appToken, tok);
+    } else if (v) {
+      const id = extractSheetId(v);
+      if (looksLikePublishId(id)) {
+        warn.textContent = '⚠️ That\'s the "Publish to web" link. Open your Sheet normally and copy the code from the address bar — between /d/ and /edit.';
+        warn.style.display = 'block';
+        return; // stay on this step until a usable ID is pasted
+      }
+      warn.style.display = 'none';
+      localStorage.setItem(LS.sheetId, id);
+      localStorage.removeItem(LS.webapp); // switching back to simple mode
+      localStorage.removeItem(LS.appToken);
+    }
+  }
+  if (step === 3) {
+    const k = document.getElementById('wizGeminiKey').value.trim();
+    if (k) localStorage.setItem(LS.geminiKey, k);
+    const wa = localStorage.getItem(LS.webapp);
+    const sid = localStorage.getItem(LS.sheetId);
+    const gk = localStorage.getItem(LS.geminiKey);
+    document.getElementById('wizSummary').innerHTML =
+      (wa
+        ? `🔒 Private mode · <b>web app</b> connected, Sheet stays Restricted<br>`
+        : `📄 Sheet ID · ${sid ? '<b>' + escapeHtml(sid.slice(0, 8)) + '…</b> saved' : 'not set (sample data)'}<br>`) +
+      `✨ Gemini key · ${gk ? '<b>' + escapeHtml(gk.slice(0, 6)) + '…</b> saved' : 'not set (add later)'}<br>` +
+      `🔒 Stored on this phone only — never sent anywhere`;
+  }
+  document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('wstep' + step).classList.add('active');
+}
+function extractSheetId(v) {
+  // Accept either a bare ID or a full URL pasted by mistake
+  // (handles both /d/ID/edit and the published /d/e/2PACX… form)
+  const m = v.match(/\/d\/(?:e\/)?([a-zA-Z0-9-_]{20,})/);
+  return m ? m[1] : v;
+}
+function wizardSkip() { wizardNext(3); }
+function wizardFinish() {
+  localStorage.setItem('fos_setup_done', '1');
+  document.getElementById('wizard').classList.remove('show');
+  manualRefresh(); // immediate feedback: success tick or a specific fix-it message
+}
+function openSettings() {
+  document.getElementById('wizSheetId').value =
+    localStorage.getItem(LS.webapp) || localStorage.getItem(LS.sheetId) || '';
+  document.getElementById('wizToken').value = localStorage.getItem(LS.appToken) || '';
+  toggleTokenField();
+  document.getElementById('wizGeminiKey').value = localStorage.getItem(LS.geminiKey) || '';
+  document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('wstep1').classList.add('active');
+  document.getElementById('wizard').classList.add('show');
+}
+if (!localStorage.getItem('fos_setup_done')) {
+  document.getElementById('wizard').classList.add('show');
+}
+
+/* ---------- Offline indicator ---------- */
+function updateOnline() {
+  document.getElementById('offlineChip').classList.toggle('show', !navigator.onLine);
+}
+window.addEventListener('online', updateOnline);
+window.addEventListener('offline', updateOnline);
+updateOnline();
+
+/* ---------- Pull to refresh ---------- */
+(function () {
+  let startY = 0, pulling = false, dist = 0;
+  const ptr = document.getElementById('ptr');
+  document.addEventListener('touchstart', (e) => {
+    if (window.scrollY <= 0 && !document.getElementById('wizard').classList.contains('show')) {
+      startY = e.touches[0].clientY; pulling = true; dist = 0;
+    }
+  }, { passive: true });
+  document.addEventListener('touchmove', (e) => {
+    if (!pulling) return;
+    dist = e.touches[0].clientY - startY;
+    if (dist > 12) {
+      ptr.style.display = 'flex';
+      const t = Math.min(dist * 0.45, 70) - 56;
+      ptr.style.transform = `translate(-50%, ${t}px) rotate(${dist * 2}deg)`;
+    }
+  }, { passive: true });
+  document.addEventListener('touchend', async () => {
+    if (!pulling) return;
+    pulling = false;
+    if (dist > 110) {
+      ptr.classList.add('spin');
+      ptr.style.transform = 'translate(-50%, 14px)';
+      await refreshData(false);
+      setGreeting();
+      ptr.classList.remove('spin');
+    }
+    ptr.style.transform = 'translate(-50%, -56px)';
+    setTimeout(() => { ptr.style.display = 'none'; }, 250);
+  }, { passive: true });
+})();
+
+/* ---------- Service worker ---------- */
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  navigator.serviceWorker.register('sw.js').then(async (reg) => {
+    // Periodic background sync (30 min) where supported
+    try {
+      if ('periodicSync' in reg) {
+        await reg.periodicSync.register('financeos-refresh', { minInterval: 30 * 60 * 1000 });
+      }
+    } catch (e) { /* permission denied — page timer covers it */ }
+  }).catch(() => {});
+  navigator.serviceWorker.addEventListener('message', (e) => {
+    if (e.data && e.data.type === 'OFFLINE_DATA') {
+      const chip = document.getElementById('offlineChip');
+      chip.textContent = '● Offline — showing last data';
+      chip.classList.add('show');
+    }
+    if (e.data && e.data.type === 'SHEETS_REFRESHED') refreshData(true);
+  });
+}
+// Universal fallback: refresh Sheet data every 30 min while the app is open
+setInterval(() => { if (navigator.onLine) refreshData(true); }, 30 * 60 * 1000);
+
+/* ---------- Boot ---------- */
+// Try cached data instantly, then go live
+try {
+  const cached = localStorage.getItem(LS.cachedData);
+  if (cached) { sheetData = JSON.parse(cached); applyLiveData(); }
+} catch (e) {}
+refreshData(true);
+</script>
+</body>
+</html>
