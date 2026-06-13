@@ -1137,6 +1137,7 @@ html[data-theme="dark"] .set-btn.danger { color: var(--red); }
     <div class="ledger-row"><label>Transport <span class="pred-sub">(fuel, transit, cabs)</span></label><div class="ledger-input"><span>₹</span><input type="number" inputmode="numeric" id="ceTransport" oninput="saveCoreExpense('transport',this.value)" placeholder="0"></div></div>
     <div class="ledger-row"><label>Groceries & Household</label><div class="ledger-input"><span>₹</span><input type="number" inputmode="numeric" id="ceGroceries" oninput="saveCoreExpense('groceries',this.value)" placeholder="0"></div></div>
     <div class="pred-line total"><span>Total core fixed / month</span><span id="ceTotal">₹0</span></div>
+    <div class="pred-sub" id="ceSyncNote" style="text-align:right;min-height:14px;color:var(--green)"></div>
   </div>
 
   <!-- Widget: Pre-Flight Liquidity Check (Safe-to-Spend) -->
@@ -1265,7 +1266,7 @@ const GEMINI_FALLBACK_MODELS = [
   'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-3.5-flash', 'gemini-2.5-flash-lite'
 ];
 
-const SHEET_TABS = ['CONFIG','ACCOUNTS','EQUITY_MF','GOLD','FIXED_INCOME','LIABILITIES','SUBSCRIPTIONS','CARD_EMIS','CARD_SWIPES','NET_WORTH','TAX'];
+const SHEET_TABS = ['CONFIG','ACCOUNTS','EQUITY_MF','GOLD','FIXED_INCOME','LIABILITIES','SUBSCRIPTIONS','CARD_EMIS','CARD_SWIPES','CORE_EXPENSES','NET_WORTH','TAX'];
 
 const GEMINI_SYSTEM_PROMPT =
 `You are a personal finance advisor for AB, an Indian professional.
@@ -1696,6 +1697,7 @@ function nwValue(label) {
 function setText(id, v) { const el = document.getElementById(id); if (el) el.textContent = v; }
 
 function applyLiveData() {
+  syncCoreFromSheet_();   // Sheet is source of truth for the baseline
   applyHome_();
   const loan = applyDebtAndAlerts_();
   applyInvest_();
@@ -2287,7 +2289,9 @@ let debtTrack = 'avalanche';
 function getPrepay_() { return parseInt(localStorage.getItem('fos_prepay') || '0', 10) || 0; }
 function getVarSpend_() { const v = localStorage.getItem('fos_var_spend'); return v === null ? 20000 : (parseInt(v, 10) || 0); }
 
-/* ----- Core Fixed Expenses ledger (stored on this device) ----- */
+/* ----- Core Fixed Expenses ledger ----- */
+// Device-cached for instant edits; mirrored to the Sheet (CORE_EXPENSES tab) so a
+// panic-wipe never loses it — the Sheet is the source of truth on reconnect.
 const CORE_FIELDS = ['rent', 'utilities', 'transport', 'groceries'];
 function getCoreExpenses_() {
   let o; try { o = JSON.parse(localStorage.getItem('fos_core_expenses') || '{}'); } catch (e) { o = {}; }
@@ -2302,14 +2306,66 @@ function saveCoreExpense(field, value) {
   try { localStorage.setItem('fos_core_expenses', JSON.stringify(o)); } catch (e) {}
   setText('ceTotal', fmtINR(totalCoreFixed_()));
   renderPredictions_();
+  pushCoreExpenses_();          // mirror to the Sheet (debounced)
 }
 function renderCoreLedger_() {
   const c = getCoreExpenses_();
   CORE_FIELDS.forEach(f => {
     const el = document.getElementById('ce' + f.charAt(0).toUpperCase() + f.slice(1));
-    if (el && c[f] > 0 && el.value === '') el.value = c[f];
+    if (el && c[f] > 0 && document.activeElement !== el) el.value = c[f];
   });
   setText('ceTotal', fmtINR(totalCoreFixed_()));
+}
+
+// Debounced push of the baseline to the Sheet via the private web app (token-protected).
+let coreyPushTimer = null;
+function pushCoreExpenses_() {
+  const base = localStorage.getItem(LS.webapp);
+  const token = localStorage.getItem(LS.appToken);
+  if (!base || !token) return; // only available in private (web app) mode
+  clearTimeout(coreyPushTimer);
+  coreyPushTimer = setTimeout(() => {
+    const c = getCoreExpenses_();
+    const url = base + '?action=saveCore&token=' + encodeURIComponent(token) +
+      '&rent=' + c.rent + '&utilities=' + c.utilities + '&transport=' + c.transport + '&groceries=' + c.groceries;
+    // JSONP keeps it CORS-free and lets us confirm the write
+    webAppJsonp_(url).then(r => {
+      if (r && r.ok) { const n = document.getElementById('ceSyncNote'); if (n) { n.textContent = 'Synced to your Sheet ✓'; setTimeout(() => { n.textContent = ''; }, 2500); } }
+    }).catch(() => {});
+  }, 900);
+}
+
+// Sheet is source of truth: pull CORE_EXPENSES into the local cache on each load.
+function syncCoreFromSheet_() {
+  const rows = sheetData.CORE_EXPENSES;
+  if (!rows || rows.length < 2) return;
+  const map = { rent: /rent|housing/i, utilities: /utilit/i, transport: /transport|fuel|commute/i, groceries: /grocer|household/i };
+  const o = getCoreExpenses_();
+  let any = false;
+  rows.forEach((r, i) => {
+    if (i === 0) return;
+    const label = (r[0] || ''); const amt = toNum(r[1]);
+    if (isNaN(amt)) return;
+    for (const key in map) { if (map[key].test(label)) { o[key] = amt; any = true; } }
+  });
+  if (any) {
+    try { localStorage.setItem('fos_core_expenses', JSON.stringify(o)); } catch (e) {}
+    CORE_FIELDS.forEach(f => { const el = document.getElementById('ce' + f.charAt(0).toUpperCase() + f.slice(1)); if (el && document.activeElement !== el) el.value = o[f] > 0 ? o[f] : ''; });
+    setText('ceTotal', fmtINR(totalCoreFixed_()));
+  }
+}
+// Checking balance = sum of savings/current accounts (fallback to liquid / sample)
+function checkingBalance_() {
+  const rows = sheetData.ACCOUNTS;
+  if (rows && rows.length) {
+    let sum = 0, found = false;
+    rows.forEach((r, i) => {
+      if (i === 0) return;
+      if (/saving|current|checking|salary/i.test((r[2] || '') + (r[0] || ''))) { sum += toNum(r[3]) || 0; found = true; }
+    });
+    if (found) return sum;
+  }
+  return Object.keys(sheetData).length ? 0 : 95000; // sample checking on first run
 }
 // Checking balance = sum of savings/current accounts (fallback to liquid / sample)
 function checkingBalance_() {
