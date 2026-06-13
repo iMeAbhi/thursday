@@ -1054,7 +1054,7 @@ html[data-theme="dark"] .set-btn.danger { color: var(--red); }
   <div id="loansList"><!-- populated by JS --></div>
 
   <div class="section-label">Credit Cards</div>
-  <p class="page-sub" style="margin:-2px 2px 10px">Tap a card to see its EMIs &amp; one-time swipes</p>
+  <p class="page-sub" style="margin:-2px 2px 10px">Tap a card to see its EMIs &amp; pay-in-full amount</p>
   <div id="cardsList"><!-- populated by JS --></div>
 
   <div class="section-label">Recurring Subscriptions</div>
@@ -1266,7 +1266,7 @@ const GEMINI_FALLBACK_MODELS = [
   'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-3.5-flash', 'gemini-2.5-flash-lite'
 ];
 
-const SHEET_TABS = ['CONFIG','ACCOUNTS','EQUITY_MF','GOLD','FIXED_INCOME','LIABILITIES','SUBSCRIPTIONS','CARD_EMIS','CARD_SWIPES','CORE_EXPENSES','NET_WORTH','TAX'];
+const SHEET_TABS = ['CONFIG','ACCOUNTS','EQUITY_MF','GOLD','FIXED_INCOME','LIABILITIES','SUBSCRIPTIONS','CORE_EXPENSES','NET_WORTH','TAX'];
 
 const GEMINI_SYSTEM_PROMPT =
 `You are a personal finance advisor for AB, an Indian professional.
@@ -1274,9 +1274,9 @@ Analyse the financial data provided and give specific, actionable advice.
 Always use ₹ and Indian number formatting (lakhs/crores).
 Reference actual numbers from the data — never give generic advice.
 Do NOT give tax-liability or tax-buffer advice — a dedicated Tax Optimizer already covers that.
-Prioritise credit-card billing insight: use each card's limit, utilisation, running EMIs
-(CARD_EMIS) and one-time swipes (CARD_SWIPES) to flag the projected next statement and
-keep utilisation under 30%.
+Prioritise credit-card billing insight: use each card's limit, utilisation, and the
+Card EMIs listed in LIABILITIES. The pay-in-full amount = outstanding − remaining EMI
+balance. Flag the projected statement and keep utilisation under 30%.
 Format your response with exactly 4 lines starting with these emojis:
 🚨 for urgent actions, 📋 for this month priorities, 💡 for one smart move,
 📊 for health score out of 100 with one reason.
@@ -1419,13 +1419,18 @@ function filterFromChart(bucket) {
 
 /* ---------- Sample data (works on first run, no Sheet needed) ---------- */
 const SAMPLE_CARDS = [
-  { name: 'ICICI Coral',  util: 12, sev: 'green', due: 14, outstanding: 18000 },
-  { name: 'Amex',         util: 44, sev: 'gold',  due: 5,  outstanding: 132000 },
-  { name: 'Bajaj',        util: 71, sev: 'red',   due: 2,  outstanding: 71000 },
-  { name: 'Kotak',        util: 8,  sev: 'green', due: 20, outstanding: 16000 },
-  { name: 'Amazon Pay',   util: 31, sev: 'gold',  due: 9,  outstanding: 24800 },
-  { name: 'Scapia',       util: 0,  sev: 'green', due: null, outstanding: 0 }
+  { name: 'ICICI Coral',  limit: 150000, util: 12, sev: 'green', due: 14, outstanding: 18000 },
+  { name: 'Amex',         limit: 300000, util: 44, sev: 'gold',  due: 5,  outstanding: 132000 },
+  { name: 'Bajaj',        limit: 100000, util: 71, sev: 'red',   due: 2,  outstanding: 71000 },
+  { name: 'Kotak',        limit: 200000, util: 8,  sev: 'green', due: 20, outstanding: 16000 },
+  { name: 'Amazon Pay',   limit: 80000,  util: 31, sev: 'gold',  due: 9,  outstanding: 24800 },
+  { name: 'Scapia',       limit: 50000,  util: 0,  sev: 'green', due: null, outstanding: 0 }
 ];
+const SAMPLE_EMIS = [
+  { card: 'Amex',  desc: 'iPhone 15 Pro', installment: 8500, total: 12, paid: 3, roi: 0.16, monthsRemaining: 9, balance: 76500 },
+  { card: 'Bajaj', desc: 'Laptop',        installment: 5200, total: 9,  paid: 2, roi: 0.18, monthsRemaining: 7, balance: 36400 }
+];
+SAMPLE_CARDS.forEach(c => augmentCard_(c, SAMPLE_EMIS));
 const SAMPLE_ALERTS = [
   { name: 'Bajaj Card',        sub: 'Credit card due',  amt: 18400, days: 2,  icon: '💳' },
   { name: 'Amex Card',         sub: 'Credit card due',  amt: 8200,  days: 5,  icon: '💳' },
@@ -1864,20 +1869,22 @@ function renderEFBreakdown_() {
 /* ----- LIABILITIES parsing: cards section, then loans section ----- */
 function parseLiabilities_() {
   const rows = sheetData.LIABILITIES || [];
-  const cards = [], loans = [];
-  let inLoans = false;
+  const cards = [], loans = [], emis = [];
+  let section = 'cards';
   for (const r of rows) {
     const name = (r[0] || '').trim();
-    if (/^card$/i.test(name)) continue;            // cards header
-    if (/^loan$/i.test(name)) { inLoans = true; continue; } // loans header
-    if (!name) continue;                           // blank separator
-    if (!inLoans) {
+    if (/^card emis?\b/i.test(name)) { section = 'emis'; continue; }  // "Card EMIs" marker
+    if (/^loan$/i.test(name)) { section = 'loans'; continue; }
+    if (/^card$/i.test(name)) { section = 'cards'; continue; }
+    if (/^on card$/i.test(name)) continue;                            // EMI column-header row
+    if (!name) continue;                                              // blank separator
+    if (section === 'cards') {
       const limit = toNum(r[2]), outst = toNum(r[3]), days = toNum(r[7]);
       if (isNaN(limit) || limit <= 0) continue;
       const util = Math.round((outst / limit) * 100);
       const sev = util >= 60 ? 'red' : (util >= 30 ? 'gold' : 'green');
       cards.push({ name, limit, util, sev, due: isNaN(days) ? null : days, outstanding: outst });
-    } else {
+    } else if (section === 'loans') {
       const principal = toNum(r[2]);
       if (isNaN(principal) || principal <= 0) continue;
       let roi = toNum(r[3]);
@@ -1888,9 +1895,31 @@ function parseLiabilities_() {
         tenure: toNum(r[6]), paid: toNum(r[7]), remaining: toNum(r[8]),
         monthsLeft: toNum(r[9]), freeDate: (r[10] || '').trim()
       });
+    } else if (section === 'emis') {
+      const inst = toNum(r[2]);
+      if (isNaN(inst) || inst <= 0) continue;
+      const total = toNum(r[3]), paid = toNum(r[4]);
+      const remMonths = Math.max(0, (isNaN(total) ? 0 : total) - (isNaN(paid) ? 0 : paid));
+      let roi = toNum(r[5]); if (!isNaN(roi) && roi > 1) roi = roi / 100;
+      emis.push({
+        card: name, desc: (r[1] || '').trim(), installment: inst,
+        total, paid, roi, monthsRemaining: remMonths, balance: inst * remMonths
+      });
     }
   }
-  return { cards, loans, loan: loans[0] || null };
+  cards.forEach(c => augmentCard_(c, emis));
+  return { cards, loans, loan: loans[0] || null, emis };
+}
+
+// Derive each card's EMI load and the "pay in full" swipe amount (no swipes tab needed):
+//   pay-in-full = Outstanding − remaining EMI balance on that card
+function augmentCard_(c, emis) {
+  const mine = emis.filter(e => e.card.toLowerCase() === (c.name || '').toLowerCase());
+  c.emis = mine;
+  c.emiInstallment = mine.reduce((s, e) => s + (e.monthsRemaining > 0 ? e.installment : 0), 0);
+  c.emiRemaining = mine.reduce((s, e) => s + e.balance, 0);
+  c.payInFull = Math.max(0, c.outstanding - c.emiRemaining);
+  return c;
 }
 
 /* ----- Parsers for the new sheet tabs ----- */
@@ -1914,42 +1943,7 @@ function parseSubscriptions_() {
   });
   return subs;
 }
-function parseCardEmis_() {
-  const rows = sheetData.CARD_EMIS || [];
-  const emis = [];
-  rows.forEach((r, i) => {
-    if (i === 0) return;
-    const card = (r[0] || '').trim();
-    if (!card) return;
-    const inst = toNum(r[2]);
-    if (isNaN(inst)) return;
-    const total = toNum(r[3]), paid = toNum(r[4]);
-    const remMonths = Math.max(0, (isNaN(total) ? 0 : total) - (isNaN(paid) ? 0 : paid));
-    let roi = toNum(r[5]);
-    if (!isNaN(roi) && roi > 1) roi = roi / 100; // "16.0%" → 0.16
-    emis.push({
-      card, desc: (r[1] || '').trim(), installment: inst,
-      total, paid, roi,
-      monthsRemaining: remMonths, balance: inst * remMonths
-    });
-  });
-  return emis;
-}
-function parseCardSwipes_() {
-  const rows = sheetData.CARD_SWIPES || [];
-  const swipes = [];
-  rows.forEach((r, i) => {
-    if (i === 0) return;
-    const card = (r[0] || '').trim();
-    if (!card) return;
-    const amt = toNum(r[2]);
-    if (isNaN(amt)) return;
-    swipes.push({ card, desc: (r[1] || '').trim(), amount: amt, date: (r[3] || '').trim(), category: (r[4] || '').trim() });
-  });
-  return swipes;
-}
-function emisForCard_(name) { return parseCardEmis_().filter(e => e.card.toLowerCase() === name.toLowerCase()); }
-function swipesForCard_(name) { return parseCardSwipes_().filter(s => s.card.toLowerCase() === name.toLowerCase()); }
+function emisForCard_(name) { return parseLiabilities_().emis.filter(e => e.card.toLowerCase() === name.toLowerCase()); }
 
 function nextDueDays_(dayOfMonth) {
   const now = new Date();
@@ -1984,14 +1978,15 @@ function renderCardsSection_(cards) {
   const sevClass = { green: 'u-green', gold: 'u-gold', red: 'u-red' };
   const fillClass = { green: 'fill-green', gold: 'fill-gold', red: 'fill-red' };
   el.innerHTML = cards.length ? cards.map((c, i) => {
-    const emis = emisForCard_(c.name), swipes = swipesForCard_(c.name);
+    const emis = c.emis || emisForCard_(c.name);
     const dueTxt = c.due === null ? 'No dues' : (c.due <= 2 ? `Due in ${c.due}d !` : `Due in ${c.due}d`);
     const emiHtml = emis.length ? emis.map(e =>
       `<div class="drawer-row"><div><div>${escapeHtml(e.desc || 'EMI')}</div><div class="dr-sub">${fmtINR(e.installment)}/mo · ${e.monthsRemaining} of ${isNaN(e.total) ? '?' : e.total} left${isNaN(e.roi) ? '' : ' · ' + (e.roi * 100).toFixed(0) + '%'}</div></div><div class="dr-amt">${fmtINR(e.balance)}</div></div>`
     ).join('') : '<div class="drawer-empty">No active EMIs on this card</div>';
-    const swHtml = swipes.length ? swipes.map(s =>
-      `<div class="drawer-row"><div><div>${escapeHtml(s.desc || 'Swipe')}</div><div class="dr-sub">${escapeHtml(s.category || '')}${s.date ? ' · ' + s.date : ''}</div></div><div class="dr-amt">${fmtINR(s.amount)}</div></div>`
-    ).join('') : '<div class="drawer-empty">No one-time swipes logged</div>';
+    // Pay-in-full is derived, not logged: outstanding − remaining EMI balance
+    const payHtml =
+      `<div class="drawer-row"><div><div>Pay in full now</div><div class="dr-sub">₹${fmtINR(c.outstanding).slice(1)} outstanding − ₹${fmtINR(c.emiRemaining || 0).slice(1)} on EMI</div></div><div class="dr-amt">${fmtINR(c.payInFull || 0)}</div></div>` +
+      (c.emiInstallment ? `<div class="drawer-row"><div><div>EMI installments this cycle</div><div class="dr-sub">${emis.filter(e=>e.monthsRemaining>0).length} active</div></div><div class="dr-amt">${fmtINR(c.emiInstallment)}</div></div>` : '');
     return `<div class="li-card" id="cardItem${i}">
       <div class="li-head" onclick="toggleCardDrawer(${i})" style="cursor:pointer">
         <div class="li-icon">💳</div>
@@ -2003,7 +1998,7 @@ function renderCardsSection_(cards) {
       <div class="li-bar-wrap"><div class="bar bar-thin"><i class="${fillClass[c.sev]}" style="width:${Math.max(c.util, 2)}%"></i></div></div>
       <div class="card-drawer"><div class="drawer-inner">
         <div class="drawer-label">Running EMIs</div>${emiHtml}
-        <div class="drawer-label">One-time swipes (this cycle)</div>${swHtml}
+        <div class="drawer-label">Pay in full this statement (derived)</div>${payHtml}
       </div></div>
     </div>`;
   }).join('') : '<p class="drawer-empty" style="text-align:center">No credit cards</p>';
@@ -2276,15 +2271,6 @@ function renderSampleInvest_() {
 /* ============================================================
    PREDICT — forecasting engine
    ============================================================ */
-const SAMPLE_EMIS = [
-  { card: 'Amex', desc: 'iPhone 15 Pro', installment: 8500, total: 12, paid: 3, roi: 0.16, monthsRemaining: 9, balance: 76500 },
-  { card: 'Bajaj', desc: 'Laptop', installment: 5200, total: 9, paid: 2, roi: 0.18, monthsRemaining: 7, balance: 36400 }
-];
-const SAMPLE_SWIPES = [
-  { card: 'Amex', desc: 'Flight tickets', amount: 18400, date: '', category: 'Travel' },
-  { card: 'ICICI Coral', desc: 'Dining', amount: 3200, date: '', category: 'Food' }
-];
-
 let debtTrack = 'avalanche';
 function getPrepay_() { return parseInt(localStorage.getItem('fos_prepay') || '0', 10) || 0; }
 function getVarSpend_() { const v = localStorage.getItem('fos_var_spend'); return v === null ? 20000 : (parseInt(v, 10) || 0); }
@@ -2384,16 +2370,16 @@ function checkingBalance_() {
 function predInputs_() {
   const live = Object.keys(sheetData).length > 0;
   if (live) {
-    const { cards, loans } = parseLiabilities_();
+    const { cards, loans, emis } = parseLiabilities_();
     const liqV = nwValue('Total Liquid Cash');
     const obV = nwValue('Monthly Obligations');
     return {
-      cards, loans, subs: parseSubscriptions_(), emis: parseCardEmis_(), swipes: parseCardSwipes_(),
+      cards, loans, emis, subs: parseSubscriptions_(),
       liquid: isNaN(liqV) ? 0 : liqV, monthlyObligations: isNaN(obV) ? NaN : obV
     };
   }
   return {
-    cards: SAMPLE_CARDS, loans: SAMPLE_LOANS, subs: SAMPLE_SUBS, emis: SAMPLE_EMIS, swipes: SAMPLE_SWIPES,
+    cards: SAMPLE_CARDS, loans: SAMPLE_LOANS, emis: SAMPLE_EMIS, subs: SAMPLE_SUBS,
     liquid: 182000, monthlyObligations: NaN
   };
 }
@@ -2437,16 +2423,15 @@ function renderPredictions_() {
   const inp = predInputs_();
 
   // ---- Widget 1: credit-card statement projection ----
-  const cardOut = inp.cards.reduce((s, c) => s + c.outstanding, 0);
-  const emiSum = inp.emis.reduce((s, e) => s + e.installment, 0);
-  const swipeSum = inp.swipes.reduce((s, x) => s + x.amount, 0);
-  const billTotal = cardOut + emiSum + swipeSum;
+  // Swipe / pay-in-full is DERIVED: outstanding − remaining EMI balance per card.
+  const payInFull = inp.cards.reduce((s, c) => s + (c.payInFull || 0), 0);
+  const cardEmiInstall = inp.cards.reduce((s, c) => s + (c.emiInstallment || 0), 0);
+  const billTotal = payInFull + cardEmiInstall;
   setText('predBillTotal', fmtINR(billTotal));
   document.getElementById('predBillBreakdown').innerHTML =
-    `<div class="pred-line"><span class="pl-sub">Current outstanding</span><span class="pl-amt">${fmtINR(cardOut)}</span></div>` +
-    `<div class="pred-line"><span class="pl-sub">EMI installments (next cycle)</span><span class="pl-amt">${fmtINR(emiSum)}</span></div>` +
-    `<div class="pred-line"><span class="pl-sub">One-time swipes this cycle</span><span class="pl-amt">${fmtINR(swipeSum)}</span></div>` +
-    `<div class="pred-line total"><span>Projected next statement</span><span>${fmtINR(billTotal)}</span></div>`;
+    `<div class="pred-line"><span class="pl-sub">Pay-in-full (swipes due) <span style="color:var(--text-3)">= outstanding − EMI balances</span></span><span class="pl-amt">${fmtINR(payInFull)}</span></div>` +
+    `<div class="pred-line"><span class="pl-sub">EMI installments this cycle</span><span class="pl-amt">${fmtINR(cardEmiInstall)}</span></div>` +
+    `<div class="pred-line total"><span>Card bill this statement</span><span>${fmtINR(billTotal)}</span></div>`;
 
   // ---- Widget 2: debt freedom countdown ----
   const prepay = getPrepay_();
@@ -2466,7 +2451,7 @@ function renderPredictions_() {
   // shared monthly aggregates
   const subBurn = inp.subs.reduce((s, x) => s + x.monthly, 0);
   const loanEmi = inp.loans.reduce((s, l) => s + (isNaN(l.emi) ? 0 : l.emi), 0);
-  const cardEmi = emiSum;                       // card EMI installments (from widget 1)
+  const cardEmi = cardEmiInstall;               // card EMI installments (from widget 1)
   const core = totalCoreFixed_();
   const ce = getCoreExpenses_();
   renderCoreLedger_();
@@ -2497,9 +2482,9 @@ function renderPredictions_() {
     : 'Add your Core Fixed Expenses above to compute runway');
 
   // ---- Next month's expense forecast ----
-  const swipeAvg = swipeSum; // rolling proxy from this cycle's one-time swipes
-  const useAuto = swipeAvg > 0;
-  const variable = useAuto ? swipeAvg : getVarSpend_();
+  // Variable spend proxy = this cycle's derived pay-in-full (non-EMI card spend)
+  const useAuto = payInFull > 0;
+  const variable = useAuto ? payInFull : getVarSpend_();
   const expTotal = core + loanEmi + cardEmi + subBurn + variable;
   setText('predExpenseTotal', fmtINR(expTotal));
   const varLine = useAuto
