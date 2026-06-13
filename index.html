@@ -437,6 +437,14 @@ html[data-theme="dark"] .debt-item.first .di-rank { background: rgba(173,198,255
 .pred-line.total { font-weight: 700; border-top: 1.5px solid var(--outline-strong); margin-top: 4px; padding-top: 8px; }
 .step-btn { width: 30px; height: 30px; border-radius: 100px; background: var(--surface-high); border: 1px solid var(--glass-edge); font-size: 17px; font-weight: 600; color: var(--text); vertical-align: middle; }
 .pred-row b { margin: 0 10px; }
+.ledger-row { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-top: 1px solid var(--outline); }
+.ledger-row:first-of-type { border-top: none; }
+.ledger-row label { flex: 1; font-size: 13.5px; font-weight: 500; }
+.ledger-row label .pred-sub { font-weight: 400; }
+.ledger-input { display: flex; align-items: center; gap: 4px; background: var(--surface-high); border: 1px solid var(--glass-edge); border-radius: 12px; padding: 0 12px; min-height: 42px; width: 130px; }
+.ledger-input span { color: var(--text-2); font-size: 14px; }
+.ledger-input input { width: 100%; background: none; border: none; outline: none; color: var(--text); font-size: 15px; font-weight: 600; text-align: right; -moz-appearance: textfield; }
+.ledger-input input::-webkit-outer-spin-button, .ledger-input input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .alert-split-sub { font-size: 12px; color: var(--text-2); margin: 6px 2px 12px; }
 
 /* ---------- Investment goal tag ---------- */
@@ -1120,6 +1128,23 @@ html[data-theme="dark"] .set-btn.danger { color: var(--red); }
 <section class="screen" id="screen-predict">
   <h1 class="page-title">Predict</h1>
   <p class="page-sub">Forecasts from your live numbers</p>
+
+  <!-- Core Fixed Expenses Ledger (stored on this device) -->
+  <div class="card pred-card">
+    <div class="pred-head"><span class="pred-icon">🏠</span><div><div class="eyebrow">Core Fixed Expenses</div><div class="pred-sub">Your monthly living baseline · saved on this device</div></div></div>
+    <div class="ledger-row"><label>Rent & Housing</label><div class="ledger-input"><span>₹</span><input type="number" inputmode="numeric" id="ceRent" oninput="saveCoreExpense('rent',this.value)" placeholder="0"></div></div>
+    <div class="ledger-row"><label>Utilities <span class="pred-sub">(power, water, internet, mobile)</span></label><div class="ledger-input"><span>₹</span><input type="number" inputmode="numeric" id="ceUtilities" oninput="saveCoreExpense('utilities',this.value)" placeholder="0"></div></div>
+    <div class="ledger-row"><label>Transport <span class="pred-sub">(fuel, transit, cabs)</span></label><div class="ledger-input"><span>₹</span><input type="number" inputmode="numeric" id="ceTransport" oninput="saveCoreExpense('transport',this.value)" placeholder="0"></div></div>
+    <div class="ledger-row"><label>Groceries & Household</label><div class="ledger-input"><span>₹</span><input type="number" inputmode="numeric" id="ceGroceries" oninput="saveCoreExpense('groceries',this.value)" placeholder="0"></div></div>
+    <div class="pred-line total"><span>Total core fixed / month</span><span id="ceTotal">₹0</span></div>
+  </div>
+
+  <!-- Widget: Pre-Flight Liquidity Check (Safe-to-Spend) -->
+  <div class="card pred-card">
+    <div class="pred-head"><span class="pred-icon">🛟</span><div><div class="eyebrow">Safe-to-Spend</div><div class="pred-sub">Checking balance minus what's still due this cycle</div></div></div>
+    <div class="display pred-big" id="predSafeSpend">₹0</div>
+    <div id="predSafeBreakdown"></div>
+  </div>
 
   <!-- Widget 1: Credit Card Statement Projection -->
   <div class="card pred-card">
@@ -2262,6 +2287,44 @@ let debtTrack = 'avalanche';
 function getPrepay_() { return parseInt(localStorage.getItem('fos_prepay') || '0', 10) || 0; }
 function getVarSpend_() { const v = localStorage.getItem('fos_var_spend'); return v === null ? 20000 : (parseInt(v, 10) || 0); }
 
+/* ----- Core Fixed Expenses ledger (stored on this device) ----- */
+const CORE_FIELDS = ['rent', 'utilities', 'transport', 'groceries'];
+function getCoreExpenses_() {
+  let o; try { o = JSON.parse(localStorage.getItem('fos_core_expenses') || '{}'); } catch (e) { o = {}; }
+  const out = {};
+  CORE_FIELDS.forEach(f => { out[f] = Number(o[f]) || 0; });
+  return out;
+}
+function totalCoreFixed_() { const c = getCoreExpenses_(); return CORE_FIELDS.reduce((s, f) => s + c[f], 0); }
+function saveCoreExpense(field, value) {
+  const o = getCoreExpenses_();
+  o[field] = Math.max(0, parseInt(value, 10) || 0);
+  try { localStorage.setItem('fos_core_expenses', JSON.stringify(o)); } catch (e) {}
+  setText('ceTotal', fmtINR(totalCoreFixed_()));
+  renderPredictions_();
+}
+function renderCoreLedger_() {
+  const c = getCoreExpenses_();
+  CORE_FIELDS.forEach(f => {
+    const el = document.getElementById('ce' + f.charAt(0).toUpperCase() + f.slice(1));
+    if (el && c[f] > 0 && el.value === '') el.value = c[f];
+  });
+  setText('ceTotal', fmtINR(totalCoreFixed_()));
+}
+// Checking balance = sum of savings/current accounts (fallback to liquid / sample)
+function checkingBalance_() {
+  const rows = sheetData.ACCOUNTS;
+  if (rows && rows.length) {
+    let sum = 0, found = false;
+    rows.forEach((r, i) => {
+      if (i === 0) return;
+      if (/saving|current|checking|salary/i.test((r[2] || '') + (r[0] || ''))) { sum += toNum(r[3]) || 0; found = true; }
+    });
+    if (found) return sum;
+  }
+  return Object.keys(sheetData).length ? 0 : 95000; // sample checking on first run
+}
+
 function predInputs_() {
   const live = Object.keys(sheetData).length > 0;
   if (live) {
@@ -2344,28 +2407,54 @@ function renderPredictions_() {
     setText('predFreedomDate', '60+ yrs'); setText('predFreedomMonths', 'Minimums barely cover interest — add extra prepayment');
   }
 
-  // ---- Widget 3: jobless runway ----
+  // shared monthly aggregates
   const subBurn = inp.subs.reduce((s, x) => s + x.monthly, 0);
-  let burn = inp.monthlyObligations;
-  if (isNaN(burn)) burn = inp.loans.reduce((s, l) => s + (isNaN(l.emi) ? 0 : l.emi), 0) +
-    inp.cards.reduce((s, c) => s + cardMinDue_(c.outstanding), 0) + subBurn + getVarSpend_();
-  const runwayMonths = burn > 0 ? inp.liquid / burn : 0;
-  setText('predRunway', runwayMonths >= 0.1 ? runwayMonths.toFixed(1) + ' months' : '—');
-  document.getElementById('predRunwayBar').style.width = Math.min(100, runwayMonths / 12 * 100) + '%';
-  setText('predRunwaySub', `${fmtINR(inp.liquid)} liquid ÷ ${fmtINR(Math.round(burn))}/mo burn` +
-    (runwayMonths < 6 ? ' · aim for 6+ months' : ' · healthy cushion'));
-
-  // ---- Widget 4: next month's expense forecast ----
   const loanEmi = inp.loans.reduce((s, l) => s + (isNaN(l.emi) ? 0 : l.emi), 0);
-  const cardMins = inp.cards.reduce((s, c) => s + cardMinDue_(c.outstanding), 0);
-  const varSpend = getVarSpend_();
-  const expTotal = loanEmi + subBurn + cardMins + varSpend;
+  const cardEmi = emiSum;                       // card EMI installments (from widget 1)
+  const core = totalCoreFixed_();
+  const ce = getCoreExpenses_();
+  renderCoreLedger_();
+
+  // ---- Pre-Flight Liquidity Check (Safe-to-Spend) ----
+  const checking = checkingBalance_();
+  const dueThisCycle = ce.rent + ce.utilities + loanEmi + cardEmi + subBurn;
+  const safe = checking - dueThisCycle;
+  const safeEl = document.getElementById('predSafeSpend');
+  safeEl.textContent = fmtINR(safe);
+  safeEl.style.color = safe < 0 ? 'var(--red)' : (safe < checking * 0.15 ? 'var(--gold)' : 'var(--green)');
+  document.getElementById('predSafeBreakdown').innerHTML =
+    `<div class="pred-line"><span class="pl-sub">Checking balance</span><span class="pl-amt">${fmtINR(checking)}</span></div>` +
+    `<div class="pred-line"><span class="pl-sub">− Rent & housing</span><span class="pl-amt">${fmtINR(ce.rent)}</span></div>` +
+    `<div class="pred-line"><span class="pl-sub">− Utilities</span><span class="pl-amt">${fmtINR(ce.utilities)}</span></div>` +
+    `<div class="pred-line"><span class="pl-sub">− Active EMIs (loan + card)</span><span class="pl-amt">${fmtINR(loanEmi + cardEmi)}</span></div>` +
+    `<div class="pred-line"><span class="pl-sub">− Scheduled subscriptions</span><span class="pl-amt">${fmtINR(subBurn)}</span></div>` +
+    `<div class="pred-line total"><span>Safe to spend this cycle</span><span>${fmtINR(safe)}</span></div>`;
+
+  // ---- Jobless runway: reserves ÷ (core fixed + loan EMIs + subscriptions) ----
+  const essentials = core + loanEmi + subBurn;
+  const runwayMonths = essentials > 0 ? inp.liquid / essentials : 0;
+  setText('predRunway', runwayMonths >= 0.1 ? runwayMonths.toFixed(1) + ' months' : (essentials === 0 ? 'Set your baseline ↑' : '—'));
+  document.getElementById('predRunwayBar').style.width = Math.min(100, runwayMonths / 12 * 100) + '%';
+  setText('predRunwaySub', essentials > 0
+    ? `${fmtINR(inp.liquid)} reserves ÷ ${fmtINR(Math.round(essentials))}/mo essentials` +
+      (runwayMonths < 6 ? ' · aim for 6+ months' : ' · healthy cushion')
+    : 'Add your Core Fixed Expenses above to compute runway');
+
+  // ---- Next month's expense forecast ----
+  const swipeAvg = swipeSum; // rolling proxy from this cycle's one-time swipes
+  const useAuto = swipeAvg > 0;
+  const variable = useAuto ? swipeAvg : getVarSpend_();
+  const expTotal = core + loanEmi + cardEmi + subBurn + variable;
   setText('predExpenseTotal', fmtINR(expTotal));
+  const varLine = useAuto
+    ? `<div class="pred-line"><span class="pl-sub">Variable CC spend (recent avg)</span><span class="pl-amt">${fmtINR(variable)}</span></div>`
+    : `<div class="pred-line"><span class="pl-sub">Variable / lifestyle (est.) <button class="step-btn" onclick="bumpVar(-2500)">−</button> <button class="step-btn" onclick="bumpVar(2500)">+</button></span><span class="pl-amt">${fmtINR(variable)}</span></div>`;
   document.getElementById('predExpenseBreakdown').innerHTML =
+    `<div class="pred-line"><span class="pl-sub">Core fixed expenses</span><span class="pl-amt">${fmtINR(core)}</span></div>` +
     `<div class="pred-line"><span class="pl-sub">Loan EMIs</span><span class="pl-amt">${fmtINR(loanEmi)}</span></div>` +
+    `<div class="pred-line"><span class="pl-sub">Card EMIs</span><span class="pl-amt">${fmtINR(cardEmi)}</span></div>` +
     `<div class="pred-line"><span class="pl-sub">Subscriptions</span><span class="pl-amt">${fmtINR(subBurn)}</span></div>` +
-    `<div class="pred-line"><span class="pl-sub">Credit-card minimums</span><span class="pl-amt">${fmtINR(cardMins)}</span></div>` +
-    `<div class="pred-line"><span class="pl-sub">Everyday / lifestyle (est.) <button class="step-btn" onclick="bumpVar(-2500)">−</button> <button class="step-btn" onclick="bumpVar(2500)">+</button></span><span class="pl-amt">${fmtINR(varSpend)}</span></div>` +
+    varLine +
     `<div class="pred-line total"><span>Forecast total</span><span>${fmtINR(expTotal)}</span></div>`;
 }
 function bumpVar(d) {
