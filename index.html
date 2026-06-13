@@ -23,11 +23,11 @@ html[data-theme="light"] {
   --bg: #eef1fb;
   --bg2: #f8f9ff;
   /* Liquid Glass surfaces */
-  --surface: rgba(255,255,255,0.45);
-  --surface-high: rgba(255,255,255,0.62);
-  --glass-edge: rgba(255,255,255,0.65);
+  --surface: rgba(255,255,255,0.58);
+  --surface-high: rgba(255,255,255,0.74);
+  --glass-edge: rgba(255,255,255,0.85);
   --glass-blur: blur(16px) saturate(1.2);
-  --card-shadow: 0 8px 30px rgba(20,30,60,0.10);
+  --card-shadow: 0 10px 34px rgba(17,28,60,0.14);
   --primary: #2d6bc6;
   --primary-cont: #d6e3ff;
   --on-prim-cont: #001945;
@@ -352,6 +352,19 @@ html[data-theme="dark"] .loan-icon { color: var(--primary); background: rgba(173
 .seg-opt.active { background: var(--primary-cont); color: var(--on-prim-cont); }
 html[data-theme="dark"] .seg-opt.active { background: rgba(173,198,255,0.18); color: var(--primary); }
 
+/* Filter chips (investment buckets) */
+.filter-chips { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 12px; scrollbar-width: none; }
+.filter-chips::-webkit-scrollbar { display: none; }
+.filter-chip {
+  white-space: nowrap; min-height: 38px; padding: 0 16px; border-radius: 100px;
+  font-size: 13px; font-weight: 600; color: var(--text-2);
+  background: var(--surface); border: 1px solid var(--glass-edge);
+  -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+}
+.filter-chip.active { background: var(--primary-cont); color: var(--on-prim-cont); border-color: transparent; }
+html[data-theme="dark"] .filter-chip.active { background: rgba(173,198,255,0.18); color: var(--primary); }
+.bucket-label { font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-2); margin: 16px 4px 8px; }
+
 /* ---------- Debt attack list ---------- */
 .debt-item {
   display: flex; align-items: center; gap: 13px;
@@ -378,8 +391,52 @@ html[data-theme="dark"] .debt-item.first .di-rank { background: rgba(173,198,255
 .di-bal { font-size: 15px; font-weight: 700; }
 .dt-target { display: inline-block; margin-top: 3px; font-size: 10px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; color: var(--primary); }
 
+/* Loan / card / subscription items + drill-down drawer */
+.li-card {
+  background: var(--surface);
+  -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-edge);
+  border-radius: 18px; padding: 14px 15px; margin-bottom: 10px;
+  box-shadow: var(--card-shadow);
+}
+.li-head { display: flex; align-items: center; gap: 12px; }
+.li-icon { width: 42px; height: 42px; min-width: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; background: var(--surface-high); border: 1px solid var(--glass-edge); }
+.li-main { flex: 1; min-width: 0; }
+.li-name { font-size: 14.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.li-sub { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+.li-right { text-align: right; }
+.li-amt { font-size: 14.5px; font-weight: 700; }
+.li-amt.red { color: var(--red); }
+.li-chev { font-size: 12px; color: var(--text-3); margin-left: 2px; transition: transform var(--dur) var(--ease); }
+.li-card.open .li-chev { transform: rotate(180deg); }
+.li-bar-wrap { margin-top: 11px; }
+.card-drawer { max-height: 0; overflow: hidden; transition: max-height var(--dur) var(--ease); }
+.li-card.open .card-drawer { max-height: 600px; }
+.drawer-inner { padding-top: 12px; margin-top: 12px; border-top: 1px solid var(--outline); }
+.drawer-label { font-size: 10.5px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-2); margin: 8px 0 6px; }
+.drawer-row { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; padding: 5px 0; }
+.drawer-row .dr-sub { font-size: 11px; color: var(--text-2); }
+.drawer-row .dr-amt { font-weight: 600; white-space: nowrap; }
+.drawer-empty { font-size: 12px; color: var(--text-3); padding: 4px 0; }
+.burn-tag { font-size: 11px; color: var(--text-2); }
+
 /* ---------- Alerts split sections ---------- */
 .alert-section-label { font-size: 11.5px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-2); margin: 16px 4px 9px; }
+
+/* Predict widgets */
+.pred-card { padding: 18px 20px; }
+.pred-head { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.pred-icon { width: 40px; height: 40px; min-width: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 19px; background: var(--surface-high); border: 1px solid var(--glass-edge); }
+.pred-sub { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+.pred-big { font-size: 30px; font-weight: 500; letter-spacing: -0.5px; margin: 6px 0 2px; }
+.pred-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 13.5px; padding: 6px 0; }
+.pred-line { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; padding: 5px 0; border-top: 1px solid var(--outline); }
+.pred-line:first-child { border-top: none; }
+.pred-line .pl-sub { color: var(--text-2); }
+.pred-line .pl-amt { font-weight: 600; }
+.pred-line.total { font-weight: 700; border-top: 1.5px solid var(--outline-strong); margin-top: 4px; padding-top: 8px; }
+.step-btn { width: 30px; height: 30px; border-radius: 100px; background: var(--surface-high); border: 1px solid var(--glass-edge); font-size: 17px; font-weight: 600; color: var(--text); vertical-align: middle; }
+.pred-row b { margin: 0 10px; }
 .alert-split-sub { font-size: 12px; color: var(--text-2); margin: 6px 2px 12px; }
 
 /* ---------- Investment goal tag ---------- */
@@ -738,6 +795,9 @@ html[data-theme="dark"] .climb-line { color: var(--text); }
 }
 html[data-theme="dark"] .set-btn { color: #001945; }
 .set-btn.ghost { background: var(--surface); color: var(--text); border: 1px solid var(--glass-edge); }
+html[data-theme="dark"] .set-btn.ghost { color: var(--text); }
+.set-btn.danger { background: var(--red-cont); color: var(--red); border: 1px solid var(--red); }
+html[data-theme="dark"] .set-btn.danger { color: var(--red); }
 /* iOS-style switch */
 .switch { width: 50px; height: 30px; border-radius: 100px; background: var(--outline-strong); position: relative; transition: background var(--dur) var(--ease); flex: 0 0 auto; }
 .switch.on { background: var(--primary); }
@@ -782,6 +842,7 @@ html[data-theme="dark"] .set-btn { color: #001945; }
 .pin-key:active { transform: scale(0.93); }
 .pin-key.blank { background: none; border: none; }
 .lock-bio-btn { margin-top: 18px; font-size: 14px; font-weight: 600; color: var(--primary); min-height: 44px; }
+.lock-reset-btn { margin-top: 8px; font-size: 12.5px; font-weight: 500; color: var(--text-3); min-height: 44px; }
 .privacy-mask {
   position: fixed; inset: 0; z-index: 990; display: none;
   background: var(--surface);
@@ -873,6 +934,8 @@ html[data-theme="dark"] .set-btn { color: #001945; }
       </div>
     </div>
     <button class="set-btn ghost" id="changePinBtn" style="display:none" onclick="startSetPin()">Change PIN</button>
+    <button class="set-btn danger" onclick="manualPurge()">🧨 Panic wipe — disconnect data now</button>
+    <p class="sr-sub" style="margin:-2px 4px 4px;text-align:center">Removes your Sheet, token &amp; AI key from this app. Also triggers automatically after 5 wrong PINs. Your data in Google Sheets stays safe.</p>
 
     <div class="set-section">Data &amp; AI</div>
     <button class="set-btn ghost" onclick="closeSettings();openDataWizard()">Reconnect Sheet / API key</button>
@@ -891,6 +954,7 @@ html[data-theme="dark"] .set-btn { color: #001945; }
     <div class="pin-dots" id="pinDots"></div>
     <div class="pin-pad" id="pinPad"></div>
     <button class="lock-bio-btn" id="lockBioBtn" style="display:none" onclick="tryBiometric()">🔓 Use biometrics</button>
+    <button class="lock-reset-btn" id="lockResetBtn" style="display:none" onclick="lockScreenReset()">Forgot PIN? Reset app</button>
   </div>
 </div>
 
@@ -918,9 +982,10 @@ html[data-theme="dark"] .set-btn { color: #001945; }
 
   <div class="hero-networth">
     <div class="eyebrow">Net Worth</div>
-    <div class="networth-num display" id="netWorthNum">₹14,82,340</div>
+    <div class="networth-num display" id="netWorthNum" style="cursor:pointer" onclick="toggleSparkline()">₹14,82,340</div>
     <span class="delta-chip" id="netWorthDelta">↑ +₹23,410 this month</span>
     <div class="climb-line" id="netWorthGap" style="display:none"></div>
+    <div id="nwSparkWrap" style="display:none;margin-top:12px"></div>
     <div class="subchip-row">
       <div class="subchip"><div class="sc-label">Assets</div><div class="sc-val sc-green" id="chipAssets">₹21.4L</div></div>
       <div class="subchip"><div class="sc-label">Liabilities</div><div class="sc-val sc-red" id="chipLiab">₹6.9L</div></div>
@@ -933,21 +998,21 @@ html[data-theme="dark"] .set-btn { color: #001945; }
     <div class="donut-wrap">
       <svg class="donut" viewBox="0 0 36 36" aria-label="Asset allocation donut chart">
         <circle cx="18" cy="18" r="15.9155" stroke="var(--outline-strong)" stroke-width="4.4" fill="none"></circle>
-        <circle id="segEquity" cx="18" cy="18" r="15.9155" stroke="var(--primary)" stroke-dasharray="45 55" stroke-dashoffset="0"></circle>
-        <circle id="segFixed"  cx="18" cy="18" r="15.9155" stroke="var(--green)"   stroke-dasharray="27 73" stroke-dashoffset="-45"></circle>
-        <circle id="segGold"   cx="18" cy="18" r="15.9155" stroke="var(--gold)"    stroke-dasharray="18 82" stroke-dashoffset="-72"></circle>
-        <circle id="segCash"   cx="18" cy="18" r="15.9155" stroke="var(--purple)"  stroke-dasharray="10 90" stroke-dashoffset="-90"></circle>
+        <circle id="segEquity" style="cursor:pointer" onclick="filterFromChart('equity')" cx="18" cy="18" r="15.9155" stroke="var(--primary)" stroke-dasharray="45 55" stroke-dashoffset="0"></circle>
+        <circle id="segFixed"  style="cursor:pointer" onclick="filterFromChart('fixed')"  cx="18" cy="18" r="15.9155" stroke="var(--green)"   stroke-dasharray="27 73" stroke-dashoffset="-45"></circle>
+        <circle id="segGold"   style="cursor:pointer" onclick="filterFromChart('gold')"   cx="18" cy="18" r="15.9155" stroke="var(--gold)"    stroke-dasharray="18 82" stroke-dashoffset="-72"></circle>
+        <circle id="segCash"   style="cursor:pointer" onclick="filterFromChart('all')"    cx="18" cy="18" r="15.9155" stroke="var(--purple)"  stroke-dasharray="10 90" stroke-dashoffset="-90"></circle>
       </svg>
       <div class="legend">
-        <div class="legend-row"><span class="legend-dot" style="background:var(--primary)"></span><span class="ln">Equity</span><span class="lp" id="lpEquity">45%</span></div>
-        <div class="legend-row"><span class="legend-dot" style="background:var(--green)"></span><span class="ln">Fixed</span><span class="lp" id="lpFixed">27%</span></div>
-        <div class="legend-row"><span class="legend-dot" style="background:var(--gold)"></span><span class="ln">Gold</span><span class="lp" id="lpGold">18%</span></div>
-        <div class="legend-row"><span class="legend-dot" style="background:var(--purple)"></span><span class="ln">Cash</span><span class="lp" id="lpCash">10%</span></div>
+        <div class="legend-row" style="cursor:pointer" onclick="filterFromChart('equity')"><span class="legend-dot" style="background:var(--primary)"></span><span class="ln">Equity</span><span class="lp" id="lpEquity">45%</span></div>
+        <div class="legend-row" style="cursor:pointer" onclick="filterFromChart('fixed')"><span class="legend-dot" style="background:var(--green)"></span><span class="ln">Fixed</span><span class="lp" id="lpFixed">27%</span></div>
+        <div class="legend-row" style="cursor:pointer" onclick="filterFromChart('gold')"><span class="legend-dot" style="background:var(--gold)"></span><span class="ln">Gold</span><span class="lp" id="lpGold">18%</span></div>
+        <div class="legend-row" style="cursor:pointer" onclick="filterFromChart('all')"><span class="legend-dot" style="background:var(--purple)"></span><span class="ln">Cash</span><span class="lp" id="lpCash">10%</span></div>
       </div>
     </div>
   </div>
 
-  <div class="card">
+  <div class="card li-card" id="efCard" style="cursor:pointer;margin-bottom:14px" onclick="toggleEF()">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
       <div>
         <div class="eyebrow">Emergency Fund</div>
@@ -956,7 +1021,11 @@ html[data-theme="dark"] .set-btn { color: #001945; }
       <span class="tchip amber" id="efChip">VULNERABLE</span>
     </div>
     <div class="bar"><i class="fill-gold" id="efBar" style="width:51%"></i></div>
-    <p style="font-size:12.5px;color:var(--text-2);margin-top:9px" id="efSub">51% of 6× monthly obligations · Need ₹1.78L more</p>
+    <p style="font-size:12.5px;color:var(--text-2);margin-top:9px" id="efSub">51% of 6× monthly obligations · Need ₹1.78L more <span class="li-chev">▾</span></p>
+    <div class="card-drawer"><div class="drawer-inner">
+      <div class="drawer-label">Where it's parked · cash-out time</div>
+      <div id="efBreakdown"></div>
+    </div></div>
   </div>
 </section>
 
@@ -973,26 +1042,27 @@ html[data-theme="dark"] .set-btn { color: #001945; }
     <p style="font-size:12.5px;color:var(--text-2);margin-top:9px" id="debtFreedomDate">Freedom date · December 2027</p>
   </div>
 
-  <div class="section-label">Loan</div>
-  <div class="card">
-    <div class="loan-row" style="margin-bottom:13px">
-      <div class="loan-icon">🏦</div>
-      <div style="flex:1">
-        <div style="font-size:14.5px;font-weight:600" id="loanName">IndMoney Personal Loan</div>
-        <div style="font-size:12px;color:var(--text-2);margin-top:2px" id="loanSub">EMI ₹12,400 · 14% p.a.</div>
-      </div>
-      <div style="text-align:right;font-size:13px;font-weight:700;color:var(--red)"><span id="loanRemaining">₹4.8L</span><div style="font-size:10.5px;font-weight:500;color:var(--text-2)">remaining</div></div>
-    </div>
-    <div class="bar"><i class="fill-prim" id="loanBar" style="width:38%"></i></div>
-  </div>
+  <div class="section-label">Loans</div>
+  <div id="loansList"><!-- populated by JS --></div>
 
-  <div class="section-label">Attack order</div>
-  <div class="seg-toggle">
-    <button class="seg-opt active" data-method="avalanche" onclick="setDebtMethod('avalanche')">Avalanche · by rate</button>
-    <button class="seg-opt" data-method="snowball" onclick="setDebtMethod('snowball')">Snowball · by balance</button>
+  <div class="section-label">Credit Cards</div>
+  <p class="page-sub" style="margin:-2px 2px 10px">Tap a card to see its EMIs &amp; one-time swipes</p>
+  <div id="cardsList"><!-- populated by JS --></div>
+
+  <div class="section-label">Recurring Subscriptions</div>
+  <div class="card" id="subsBurnCard" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div class="eyebrow">Total Burn Rate</div>
+        <div class="display" style="font-size:24px;font-weight:500;color:var(--purple);margin-top:5px" id="subsBurnMonthly">₹0</div>
+      </div>
+      <div style="text-align:right">
+        <div class="sr-sub" id="subsBurnYearly">₹0 / year</div>
+        <div class="sr-sub" id="subsBurnCount">0 services</div>
+      </div>
+    </div>
   </div>
-  <p class="page-sub" id="debtMethodNote" style="margin:8px 2px 12px">Highest interest first — saves the most money.</p>
-  <div id="debtList"><!-- populated by JS --></div>
+  <div id="subsList"><!-- populated by JS --></div>
 </section>
 
 <!-- ================= 3. INVESTMENTS ================= -->
@@ -1002,31 +1072,19 @@ html[data-theme="dark"] .set-btn { color: #001945; }
 
   <div class="banner gold" id="ppfBanner">⚠️&nbsp; PPF Account is dormant · Pay ₹500 to reactivate · 7.1% tax-free</div>
 
-  <div class="card" id="invCard">
-    <div class="inv-row">
-      <div class="iv-main"><div class="iv-name">Parag Parikh Flexi Cap</div><div class="iv-sub">SIP ₹5,000/mo</div></div>
-      <div class="iv-right"><div class="iv-val">₹2,14,300</div><span class="tchip green" style="margin-top:4px">+31.2%</span></div>
-    </div>
-    <div class="inv-row">
-      <div class="iv-main"><div class="iv-name">Mirae Asset Large Cap</div><div class="iv-sub">Lumpsum MF</div></div>
-      <div class="iv-right"><div class="iv-val">₹98,400</div><span class="tchip green" style="margin-top:4px">+18.7%</span></div>
-    </div>
-    <div class="inv-row">
-      <div class="iv-main"><div class="iv-name">Gold SIP + Physical</div><div class="iv-sub">14.2g · ₹7,240/g</div></div>
-      <div class="iv-right"><div class="iv-val">₹1,02,800</div><span class="tchip green" style="margin-top:4px">+24.1%</span></div>
-    </div>
-    <div class="inv-row">
-      <div class="iv-main"><div class="iv-name">Recurring Deposit</div><div class="iv-sub">Matures 8 months</div></div>
-      <div class="iv-right"><div class="iv-val">₹84,000</div><span class="tchip green" style="margin-top:4px">+7.2%</span></div>
-    </div>
-    <div class="inv-row muted">
-      <div class="iv-main"><div class="iv-name">PPF Account</div><div class="iv-sub" style="color:var(--gold)">Dormant</div></div>
-      <div class="iv-right"><div class="iv-val">₹42,000</div><span class="tchip amber" style="margin-top:4px">7.1%</span></div>
-    </div>
-    <div class="inv-total">
-      <div><div class="t-label">Invested</div><div class="t-val">₹4,49,400</div></div>
-      <div><div class="t-label">Current</div><div class="t-val">₹5,41,500</div></div>
-      <div><div class="t-label">Overall</div><div class="t-val" style="color:var(--green)">+20.5%</div></div>
+  <div class="filter-chips" id="invFilters">
+    <button class="filter-chip active" data-bucket="all" onclick="setInvestFilter('all')">All</button>
+    <button class="filter-chip" data-bucket="equity" onclick="setInvestFilter('equity')">MF &amp; Stocks</button>
+    <button class="filter-chip" data-bucket="fixed" onclick="setInvestFilter('fixed')">Fixed &amp; PPF</button>
+    <button class="filter-chip" data-bucket="gold" onclick="setInvestFilter('gold')">ETF &amp; Gold</button>
+  </div>
+
+  <div id="invBuckets"><!-- populated by JS --></div>
+  <div class="card" id="invTotalCard" style="display:none">
+    <div class="inv-total" style="border-top:none;padding-top:0">
+      <div><div class="t-label">Invested</div><div class="t-val" id="invTotInvested">₹0</div></div>
+      <div><div class="t-label">Current</div><div class="t-val" id="invTotCurrent">₹0</div></div>
+      <div><div class="t-label">Overall</div><div class="t-val" id="invTotReturn">0%</div></div>
     </div>
   </div>
 </section>
@@ -1058,19 +1116,57 @@ html[data-theme="dark"] .set-btn { color: #001945; }
   </div>
 </section>
 
-<!-- ================= 5. ALERTS ================= -->
-<section class="screen" id="screen-alerts">
-  <h1 class="page-title">Upcoming</h1>
-  <p class="page-sub" id="alertsSub">5 payments · ₹48,200 total this month</p>
+<!-- ================= 5. PREDICT ================= -->
+<section class="screen" id="screen-predict">
+  <h1 class="page-title">Predict</h1>
+  <p class="page-sub">Forecasts from your live numbers</p>
 
-  <div class="banner red" id="alertsBanner">🚨&nbsp; A payment is due within 3 days — act now</div>
+  <!-- Widget 1: Credit Card Statement Projection -->
+  <div class="card pred-card">
+    <div class="pred-head"><span class="pred-icon">💳</span><div><div class="eyebrow">Next Statement Forecast</div><div class="pred-sub">Outstanding + EMIs + this-cycle swipes</div></div></div>
+    <div class="display pred-big" id="predBillTotal">₹0</div>
+    <div id="predBillBreakdown"></div>
+  </div>
 
+  <!-- Widget 2: Debt Freedom Countdown -->
+  <div class="card pred-card">
+    <div class="pred-head"><span class="pred-icon">🏁</span><div><div class="eyebrow">Debt Freedom Countdown</div><div class="pred-sub">With your current EMIs + extra prepayment</div></div></div>
+    <div class="seg-toggle" style="margin:6px 0 10px">
+      <button class="seg-opt active" data-track="avalanche" onclick="setDebtTrack('avalanche')">Avalanche</button>
+      <button class="seg-opt" data-track="snowball" onclick="setDebtTrack('snowball')">Snowball</button>
+    </div>
+    <div class="pred-row"><span>Extra / month</span>
+      <span><button class="step-btn" onclick="bumpPrepay(-1000)">−</button>
+      <b id="prepayAmt">₹0</b>
+      <button class="step-btn" onclick="bumpPrepay(1000)">+</button></span></div>
+    <div class="display pred-big" id="predFreedomDate">—</div>
+    <div class="pred-sub" id="predFreedomMonths"></div>
+  </div>
+
+  <!-- Widget 3: Jobless Runway -->
+  <div class="card pred-card">
+    <div class="pred-head"><span class="pred-icon">🪂</span><div><div class="eyebrow">Jobless Runway</div><div class="pred-sub">If income stopped today</div></div></div>
+    <div class="display pred-big" id="predRunway">—</div>
+    <div class="bar" style="margin-top:8px"><i class="fill-prim" id="predRunwayBar" style="width:0%"></i></div>
+    <div class="pred-sub" id="predRunwaySub" style="margin-top:8px"></div>
+  </div>
+
+  <!-- Widget 4: Next Month Expense Forecast -->
+  <div class="card pred-card">
+    <div class="pred-head"><span class="pred-icon">📅</span><div><div class="eyebrow">Next Month's Expense Forecast</div><div class="pred-sub">Pre-allocated from known commitments</div></div></div>
+    <div class="display pred-big" id="predExpenseTotal">₹0</div>
+    <div id="predExpenseBreakdown"></div>
+  </div>
+
+  <!-- Upcoming payments (kept) -->
+  <div class="section-label">Upcoming payments</div>
+  <p class="page-sub" id="alertsSub" style="margin:-2px 2px 8px">—</p>
+  <div class="banner red" id="alertsBanner" style="display:none">🚨&nbsp; A payment is due within 3 days — act now</div>
   <div class="seg-toggle">
     <button class="seg-opt active" data-mode="min" onclick="setAlertMode('min')">Minimum to stay healthy</button>
     <button class="seg-opt" data-mode="full" onclick="setAlertMode('full')">Pay in full</button>
   </div>
   <p class="alert-split-sub" id="alertSplitSub"></p>
-
   <div id="alertsList"><!-- populated by JS --></div>
 </section>
 
@@ -1118,7 +1214,7 @@ html[data-theme="dark"] .set-btn { color: #001945; }
   <button class="navbtn" data-screen="debt"   onclick="goScreen('debt')"><span class="nicon">💳</span>Debt</button>
   <button class="navbtn" data-screen="invest" onclick="goScreen('invest')"><span class="nicon">📈</span>Invest</button>
   <button class="navbtn" data-screen="ai"     onclick="goScreen('ai')"><span class="nicon">✨</span>AI</button>
-  <button class="navbtn" data-screen="alerts" onclick="goScreen('alerts')"><span class="nicon">⏰</span>Alerts</button>
+  <button class="navbtn" data-screen="predict" onclick="goScreen('predict')"><span class="nicon">🔮</span>Predict</button>
   <button class="navbtn" data-screen="tax"    onclick="goScreen('tax')"><span class="nicon">🧾</span>Tax</button>
 </nav>
 
@@ -1144,13 +1240,17 @@ const GEMINI_FALLBACK_MODELS = [
   'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-3.5-flash', 'gemini-2.5-flash-lite'
 ];
 
-const SHEET_TABS = ['CONFIG','ACCOUNTS','EQUITY_MF','GOLD','FIXED_INCOME','LIABILITIES','NET_WORTH','TAX'];
+const SHEET_TABS = ['CONFIG','ACCOUNTS','EQUITY_MF','GOLD','FIXED_INCOME','LIABILITIES','SUBSCRIPTIONS','CARD_EMIS','CARD_SWIPES','NET_WORTH','TAX'];
 
 const GEMINI_SYSTEM_PROMPT =
 `You are a personal finance advisor for AB, an Indian professional.
 Analyse the financial data provided and give specific, actionable advice.
 Always use ₹ and Indian number formatting (lakhs/crores).
 Reference actual numbers from the data — never give generic advice.
+Do NOT give tax-liability or tax-buffer advice — a dedicated Tax Optimizer already covers that.
+Prioritise credit-card billing insight: use each card's limit, utilisation, running EMIs
+(CARD_EMIS) and one-time swipes (CARD_SWIPES) to flag the projected next statement and
+keep utilisation under 30%.
 Format your response with exactly 4 lines starting with these emojis:
 🚨 for urgent actions, 📋 for this month priorities, 💡 for one smart move,
 📊 for health score out of 100 with one reason.
@@ -1261,7 +1361,7 @@ function setGreeting() {
 setGreeting();
 
 /* ---------- Navigation (slide transitions) ---------- */
-const SCREEN_ORDER = ['home','debt','invest','ai','alerts','tax'];
+const SCREEN_ORDER = ['home','debt','invest','ai','predict','tax'];
 let currentScreen = 'home';
 function goScreen(name) {
   if (name === currentScreen) return;
@@ -1281,8 +1381,15 @@ function goScreen(name) {
     aiAutoRan = true;
     refreshAdvice();
   }
+  if (name === 'predict') renderPredictions_();
 }
 let aiAutoRan = false;
+
+// Tap a chart segment / legend → jump to Invest filtered to that bucket
+function filterFromChart(bucket) {
+  goScreen('invest');
+  setInvestFilter(bucket);
+}
 
 /* ---------- Sample data (works on first run, no Sheet needed) ---------- */
 const SAMPLE_CARDS = [
@@ -1301,64 +1408,22 @@ const SAMPLE_ALERTS = [
   { name: 'Recurring Deposit', sub: 'Monthly RD',       amt: 4200,  days: 15, icon: '🏛️' }
 ];
 
-const SAMPLE_LOAN = {
-  name: 'Personal Loan', lender: 'IndMoney', emi: 12400, roi: 14,
-  tenure: 60, paid: 17, remaining: 480000, monthsLeft: 43, freeDate: 'Dec 2027'
-};
 const CARD_APR = 0.40; // assumed revolving APR for cards (rates aren't in the sheet)
-let lastDebtCards = [], lastDebtLoan = null, debtMethod = 'avalanche';
+const SAMPLE_LOANS = [
+  { name: 'Personal Loan', lender: 'IndMoney', principal: 700000, emi: 12400, roi: 0.14,
+    tenure: 60, paid: 17, remaining: 480000, monthsLeft: 43, freeDate: 'Dec 2027' }
+];
+const SAMPLE_SUBS = [
+  { name: 'Netflix', amount: 649, cycle: 'Monthly', day: 12, category: 'Entertainment', monthly: 649, nextDays: 4 },
+  { name: 'ChatGPT Plus', amount: 1700, cycle: 'Monthly', day: 20, category: 'Productivity', monthly: 1700, nextDays: 12 },
+  { name: 'Amazon Prime', amount: 1499, cycle: 'Annual', day: 8, category: 'Shopping', monthly: 125, nextDays: 26 }
+];
 
-function setDebtMethod(m) {
-  debtMethod = m;
-  document.querySelectorAll('#screen-debt .seg-opt').forEach(b =>
-    b.classList.toggle('active', b.dataset.method === m));
-  setText('debtMethodNote', m === 'snowball'
-    ? 'Smallest balance first — quick wins build momentum.'
-    : 'Highest interest first — saves the most money.');
-  renderDebtListNow_();
-}
-
-// Kept name renderCards for callers; now builds the vertical attack list
-function renderCards(cards, loan) {
-  lastDebtCards = cards || [];
-  if (loan !== undefined) lastDebtLoan = loan;
-  renderDebtListNow_();
-}
-
-function renderDebtListNow_() {
-  const items = [];
-  lastDebtCards.forEach(c => {
-    if (c.outstanding > 0) items.push({
-      name: c.name + ' card', bal: c.outstanding, rate: CARD_APR,
-      util: c.util, type: 'card', est: true
-    });
-  });
-  if (lastDebtLoan && !isNaN(lastDebtLoan.remaining) && lastDebtLoan.remaining > 0) {
-    items.push({
-      name: ((lastDebtLoan.lender || '') + ' ' + lastDebtLoan.name).trim(),
-      bal: lastDebtLoan.remaining,
-      rate: isNaN(lastDebtLoan.roi) ? null : lastDebtLoan.roi / 100,
-      type: 'loan'
-    });
-  }
-  if (debtMethod === 'snowball') items.sort((a, b) => a.bal - b.bal);
-  else items.sort((a, b) => (b.rate || 0) - (a.rate || 0) || b.bal - a.bal);
-
-  const el = document.getElementById('debtList');
-  if (!el) return;
-  if (!items.length) { el.innerHTML = '<p class="page-sub" style="text-align:center">No outstanding debt 🎉</p>'; return; }
-  el.innerHTML = items.map((it, i) => {
-    const rateTxt = it.rate != null
-      ? Math.round(it.rate * 100) + '% APR' + (it.est ? ' (est.)' : '')
-      : 'rate n/a';
-    const utilTxt = it.util != null ? ' · ' + it.util + '% utilisation' : '';
-    const target = i === 0 ? '<div class="dt-target">Attack first</div>' : '';
-    return `<div class="debt-item ${i === 0 ? 'first' : ''}">
-      <div class="di-rank">${i + 1}</div>
-      <div class="di-main"><div class="di-name">${escapeHtml(it.name)}</div><div class="di-sub">${rateTxt}${utilTxt}</div></div>
-      <div class="di-right"><div class="di-bal">${fmtINR(it.bal)}</div>${target}</div>
-    </div>`;
-  }).join('');
+// Render sample debt sections on first run (no live sheet yet)
+function renderSampleDebt_() {
+  renderLoans_(SAMPLE_LOANS);
+  renderCardsSection_(SAMPLE_CARDS);
+  renderSubscriptions_(SAMPLE_SUBS, []);
 }
 
 let lastAlerts = [], alertMode = 'min';
@@ -1371,7 +1436,7 @@ function isCardAlert_(a) { return /credit card/i.test(a.sub || ''); }
 
 function setAlertMode(m) {
   alertMode = m;
-  document.querySelectorAll('#screen-alerts .seg-opt').forEach(b =>
+  document.querySelectorAll('#screen-predict .seg-opt[data-mode]').forEach(b =>
     b.classList.toggle('active', b.dataset.mode === m));
   renderAlertsNow_();
 }
@@ -1444,8 +1509,8 @@ function renderAlertsNow_() {
   document.getElementById('alertsList').innerHTML = html;
 }
 
-renderCards(SAMPLE_CARDS, SAMPLE_LOAN);
-renderAlerts(SAMPLE_ALERTS.slice());
+// (first-run sample rendering happens in the boot block at the end,
+//  after all module variables are declared)
 
 /* ---------- CSV parsing (handles quoted commas) ---------- */
 function parseCSV(text) {
@@ -1610,6 +1675,8 @@ function applyLiveData() {
   const loan = applyDebtAndAlerts_();
   applyInvest_();
   applyTax_();
+  renderPredictions_();
+  captureNetWorthHistory_();
 }
 
 /* ----- Home: hero, delta, donut, emergency fund ----- */
@@ -1691,19 +1758,87 @@ function applyHome_() {
     const pct = Math.min(100, Math.round(pctRaw));
     document.getElementById('efBar').style.width = pct + '%';
     const need = Math.max(0, efTarget - liquid);
-    setText('efSub', `${pct}% of 6× monthly obligations · Need ${fmtCompact(need)} more`);
+    document.getElementById('efSub').innerHTML =
+      `${pct}% of 6× monthly obligations · Need ${fmtCompact(need)} more <span class="li-chev">▾</span>`;
     const chip = document.getElementById('efChip');
     if (pctRaw >= 100) { chip.textContent = 'SAFE'; chip.className = 'tchip green'; }
     else if (pctRaw >= 50) { chip.textContent = 'VULNERABLE'; chip.className = 'tchip amber'; }
     else { chip.textContent = 'CRITICAL'; chip.className = 'tchip red'; }
   }
+  renderEFBreakdown_();
+}
+
+function toggleEF() { document.getElementById('efCard').classList.toggle('open'); }
+
+/* ----- Net worth history + sparkline ----- */
+function captureNetWorthHistory_() {
+  const nw = nwValue('NET WORTH');
+  if (isNaN(nw)) return;
+  let hist;
+  try { hist = JSON.parse(localStorage.getItem('fos_nw_history') || '[]'); } catch (e) { hist = []; }
+  const today = new Date().toISOString().slice(0, 10);
+  if (hist.length && hist[hist.length - 1].d === today) hist[hist.length - 1].v = nw;
+  else hist.push({ d: today, v: nw });
+  if (hist.length > 90) hist = hist.slice(-90);
+  try { localStorage.setItem('fos_nw_history', JSON.stringify(hist)); } catch (e) {}
+}
+function toggleSparkline() {
+  const wrap = document.getElementById('nwSparkWrap');
+  if (wrap.style.display !== 'none') { wrap.style.display = 'none'; return; }
+  let hist;
+  try { hist = JSON.parse(localStorage.getItem('fos_nw_history') || '[]'); } catch (e) { hist = []; }
+  wrap.style.display = '';
+  if (hist.length < 2) {
+    wrap.innerHTML = '<div class="climb-line">📈 Your net-worth trend builds here — check in over the coming weeks and this becomes a chart.</div>';
+    return;
+  }
+  const vals = hist.map(h => h.v), min = Math.min(...vals), max = Math.max(...vals);
+  const W = 280, H = 64, pad = 4, span = (max - min) || 1;
+  const pts = hist.map((h, i) => {
+    const x = pad + i / (hist.length - 1) * (W - 2 * pad);
+    const y = H - pad - (h.v - min) / span * (H - 2 * pad);
+    return x.toFixed(1) + ',' + y.toFixed(1);
+  });
+  const first = vals[0], last = vals[vals.length - 1], up = last >= first;
+  const col = up ? 'var(--green)' : 'var(--red)';
+  wrap.innerHTML =
+    `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" preserveAspectRatio="none" style="display:block">
+      <polyline points="${pts.join(' ')}" fill="none" stroke="${col}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="pred-sub" style="display:flex;justify-content:space-between;margin-top:4px">
+      <span>${hist.length} check-ins</span><span style="color:${col}">${up ? '▲' : '▼'} ${fmtINR(Math.abs(last - first))} overall</span></div>`;
+}
+
+function renderEFBreakdown_() {
+  const el = document.getElementById('efBreakdown');
+  if (!el) return;
+  const LIQUIDATION = [
+    { match: /saving/i, time: 'Instant' },
+    { match: /liquid/i, time: 'T+1 day' },
+    { match: /\bfd\b|fixed deposit/i, time: '1–2 days (premature)' }
+  ];
+  const rows = sheetData.ACCOUNTS || [];
+  const items = [];
+  rows.forEach((r, i) => {
+    if (i === 0) return;
+    const name = (r[0] || '').trim();
+    const bal = toNum(r[3]);
+    if (!name || isNaN(bal) || bal <= 0) return;
+    const type = (r[2] || '').trim();
+    const liq = LIQUIDATION.find(l => l.match.test(type) || l.match.test(name));
+    items.push({ name, bank: (r[1] || '').trim(), bal, type, time: liq ? liq.time : '—' });
+  });
+  if (!items.length) { el.innerHTML = '<div class="drawer-empty">Add accounts in your Sheet to see the breakdown</div>'; return; }
+  el.innerHTML = items.map(a =>
+    `<div class="drawer-row"><div><div>${escapeHtml(a.name)}${a.bank ? ' · ' + escapeHtml(a.bank) : ''}</div><div class="dr-sub">${escapeHtml(a.type)} · cash-out ${a.time}</div></div><div class="dr-amt">${fmtINR(a.bal)}</div></div>`
+  ).join('');
 }
 
 /* ----- LIABILITIES parsing: cards section, then loans section ----- */
 function parseLiabilities_() {
   const rows = sheetData.LIABILITIES || [];
-  const cards = [];
-  let loan = null, inLoans = false;
+  const cards = [], loans = [];
+  let inLoans = false;
   for (const r of rows) {
     const name = (r[0] || '').trim();
     if (/^card$/i.test(name)) continue;            // cards header
@@ -1714,18 +1849,80 @@ function parseLiabilities_() {
       if (isNaN(limit) || limit <= 0) continue;
       const util = Math.round((outst / limit) * 100);
       const sev = util >= 60 ? 'red' : (util >= 30 ? 'gold' : 'green');
-      cards.push({ name, util, sev, due: isNaN(days) ? null : days, outstanding: outst });
-    } else if (!loan) {
-      loan = {
+      cards.push({ name, limit, util, sev, due: isNaN(days) ? null : days, outstanding: outst });
+    } else {
+      const principal = toNum(r[2]);
+      if (isNaN(principal) || principal <= 0) continue;
+      let roi = toNum(r[3]);
+      if (!isNaN(roi) && roi > 1) roi = roi / 100; // "14.0%" → 0.14
+      loans.push({
         name, lender: (r[1] || '').trim(),
-        principal: toNum(r[2]), roi: toNum(r[3]), emi: toNum(r[4]), start: (r[5] || '').trim(),
+        principal, roi, emi: toNum(r[4]), start: (r[5] || '').trim(),
         tenure: toNum(r[6]), paid: toNum(r[7]), remaining: toNum(r[8]),
         monthsLeft: toNum(r[9]), freeDate: (r[10] || '').trim()
-      };
+      });
     }
   }
-  return { cards, loan };
+  return { cards, loans, loan: loans[0] || null };
 }
+
+/* ----- Parsers for the new sheet tabs ----- */
+function parseSubscriptions_() {
+  const rows = sheetData.SUBSCRIPTIONS || [];
+  const subs = [];
+  rows.forEach((r, i) => {
+    if (i === 0) return;
+    const name = (r[0] || '').trim();
+    if (!name) return;
+    const amount = toNum(r[1]);
+    if (isNaN(amount)) return;
+    const cycle = (r[2] || 'Monthly').trim();
+    const day = toNum(r[3]);
+    const monthly = /annual/i.test(cycle) ? amount / 12 : amount;
+    subs.push({
+      name, amount, cycle, day: isNaN(day) ? null : day,
+      category: (r[4] || '').trim(), monthly,
+      nextDays: isNaN(day) ? null : nextDueDays_(day)
+    });
+  });
+  return subs;
+}
+function parseCardEmis_() {
+  const rows = sheetData.CARD_EMIS || [];
+  const emis = [];
+  rows.forEach((r, i) => {
+    if (i === 0) return;
+    const card = (r[0] || '').trim();
+    if (!card) return;
+    const inst = toNum(r[2]);
+    if (isNaN(inst)) return;
+    const total = toNum(r[3]), paid = toNum(r[4]);
+    const remMonths = Math.max(0, (isNaN(total) ? 0 : total) - (isNaN(paid) ? 0 : paid));
+    let roi = toNum(r[5]);
+    if (!isNaN(roi) && roi > 1) roi = roi / 100; // "16.0%" → 0.16
+    emis.push({
+      card, desc: (r[1] || '').trim(), installment: inst,
+      total, paid, roi,
+      monthsRemaining: remMonths, balance: inst * remMonths
+    });
+  });
+  return emis;
+}
+function parseCardSwipes_() {
+  const rows = sheetData.CARD_SWIPES || [];
+  const swipes = [];
+  rows.forEach((r, i) => {
+    if (i === 0) return;
+    const card = (r[0] || '').trim();
+    if (!card) return;
+    const amt = toNum(r[2]);
+    if (isNaN(amt)) return;
+    swipes.push({ card, desc: (r[1] || '').trim(), amount: amt, date: (r[3] || '').trim(), category: (r[4] || '').trim() });
+  });
+  return swipes;
+}
+function emisForCard_(name) { return parseCardEmis_().filter(e => e.card.toLowerCase() === name.toLowerCase()); }
+function swipesForCard_(name) { return parseCardSwipes_().filter(s => s.card.toLowerCase() === name.toLowerCase()); }
 
 function nextDueDays_(dayOfMonth) {
   const now = new Date();
@@ -1736,42 +1933,104 @@ function nextDueDays_(dayOfMonth) {
 }
 
 /* ----- Debt screen + card chips + alerts ----- */
+function renderLoans_(loans) {
+  const el = document.getElementById('loansList');
+  if (!el) return;
+  el.innerHTML = loans.length ? loans.map(l => {
+    const prog = l.tenure > 0 && !isNaN(l.paid) ? Math.min(100, Math.round(l.paid / l.tenure * 100)) : 0;
+    const rem = isNaN(l.remaining) ? l.principal : l.remaining;
+    return `<div class="li-card">
+      <div class="li-head">
+        <div class="li-icon">🏦</div>
+        <div class="li-main"><div class="li-name">${escapeHtml((l.lender ? l.lender + ' ' : '') + l.name)}</div>
+          <div class="li-sub">EMI ${fmtINR(l.emi)}${isNaN(l.roi) ? '' : ' · ' + (l.roi * 100).toFixed(0) + '% p.a.'}${isNaN(l.monthsLeft) ? '' : ' · ' + Math.round(l.monthsLeft) + ' mo left'}</div></div>
+        <div class="li-right"><div class="li-amt red">${fmtCompact(rem)}</div><div class="li-sub">remaining</div></div>
+      </div>
+      <div class="li-bar-wrap"><div class="bar"><i class="fill-prim" style="width:${prog}%"></i></div></div>
+    </div>`;
+  }).join('') : '<p class="drawer-empty" style="text-align:center">No loans 🎉</p>';
+}
+
+function renderCardsSection_(cards) {
+  const el = document.getElementById('cardsList');
+  if (!el) return;
+  const sevClass = { green: 'u-green', gold: 'u-gold', red: 'u-red' };
+  const fillClass = { green: 'fill-green', gold: 'fill-gold', red: 'fill-red' };
+  el.innerHTML = cards.length ? cards.map((c, i) => {
+    const emis = emisForCard_(c.name), swipes = swipesForCard_(c.name);
+    const dueTxt = c.due === null ? 'No dues' : (c.due <= 2 ? `Due in ${c.due}d !` : `Due in ${c.due}d`);
+    const emiHtml = emis.length ? emis.map(e =>
+      `<div class="drawer-row"><div><div>${escapeHtml(e.desc || 'EMI')}</div><div class="dr-sub">${fmtINR(e.installment)}/mo · ${e.monthsRemaining} of ${isNaN(e.total) ? '?' : e.total} left${isNaN(e.roi) ? '' : ' · ' + (e.roi * 100).toFixed(0) + '%'}</div></div><div class="dr-amt">${fmtINR(e.balance)}</div></div>`
+    ).join('') : '<div class="drawer-empty">No active EMIs on this card</div>';
+    const swHtml = swipes.length ? swipes.map(s =>
+      `<div class="drawer-row"><div><div>${escapeHtml(s.desc || 'Swipe')}</div><div class="dr-sub">${escapeHtml(s.category || '')}${s.date ? ' · ' + s.date : ''}</div></div><div class="dr-amt">${fmtINR(s.amount)}</div></div>`
+    ).join('') : '<div class="drawer-empty">No one-time swipes logged</div>';
+    return `<div class="li-card" id="cardItem${i}">
+      <div class="li-head" onclick="toggleCardDrawer(${i})" style="cursor:pointer">
+        <div class="li-icon">💳</div>
+        <div class="li-main"><div class="li-name">${escapeHtml(c.name)}</div>
+          <div class="li-sub ${c.due !== null && c.due <= 2 ? 'u-red' : ''}">${dueTxt}</div></div>
+        <div class="li-right"><div class="li-amt">${fmtINR(c.outstanding)}</div>
+          <div class="li-sub ${sevClass[c.sev]}">${c.util}% utilisation <span class="li-chev">▾</span></div></div>
+      </div>
+      <div class="li-bar-wrap"><div class="bar bar-thin"><i class="${fillClass[c.sev]}" style="width:${Math.max(c.util, 2)}%"></i></div></div>
+      <div class="card-drawer"><div class="drawer-inner">
+        <div class="drawer-label">Running EMIs</div>${emiHtml}
+        <div class="drawer-label">One-time swipes (this cycle)</div>${swHtml}
+      </div></div>
+    </div>`;
+  }).join('') : '<p class="drawer-empty" style="text-align:center">No credit cards</p>';
+}
+
 function applyDebtAndAlerts_() {
   if (!sheetData.LIABILITIES) return null;
-  const { cards, loan } = parseLiabilities_();
+  const { cards, loans } = parseLiabilities_();
+  const subs = parseSubscriptions_();
   const alerts = [];
 
-  if (loan) {
-    setText('loanName', (loan.lender ? loan.lender + ' ' : '') + loan.name);
-    setText('loanSub', 'EMI ' + fmtINR(loan.emi) + (isNaN(loan.roi) ? '' : ' · ' + loan.roi + '% p.a.'));
-    if (!isNaN(loan.remaining)) setText('loanRemaining', fmtCompact(loan.remaining));
-    const prog = loan.tenure > 0 && !isNaN(loan.paid)
-      ? Math.min(100, Math.round(loan.paid / loan.tenure * 100)) : 0;
-    document.getElementById('loanBar').style.width = prog + '%';
+  // ----- Debt hero: aggregate across all loans -----
+  const totalLoanRem = loans.reduce((s, l) => s + (isNaN(l.remaining) ? l.principal : l.remaining), 0);
+  const totalCardOut = cards.reduce((s, c) => s + c.outstanding, 0);
+  setText('debtTotal', fmtINR(totalLoanRem + totalCardOut));
+  // progress / months-to-freedom from the loans (weighted by tenure)
+  const leadLoan = loans.slice().sort((a, b) => (b.remaining || 0) - (a.remaining || 0))[0];
+  if (leadLoan) {
+    const prog = leadLoan.tenure > 0 && !isNaN(leadLoan.paid)
+      ? Math.min(100, Math.round(leadLoan.paid / leadLoan.tenure * 100)) : 0;
     document.getElementById('debtBar').style.width = prog + '%';
-    if (!isNaN(loan.monthsLeft)) setText('debtMonths', String(Math.round(loan.monthsLeft)));
-    if (loan.freeDate) setText('debtFreedomDate', 'Freedom date · ' + loan.freeDate);
+    if (!isNaN(leadLoan.monthsLeft)) setText('debtMonths', String(Math.round(leadLoan.monthsLeft)));
+    if (leadLoan.freeDate) setText('debtFreedomDate', 'Freedom date · ' + leadLoan.freeDate);
     setText('debtSub',
       prog >= 75 ? prog + '% cleared — the finish line is in sight.' :
       prog >= 50 ? prog + '% cleared — more behind you than ahead. Keep going.' :
       prog >= 25 ? prog + '% cleared — past the hardest stretch. Keep going.' :
                    prog + '% cleared — every EMI from here builds momentum.');
-    // EMI reminder from the loan's start-date day-of-month
-    const d = new Date(loan.start);
-    if (!isNaN(loan.emi) && loan.emi > 0 && !isNaN(d.getTime())) {
-      alerts.push({ name: (loan.lender || 'Loan') + ' EMI', sub: 'Loan EMI', amt: loan.emi, days: nextDueDays_(d.getDate()), icon: '🏦' });
-    }
   }
 
-  // Build the ranked attack list from cards + loan together
-  renderCards(cards, loan || null);
+  // ----- Section 1: Loans -----
+  renderLoans_(loans);
+
+  // EMI reminders from each loan's start-date day-of-month
+  loans.forEach(l => {
+    const d = new Date(l.start);
+    if (!isNaN(l.emi) && l.emi > 0 && !isNaN(d.getTime())) {
+      alerts.push({ name: (l.lender || 'Loan') + ' EMI', sub: 'Loan EMI', amt: l.emi, days: nextDueDays_(d.getDate()), icon: '🏦' });
+    }
+  });
+
+  // ----- Section 2: Credit cards (clickable drill-down) -----
+  renderCardsSection_(cards);
+
   cards.forEach(c => {
     if (c.due !== null && c.due >= 0 && c.due <= 31 && c.outstanding > 0) {
       alerts.push({ name: c.name + ' Card', sub: 'Credit card due', amt: c.outstanding, days: c.due, icon: '💳' });
     }
   });
 
-  // RD reminder from FIXED_INCOME (monthly amount like "4200/mo")
+  // ----- Section 3: Recurring subscriptions + burn widget -----
+  renderSubscriptions_(subs, alerts);
+
+  // RD reminder from FIXED_INCOME
   (sheetData.FIXED_INCOME || []).forEach((r, i) => {
     if (i === 0) return;
     if (!/^RD$/i.test((r[0] || '').trim())) return;
@@ -1783,8 +2042,47 @@ function applyDebtAndAlerts_() {
     }
   });
 
-  if (cards.length || loan) renderAlerts(alerts);
-  return loan;
+  renderAlerts(alerts);
+  return leadLoan;
+}
+
+function toggleCardDrawer(i) {
+  const el = document.getElementById('cardItem' + i);
+  if (el) el.classList.toggle('open');
+}
+
+function renderSubscriptions_(subs, alerts) {
+  const burnCard = document.getElementById('subsBurnCard');
+  const list = document.getElementById('subsList');
+  if (!subs.length) {
+    burnCard.style.display = 'none';
+    list.innerHTML = '<p class="drawer-empty" style="text-align:center">No subscriptions yet — add a SUBSCRIPTIONS tab to your Sheet</p>';
+    return;
+  }
+  const monthly = subs.reduce((s, x) => s + x.monthly, 0);
+  burnCard.style.display = '';
+  setText('subsBurnMonthly', fmtINR(monthly) + '/mo');
+  setText('subsBurnYearly', fmtINR(monthly * 12) + ' / year');
+  setText('subsBurnCount', subs.length + ' service' + (subs.length === 1 ? '' : 's'));
+
+  list.innerHTML = subs.slice().sort((a, b) => (a.nextDays ?? 99) - (b.nextDays ?? 99)).map(s => {
+    const countdown = s.nextDays === null ? '' :
+      (s.nextDays === 0 ? 'Bills today' : `Next bill in ${s.nextDays}d`);
+    return `<div class="li-card"><div class="li-head">
+      <div class="li-icon">🔁</div>
+      <div class="li-main"><div class="li-name">${escapeHtml(s.name)}</div>
+        <div class="li-sub">${escapeHtml(s.category || s.cycle)}${countdown ? ' · ' + countdown : ''}</div></div>
+      <div class="li-right"><div class="li-amt">${fmtINR(s.amount)}</div>
+        <div class="li-sub">${/annual/i.test(s.cycle) ? fmtINR(s.monthly) + '/mo' : 'monthly'}</div></div>
+    </div></div>`;
+  }).join('');
+
+  // subscription billing reminders (within 31 days)
+  subs.forEach(s => {
+    if (s.nextDays !== null && s.nextDays <= 31) {
+      alerts.push({ name: s.name, sub: 'Subscription', amt: /annual/i.test(s.cycle) ? s.amount : s.monthly, days: s.nextDays, icon: '🔁' });
+    }
+  });
 }
 
 /* ----- Investments screen from EQUITY_MF + GOLD + FIXED_INCOME ----- */
@@ -1808,9 +2106,16 @@ function editGoal(name) {
   applyInvest_(); // re-render with the new tag
 }
 
-function applyInvest_() {
+const BUCKETS = [
+  { key: 'equity', label: 'MF SIPs & Stocks' },
+  { key: 'fixed',  label: 'PPF & Fixed Income / RDs' },
+  { key: 'gold',   label: 'ETFs & Digital Gold' }
+];
+let investFilter = 'all', lastInvestItems = null, lastInvestTotals = null, lastInvestDormant = false;
+
+function buildInvestItems_() {
   const eq = sheetData.EQUITY_MF, gold = sheetData.GOLD, fixed = sheetData.FIXED_INCOME;
-  if (!eq && !gold && !fixed) return;
+  if (!eq && !gold && !fixed) return null;
   const items = [];
   let invested = 0, current = 0, dormant = false;
 
@@ -1818,18 +2123,20 @@ function applyInvest_() {
     if (i === 0) return;
     const name = (r[0] || '').trim();
     if (!name) return;
+    const type = (r[1] || '').trim();
     const inv = toNum(r[6]), cur = toNum(r[7]), ret = toNum(r[8]);
     if (isNaN(cur) || cur <= 0) return;
     invested += isNaN(inv) ? cur : inv;
     current += cur;
-    items.push({ name, sub: (r[1] || '').trim(), val: cur, ret: isNaN(ret) ? null : ret, kind: 'equity' });
+    // ETFs group with digital gold; MFs/SIPs/stocks are the equity bucket
+    const bucket = /etf/i.test(type) ? 'gold' : 'equity';
+    items.push({ name, sub: type, val: cur, ret: isNaN(ret) ? null : ret, kind: 'equity', bucket });
   });
 
   let gGrams = 0, gInv = 0, gCur = 0, gRate = NaN;
   (gold || []).forEach((r, i) => {
     if (i === 0) return;
-    const name = (r[0] || '').trim();
-    if (!name) return;
+    if (!(r[0] || '').trim()) return;
     const cur = toNum(r[6]);
     if (isNaN(cur) || cur <= 0) return;
     gGrams += toNum(r[1]) || 0;
@@ -1842,11 +2149,8 @@ function applyInvest_() {
     invested += gInv || gCur;
     current += gCur;
     items.push({
-      name: 'Gold',
-      sub: (Math.round(gGrams * 10) / 10) + 'g' + (isNaN(gRate) ? '' : ' · ' + fmtINR(gRate) + '/g'),
-      val: gCur,
-      ret: gInv > 0 ? (gCur - gInv) / gInv * 100 : null,
-      kind: 'equity'
+      name: 'Digital Gold', sub: (Math.round(gGrams * 10) / 10) + 'g' + (isNaN(gRate) ? '' : ' · ' + fmtINR(gRate) + '/g'),
+      val: gCur, ret: gInv > 0 ? (gCur - gInv) / gInv * 100 : null, kind: 'equity', bucket: 'gold'
     });
   }
 
@@ -1865,33 +2169,208 @@ function applyInvest_() {
     items.push({
       name: name + ((r[1] || '').trim() ? ' · ' + (r[1] || '').trim() : ''),
       sub: isDormant ? 'Dormant' : (isNaN(months) ? 'Fixed income' : 'Matures ' + Math.round(months) + ' months'),
-      val: bal, ret: isNaN(rate) ? null : rate, kind: 'fixed', muted: isDormant
+      val: bal, ret: isNaN(rate) ? null : rate, kind: 'fixed', muted: isDormant, bucket: 'fixed'
     });
   });
 
-  if (!items.length) return;
-  const rowsHtml = items.map(it => {
-    let chip = '';
-    if (it.ret !== null) {
-      if (it.kind === 'fixed') chip = `<span class="tchip amber" style="margin-top:4px">${it.ret.toFixed(1)}%</span>`;
-      else {
-        const pos = it.ret >= 0;
-        chip = `<span class="tchip ${pos ? 'green' : 'red'}" style="margin-top:4px">${pos ? '+' : ''}${it.ret.toFixed(1)}%</span>`;
-      }
-    }
-    return `<div class="inv-row ${it.muted ? 'muted' : ''}">
-      <div class="iv-main"><div class="iv-name">${escapeHtml(it.name)}</div><div class="iv-sub"${it.muted ? ' style="color:var(--gold)"' : ''}>${escapeHtml(it.sub)}</div>${goalChipHtml_(it.name)}</div>
-      <div class="iv-right"><div class="iv-val">${fmtINR(it.val)}</div>${chip}</div>
-    </div>`;
-  }).join('');
-  const overall = invested > 0 ? (current - invested) / invested * 100 : 0;
-  document.getElementById('invCard').innerHTML = rowsHtml + `
-    <div class="inv-total">
-      <div><div class="t-label">Invested</div><div class="t-val">${fmtINR(invested)}</div></div>
-      <div><div class="t-label">Current</div><div class="t-val">${fmtINR(current)}</div></div>
-      <div><div class="t-label">Overall</div><div class="t-val" style="color:var(--${overall >= 0 ? 'green' : 'red'})">${overall >= 0 ? '+' : ''}${overall.toFixed(1)}%</div></div>
-    </div>`;
-  document.getElementById('ppfBanner').style.display = dormant ? '' : 'none';
+  return { items, invested, current, dormant };
+}
+
+function setInvestFilter(bucket) {
+  investFilter = bucket;
+  document.querySelectorAll('#invFilters .filter-chip').forEach(b =>
+    b.classList.toggle('active', b.dataset.bucket === bucket));
+  renderInvestBuckets_();
+}
+
+function rowHtml_(it) {
+  let chip = '';
+  if (it.ret !== null) {
+    if (it.kind === 'fixed') chip = `<span class="tchip amber" style="margin-top:4px">${it.ret.toFixed(1)}%</span>`;
+    else { const pos = it.ret >= 0; chip = `<span class="tchip ${pos ? 'green' : 'red'}" style="margin-top:4px">${pos ? '+' : ''}${it.ret.toFixed(1)}%</span>`; }
+  }
+  return `<div class="inv-row ${it.muted ? 'muted' : ''}">
+    <div class="iv-main"><div class="iv-name">${escapeHtml(it.name)}</div><div class="iv-sub"${it.muted ? ' style="color:var(--gold)"' : ''}>${escapeHtml(it.sub)}</div>${goalChipHtml_(it.name)}</div>
+    <div class="iv-right"><div class="iv-val">${fmtINR(it.val)}</div>${chip}</div>
+  </div>`;
+}
+
+function renderInvestBuckets_() {
+  if (!lastInvestItems) return;
+  const wrap = document.getElementById('invBuckets');
+  let html = '';
+  BUCKETS.forEach(b => {
+    if (investFilter !== 'all' && investFilter !== b.key) return;
+    const rows = lastInvestItems.filter(it => it.bucket === b.key);
+    if (!rows.length) return;
+    const bucketTotal = rows.reduce((s, it) => s + it.val, 0);
+    html += `<div class="bucket-label">${b.label} · ${fmtCompact(bucketTotal)}</div>`;
+    html += `<div class="card" style="padding:6px 18px">${rows.map(rowHtml_).join('')}</div>`;
+  });
+  wrap.innerHTML = html || '<p class="drawer-empty" style="text-align:center">Nothing in this bucket</p>';
+
+  const t = lastInvestTotals;
+  if (t) {
+    const overall = t.invested > 0 ? (t.current - t.invested) / t.invested * 100 : 0;
+    document.getElementById('invTotalCard').style.display = '';
+    setText('invTotInvested', fmtINR(t.invested));
+    setText('invTotCurrent', fmtINR(t.current));
+    const rt = document.getElementById('invTotReturn');
+    rt.textContent = (overall >= 0 ? '+' : '') + overall.toFixed(1) + '%';
+    rt.style.color = 'var(--' + (overall >= 0 ? 'green' : 'red') + ')';
+  }
+  document.getElementById('ppfBanner').style.display = lastInvestDormant ? '' : 'none';
+}
+
+function applyInvest_() {
+  const built = buildInvestItems_();
+  if (!built || !built.items.length) return;
+  lastInvestItems = built.items;
+  lastInvestTotals = { invested: built.invested, current: built.current };
+  lastInvestDormant = built.dormant;
+  renderInvestBuckets_();
+}
+
+// Sample buckets for first run (no live sheet)
+function renderSampleInvest_() {
+  lastInvestItems = [
+    { name: 'Parag Parikh Flexi Cap', sub: 'MF-SIP', val: 214300, ret: 31.2, kind: 'equity', bucket: 'equity' },
+    { name: 'Mirae Asset Large Cap', sub: 'MF-Lumpsum', val: 98400, ret: 18.7, kind: 'equity', bucket: 'equity' },
+    { name: 'NIFTYBEES', sub: 'ETF', val: 22100, ret: 23.8, kind: 'equity', bucket: 'gold' },
+    { name: 'Digital Gold', sub: '14.2g · ₹7,240/g', val: 102800, ret: 24.1, kind: 'equity', bucket: 'gold' },
+    { name: 'Recurring Deposit · HDFC', sub: 'Matures 8 months', val: 84000, ret: 7.2, kind: 'fixed', bucket: 'fixed' },
+    { name: 'PPF Account · SBI', sub: 'Dormant', val: 42000, ret: 7.1, kind: 'fixed', muted: true, bucket: 'fixed' }
+  ];
+  lastInvestTotals = { invested: 449400, current: 563600 };
+  lastInvestDormant = true;
+  renderInvestBuckets_();
+}
+
+/* ============================================================
+   PREDICT — forecasting engine
+   ============================================================ */
+const SAMPLE_EMIS = [
+  { card: 'Amex', desc: 'iPhone 15 Pro', installment: 8500, total: 12, paid: 3, roi: 0.16, monthsRemaining: 9, balance: 76500 },
+  { card: 'Bajaj', desc: 'Laptop', installment: 5200, total: 9, paid: 2, roi: 0.18, monthsRemaining: 7, balance: 36400 }
+];
+const SAMPLE_SWIPES = [
+  { card: 'Amex', desc: 'Flight tickets', amount: 18400, date: '', category: 'Travel' },
+  { card: 'ICICI Coral', desc: 'Dining', amount: 3200, date: '', category: 'Food' }
+];
+
+let debtTrack = 'avalanche';
+function getPrepay_() { return parseInt(localStorage.getItem('fos_prepay') || '0', 10) || 0; }
+function getVarSpend_() { const v = localStorage.getItem('fos_var_spend'); return v === null ? 20000 : (parseInt(v, 10) || 0); }
+
+function predInputs_() {
+  const live = Object.keys(sheetData).length > 0;
+  if (live) {
+    const { cards, loans } = parseLiabilities_();
+    const liqV = nwValue('Total Liquid Cash');
+    const obV = nwValue('Monthly Obligations');
+    return {
+      cards, loans, subs: parseSubscriptions_(), emis: parseCardEmis_(), swipes: parseCardSwipes_(),
+      liquid: isNaN(liqV) ? 0 : liqV, monthlyObligations: isNaN(obV) ? NaN : obV
+    };
+  }
+  return {
+    cards: SAMPLE_CARDS, loans: SAMPLE_LOANS, subs: SAMPLE_SUBS, emis: SAMPLE_EMIS, swipes: SAMPLE_SWIPES,
+    liquid: 182000, monthlyObligations: NaN
+  };
+}
+
+function setDebtTrack(t) {
+  debtTrack = t;
+  document.querySelectorAll('#screen-predict .seg-opt[data-track]').forEach(b =>
+    b.classList.toggle('active', b.dataset.track === t));
+  renderPredictions_();
+}
+function bumpPrepay(d) {
+  localStorage.setItem('fos_prepay', String(Math.max(0, getPrepay_() + d)));
+  renderPredictions_();
+}
+
+// Month-by-month debt simulation (avalanche = highest rate first, snowball = lowest balance first)
+function simulateDebtFreedom_(loans, cards, track, extra) {
+  let debts = [];
+  loans.forEach(l => {
+    const bal = isNaN(l.remaining) ? l.principal : l.remaining;
+    if (bal > 0) debts.push({ bal, rate: (isNaN(l.roi) ? 0.14 : l.roi) / 12, min: isNaN(l.emi) ? bal * 0.02 : l.emi });
+  });
+  // Cards are revolving, not amortizing — assume they're cleared within ~6 months
+  // (paying only the 5% minimum at 40% APR would take decades, which isn't a useful forecast)
+  cards.forEach(c => { if (c.outstanding > 0) debts.push({ bal: c.outstanding, rate: CARD_APR / 12, min: Math.max(cardMinDue_(c.outstanding), c.outstanding / 6) }); });
+  if (!debts.length) return { months: 0 };
+  let months = 0;
+  while (debts.some(d => d.bal > 0.5) && months < 600) {
+    months++;
+    debts.forEach(d => { if (d.bal > 0) d.bal *= (1 + d.rate); });          // accrue interest
+    debts.forEach(d => { if (d.bal > 0) d.bal = Math.max(0, d.bal - d.min); }); // minimums
+    let pool = extra;                                                        // extra prepayment
+    const order = debts.filter(d => d.bal > 0).sort((a, b) =>
+      track === 'snowball' ? a.bal - b.bal : b.rate - a.rate);
+    for (const d of order) { if (pool <= 0) break; const pay = Math.min(pool, d.bal); d.bal -= pay; pool -= pay; }
+  }
+  return { months };
+}
+
+function renderPredictions_() {
+  const inp = predInputs_();
+
+  // ---- Widget 1: credit-card statement projection ----
+  const cardOut = inp.cards.reduce((s, c) => s + c.outstanding, 0);
+  const emiSum = inp.emis.reduce((s, e) => s + e.installment, 0);
+  const swipeSum = inp.swipes.reduce((s, x) => s + x.amount, 0);
+  const billTotal = cardOut + emiSum + swipeSum;
+  setText('predBillTotal', fmtINR(billTotal));
+  document.getElementById('predBillBreakdown').innerHTML =
+    `<div class="pred-line"><span class="pl-sub">Current outstanding</span><span class="pl-amt">${fmtINR(cardOut)}</span></div>` +
+    `<div class="pred-line"><span class="pl-sub">EMI installments (next cycle)</span><span class="pl-amt">${fmtINR(emiSum)}</span></div>` +
+    `<div class="pred-line"><span class="pl-sub">One-time swipes this cycle</span><span class="pl-amt">${fmtINR(swipeSum)}</span></div>` +
+    `<div class="pred-line total"><span>Projected next statement</span><span>${fmtINR(billTotal)}</span></div>`;
+
+  // ---- Widget 2: debt freedom countdown ----
+  const prepay = getPrepay_();
+  setText('prepayAmt', fmtINR(prepay));
+  const sim = simulateDebtFreedom_(inp.loans, inp.cards, debtTrack, prepay);
+  if (sim.months > 0 && sim.months < 600) {
+    const d = new Date(); d.setMonth(d.getMonth() + sim.months);
+    setText('predFreedomDate', d.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' }));
+    setText('predFreedomMonths', sim.months + ' month' + (sim.months === 1 ? '' : 's') + ' away · ' +
+      (debtTrack === 'avalanche' ? 'highest-rate first (saves most interest)' : 'smallest balance first (fastest wins)'));
+  } else if (sim.months === 0) {
+    setText('predFreedomDate', 'Debt-free 🎉'); setText('predFreedomMonths', 'No outstanding debt');
+  } else {
+    setText('predFreedomDate', '60+ yrs'); setText('predFreedomMonths', 'Minimums barely cover interest — add extra prepayment');
+  }
+
+  // ---- Widget 3: jobless runway ----
+  const subBurn = inp.subs.reduce((s, x) => s + x.monthly, 0);
+  let burn = inp.monthlyObligations;
+  if (isNaN(burn)) burn = inp.loans.reduce((s, l) => s + (isNaN(l.emi) ? 0 : l.emi), 0) +
+    inp.cards.reduce((s, c) => s + cardMinDue_(c.outstanding), 0) + subBurn + getVarSpend_();
+  const runwayMonths = burn > 0 ? inp.liquid / burn : 0;
+  setText('predRunway', runwayMonths >= 0.1 ? runwayMonths.toFixed(1) + ' months' : '—');
+  document.getElementById('predRunwayBar').style.width = Math.min(100, runwayMonths / 12 * 100) + '%';
+  setText('predRunwaySub', `${fmtINR(inp.liquid)} liquid ÷ ${fmtINR(Math.round(burn))}/mo burn` +
+    (runwayMonths < 6 ? ' · aim for 6+ months' : ' · healthy cushion'));
+
+  // ---- Widget 4: next month's expense forecast ----
+  const loanEmi = inp.loans.reduce((s, l) => s + (isNaN(l.emi) ? 0 : l.emi), 0);
+  const cardMins = inp.cards.reduce((s, c) => s + cardMinDue_(c.outstanding), 0);
+  const varSpend = getVarSpend_();
+  const expTotal = loanEmi + subBurn + cardMins + varSpend;
+  setText('predExpenseTotal', fmtINR(expTotal));
+  document.getElementById('predExpenseBreakdown').innerHTML =
+    `<div class="pred-line"><span class="pl-sub">Loan EMIs</span><span class="pl-amt">${fmtINR(loanEmi)}</span></div>` +
+    `<div class="pred-line"><span class="pl-sub">Subscriptions</span><span class="pl-amt">${fmtINR(subBurn)}</span></div>` +
+    `<div class="pred-line"><span class="pl-sub">Credit-card minimums</span><span class="pl-amt">${fmtINR(cardMins)}</span></div>` +
+    `<div class="pred-line"><span class="pl-sub">Everyday / lifestyle (est.) <button class="step-btn" onclick="bumpVar(-2500)">−</button> <button class="step-btn" onclick="bumpVar(2500)">+</button></span><span class="pl-amt">${fmtINR(varSpend)}</span></div>` +
+    `<div class="pred-line total"><span>Forecast total</span><span>${fmtINR(expTotal)}</span></div>`;
+}
+function bumpVar(d) {
+  localStorage.setItem('fos_var_spend', String(Math.max(0, getVarSpend_() + d)));
+  renderPredictions_();
 }
 
 /* ----- Tax screen from the TAX tab ----- */
@@ -2471,8 +2950,7 @@ setInterval(() => { if (navigator.onLine) refreshData(true); }, 30 * 60 * 1000);
 /* ============================================================
    APP LOCK — WebAuthn biometric + PIN fallback + auto-lock
    ============================================================ */
-const DORMANT_MS = 2 * 60 * 1000; // re-auth after 2 min in background
-let isLocked = false, hiddenAt = 0;
+let isLocked = false, authInProgress = false;
 let pinMode = 'unlock';   // 'unlock' | 'set' | 'confirm'
 let pinBuffer = '', pinFirst = '', pinTargetLen = 4;
 
@@ -2509,6 +2987,8 @@ async function biometricAvailable_() {
 }
 async function registerBiometric_() {
   if (!window.PublicKeyCredential) throw new Error('No WebAuthn');
+  authInProgress = true;
+  try {
   const cred = await navigator.credentials.create({
     publicKey: {
       challenge: crypto.getRandomValues(new Uint8Array(32)),
@@ -2520,19 +3000,23 @@ async function registerBiometric_() {
     }
   });
   localStorage.setItem('fos_webauthn_id', b64url_(cred.rawId));
+  } finally { setTimeout(() => { authInProgress = false; }, 800); }
 }
 async function verifyBiometric_() {
   const id = localStorage.getItem('fos_webauthn_id');
   if (!id || !window.PublicKeyCredential) throw new Error('No credential');
-  await navigator.credentials.get({
-    publicKey: {
-      challenge: crypto.getRandomValues(new Uint8Array(32)),
-      allowCredentials: [{ id: fromB64url_(id), type: 'public-key' }],
-      userVerification: 'required',
-      timeout: 60000
-    }
-  });
-  return true; // resolves only if device verification passed
+  authInProgress = true;
+  try {
+    await navigator.credentials.get({
+      publicKey: {
+        challenge: crypto.getRandomValues(new Uint8Array(32)),
+        allowCredentials: [{ id: fromB64url_(id), type: 'public-key' }],
+        userVerification: 'required',
+        timeout: 60000
+      }
+    });
+    return true; // resolves only if device verification passed
+  } finally { setTimeout(() => { authInProgress = false; }, 800); }
 }
 
 /* ----- Enabling a lock mode from Settings ----- */
@@ -2615,8 +3099,35 @@ async function onPinComplete_() {
     return;
   }
   // unlock mode
-  if (await verifyPin_(pinBuffer)) { unlockApp_(); }
-  else { shakeLock_(); pinBuffer = ''; renderPinDots_(); document.getElementById('lockSub').textContent = 'Wrong PIN — try again'; }
+  if (await verifyPin_(pinBuffer)) { pinFails = 0; unlockApp_(); }
+  else {
+    pinFails++;
+    pinBuffer = ''; renderPinDots_();
+    if (pinFails >= 5) { purgeData_(); return; } // duress / forgot-PIN safety wipe
+    shakeLock_();
+    document.getElementById('lockSub').textContent = 'Wrong PIN — try again';
+  }
+}
+let pinFails = 0;
+
+/* Panic / duress wipe — disconnects all data sources from this device.
+   The Google Sheet itself is untouched; the app just forgets how to reach it. */
+function purgeData_() {
+  ['fos_sheet_id', 'fos_webapp_url', 'fos_app_token', 'fos_gemini_key', 'fos_gemini_model',
+   'fos_cached_data', 'fos_goal_tags', 'fos_nw_baseline', 'fos_lock_mode', 'fos_pin_salt',
+   'fos_pin_hash', 'fos_pin_len', 'fos_webauthn_id', 'fos_setup_done'
+  ].forEach(k => localStorage.removeItem(k));
+  // Reload to a clean, unconfigured app (shows the setup wizard — looks fresh)
+  location.reload();
+}
+function manualPurge() {
+  if (!confirm('Disconnect your Sheet, token and AI key from this app?\n\nYour data in Google Sheets stays safe — you can reconnect anytime. The app will reset to first-run setup.')) return;
+  purgeData_();
+}
+// Reachable from the lock screen without unlocking — forgot-PIN recovery / panic escape
+function lockScreenReset() {
+  if (!confirm('Reset FinanceOS on this device?\n\nThis removes your PIN, Sheet, token and AI key from the app and returns to first-run setup. Your data in Google Sheets is NOT affected.')) return;
+  purgeData_();
 }
 
 function shakeLock_() {
@@ -2632,6 +3143,7 @@ function startSetPin() {
   document.getElementById('lockTitle').textContent = 'Set a PIN';
   document.getElementById('lockSub').textContent = 'Choose a 4-digit PIN';
   document.getElementById('lockBioBtn').style.display = 'none';
+  document.getElementById('lockResetBtn').style.display = 'none';
   renderPinPad_(); renderPinDots_();
   document.getElementById('lockScreen').classList.add('show');
 }
@@ -2641,7 +3153,7 @@ function finishSetPin_() {
 }
 
 /* ----- Lock / unlock ----- */
-function lockApp_() {
+function lockApp_(triggerBio) {
   if (lockMode_() === 'off') return;
   isLocked = true;
   pinMode = 'unlock'; pinBuffer = '';
@@ -2650,9 +3162,11 @@ function lockApp_() {
   document.getElementById('lockSub').textContent = 'Enter your PIN';
   document.getElementById('lockBioBtn').style.display =
     (lockMode_() === 'bio' && localStorage.getItem('fos_webauthn_id')) ? '' : 'none';
+  document.getElementById('lockResetBtn').style.display = '';
   renderPinPad_(); renderPinDots_();
   document.getElementById('lockScreen').classList.add('show');
-  if (lockMode_() === 'bio') tryBiometric();
+  // Only prompt biometric while the app is actually on-screen
+  if (triggerBio && lockMode_() === 'bio' && !document.hidden) tryBiometric();
 }
 function unlockApp_() {
   isLocked = false;
@@ -2664,26 +3178,34 @@ async function tryBiometric() {
   catch (e) { document.getElementById('lockSub').textContent = 'Use your PIN instead'; }
 }
 
-/* ----- Privacy mask + dormancy ----- */
+/* ----- Auto-lock: lock the moment the app leaves the foreground ----- */
+function lockScreenShown_() { return document.getElementById('lockScreen').classList.contains('show'); }
+
+function handleHidden_() {
+  // Don't fight the OS biometric/credential sheet (it briefly hides the page)
+  if (authInProgress) return;
+  if (lockMode_() !== 'off' && !isLocked && !lockScreenShown_()) lockApp_(false);
+}
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
-    hiddenAt = Date.now();
-    if (lockMode_() !== 'off' && !isLocked) document.getElementById('privacyMask').classList.add('show');
-  } else {
-    document.getElementById('privacyMask').classList.remove('show');
-    if (lockMode_() !== 'off' && !isLocked && hiddenAt && (Date.now() - hiddenAt > DORMANT_MS)) {
-      lockApp_();
-    }
+    handleHidden_();
+  } else if (isLocked && lockMode_() === 'bio' && localStorage.getItem('fos_webauthn_id')) {
+    tryBiometric(); // re-prompt biometric on return
   }
 });
-window.addEventListener('blur', () => {
-  if (lockMode_() !== 'off' && !isLocked) document.getElementById('privacyMask').classList.add('show');
-});
-window.addEventListener('focus', () => { if (!document.hidden) document.getElementById('privacyMask').classList.remove('show'); });
+// Extra safety nets for platforms where visibilitychange is unreliable
+window.addEventListener('pagehide', handleHidden_);
+window.addEventListener('blur', () => { setTimeout(() => { if (document.hidden) handleHidden_(); }, 50); });
 
 /* ---------- Boot ---------- */
+// First-run sample rendering (now safe — all module vars are declared above)
+renderSampleDebt_();
+renderSampleInvest_();
+renderAlerts(SAMPLE_ALERTS.slice());
+renderPredictions_();
+
 // Lock immediately on launch if enabled (before any data shows)
-if (lockMode_() !== 'off') lockApp_();
+if (lockMode_() !== 'off') lockApp_(true);
 
 // Try cached data instantly, then go live
 try {
