@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <circle cx="256" cy="256" r="256" fill="#06090f"/>
+  <circle cx="256" cy="256" r="234" fill="#0b1220"/>
+  <text x="256" y="357" font-family="'Google Sans Display','Google Sans','Product Sans',Roboto,Arial,sans-serif" font-size="288" font-weight="500" text-anchor="middle" fill="#adc6ff">F</text>
+</svg>

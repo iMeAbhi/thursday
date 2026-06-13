@@ -1,0 +1,8 @@
+# Local tooling — not part of the app
+.claude/
+
+# Separate project — keep it out of the FinanceOS repo
+LMS/
+*.log
+.DS_Store
+Thumbs.db

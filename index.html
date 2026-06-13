@@ -1,0 +1,3429 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>FinanceOS</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="icon-192.svg">
+<link rel="apple-touch-icon" href="icon-192.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Google+Sans+Display:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   FinanceOS — Material You 3 tonal system seeded from #4f8ef7
+   ============================================================ */
+:root,
+html[data-theme="light"] {
+  --bg: #eef1fb;
+  --bg2: #f8f9ff;
+  /* Liquid Glass surfaces */
+  --surface: rgba(255,255,255,0.58);
+  --surface-high: rgba(255,255,255,0.74);
+  --glass-edge: rgba(255,255,255,0.85);
+  --glass-blur: blur(16px) saturate(1.2);
+  --card-shadow: 0 10px 34px rgba(17,28,60,0.14);
+  --primary: #2d6bc6;
+  --primary-cont: #d6e3ff;
+  --on-prim-cont: #001945;
+  --green: #1a7f4b;
+  --green-cont: #b7f0d4;
+  --red: #ba1a1a;
+  --red-cont: #ffdad6;
+  --gold: #7a5900;
+  --gold-cont: #ffdea8;
+  --purple: #6750a4;
+  --purple-cont: #eaddff;
+  --outline: rgba(0,0,0,0.07);
+  --outline-strong: rgba(0,0,0,0.13);
+  --text: #1a1c22;
+  --text-2: rgba(26,28,34,0.62);
+  --text-3: rgba(26,28,34,0.42);
+  --shadow: 0 1px 3px rgba(20,30,60,0.10);
+  --nav-bg: rgba(255,255,255,0.55);
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --dur: 280ms;
+}
+html[data-theme="dark"] {
+  --bg: #000000;
+  --bg2: #0a0a0a;
+  /* Liquid Glass surfaces over true AMOLED black */
+  --surface: rgba(30,30,30,0.45);
+  --surface-high: rgba(48,48,48,0.55);
+  --glass-edge: rgba(255,255,255,0.14);
+  --glass-blur: blur(16px) saturate(1.2);
+  --card-shadow: 0 8px 32px rgba(0,0,0,0.55);
+  --primary: #adc6ff;
+  --primary-cont: #1050a4;
+  --on-prim-cont: #d6e3ff;
+  --green: #72dba4;
+  --green-cont: rgba(114,219,164,0.12);
+  --red: #ffb4ab;
+  --red-cont: rgba(186,26,26,0.18);
+  --gold: #ffb95d;
+  --gold-cont: rgba(255,185,93,0.10);
+  --purple: #d0bcff;
+  --purple-cont: rgba(103,80,164,0.22);
+  --outline: rgba(255,255,255,0.10);
+  --outline-strong: rgba(255,255,255,0.16);
+  --text: #e7e9f2;
+  --text-2: rgba(231,233,242,0.62);
+  --text-3: rgba(231,233,242,0.40);
+  --shadow: 0 1px 2px rgba(0,0,0,0.6);
+  --nav-bg: rgba(10,10,10,0.55);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Google Sans', Roboto, system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+  overscroll-behavior-y: contain;
+}
+.display { font-family: 'Google Sans Display', 'Google Sans', sans-serif; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+input { font-family: inherit; }
+
+/* ---------- Top bar ---------- */
+.topbar {
+  position: sticky; top: 0; z-index: 50;
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 18px;
+  padding-top: calc(12px + env(safe-area-inset-top, 0px));
+  background: var(--nav-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid var(--outline);
+  transition: background var(--dur) var(--ease);
+}
+.wordmark {
+  font-family: 'Google Sans Display', sans-serif;
+  font-size: 19px; font-weight: 500; letter-spacing: -0.2px;
+  margin-right: auto;
+}
+.wordmark span { color: var(--primary); }
+.offline-chip {
+  display: none; align-items: center; gap: 5px;
+  font-size: 11.5px; font-weight: 500;
+  padding: 5px 10px; border-radius: 100px;
+  background: var(--gold-cont); color: var(--gold);
+  border: 1px solid var(--outline);
+}
+.offline-chip.show { display: inline-flex; }
+.theme-pill {
+  min-width: 44px; min-height: 44px;
+  height: 44px; padding: 0 6px;
+  display: flex; align-items: center; justify-content: center; gap: 2px;
+  border-radius: 100px;
+  background: var(--surface-high);
+  border: 1px solid var(--outline);
+  transition: all var(--dur) var(--ease);
+}
+.theme-pill .tp-opt {
+  width: 32px; height: 32px; border-radius: 100px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; opacity: 0.45; transition: all var(--dur) var(--ease);
+}
+.theme-pill .tp-opt.active { background: var(--primary-cont); opacity: 1; }
+.iconbtn {
+  min-width: 44px; min-height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 100px; font-size: 18px;
+  transition: background var(--dur) var(--ease);
+}
+.iconbtn:active { background: var(--surface-high); }
+.avatar {
+  width: 38px; height: 38px; min-width: 38px;
+  border-radius: 100px;
+  background: linear-gradient(140deg, var(--primary-cont), var(--purple-cont));
+  color: var(--text);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700;
+  border: 1px solid var(--outline-strong);
+}
+
+/* ---------- Layout / screens ---------- */
+main {
+  max-width: 560px; margin: 0 auto;
+  padding: 18px 16px calc(120px + env(safe-area-inset-bottom, 0px));
+  overflow-x: hidden;
+}
+.screen { display: none; }
+.screen.active { display: block; animation: slideIn var(--dur) var(--ease); }
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(26px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.screen.slide-left { animation: slideInL var(--dur) var(--ease); }
+@keyframes slideInL {
+  from { opacity: 0; transform: translateX(-26px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.page-title {
+  font-family: 'Google Sans Display', sans-serif;
+  font-size: 26px; font-weight: 500; letter-spacing: -0.3px;
+}
+.page-sub { font-size: 13.5px; color: var(--text-2); margin: 4px 0 18px; }
+
+/* ---------- Cards (Liquid Glass) ---------- */
+.card {
+  background: var(--surface);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-edge);
+  border-radius: 28px;
+  padding: 20px;
+  margin-bottom: 14px;
+  box-shadow: var(--card-shadow);
+  transition: background var(--dur) var(--ease), border var(--dur) var(--ease);
+}
+.eyebrow {
+  font-size: 11px; font-weight: 700; letter-spacing: 1.6px;
+  text-transform: uppercase; color: var(--text-2);
+}
+
+/* ---------- Hero cards ---------- */
+.hero-networth {
+  background: linear-gradient(140deg, var(--primary-cont), var(--purple-cont));
+  border: 1px solid var(--glass-edge);
+  border-radius: 32px;
+  padding: 24px 22px;
+  margin-bottom: 14px;
+  box-shadow: var(--card-shadow);
+  transition: background var(--dur) var(--ease);
+}
+/* Night dynamic hero: dark sky + faint static stars, light text */
+.hero-networth.hero-night {
+  background-image:
+    radial-gradient(1.2px 1.2px at 18% 30%, rgba(255,255,255,0.9), transparent),
+    radial-gradient(1px 1px at 62% 22%, rgba(255,255,255,0.7), transparent),
+    radial-gradient(1.4px 1.4px at 82% 48%, rgba(255,255,255,0.8), transparent),
+    radial-gradient(1px 1px at 38% 64%, rgba(255,255,255,0.6), transparent),
+    linear-gradient(140deg, #0b1f4d 0%, #1a0f3d 100%) !important;
+}
+.hero-networth.hero-night .eyebrow,
+.hero-networth.hero-night .networth-num,
+.hero-networth.hero-night .climb-line { color: #eaf0ff !important; }
+.hero-networth .eyebrow { color: var(--on-prim-cont); opacity: 0.75; }
+html[data-theme="dark"] .hero-networth .eyebrow { color: var(--text-2); opacity: 1; }
+.networth-num {
+  font-family: 'Google Sans Display', sans-serif;
+  font-size: 42px; font-weight: 400; letter-spacing: -1px;
+  margin: 6px 0 10px; color: var(--on-prim-cont);
+}
+html[data-theme="dark"] .networth-num { color: #e7ecff; }
+.delta-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 13px; font-weight: 600;
+  padding: 6px 13px; border-radius: 100px;
+  background: var(--green-cont); color: var(--green);
+  border: 1px solid var(--outline);
+}
+html[data-theme="light"] .delta-chip { background: rgba(183,240,212,0.85); }
+.subchip-row { display: flex; gap: 8px; margin-top: 16px; }
+.subchip {
+  flex: 1; min-height: 56px;
+  background: var(--surface-high);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--outline);
+  border-radius: 16px;
+  padding: 9px 11px;
+}
+.subchip .sc-label { font-size: 10.5px; font-weight: 600; letter-spacing: 0.6px; text-transform: uppercase; color: var(--text-2); }
+.subchip .sc-val { font-size: 15.5px; font-weight: 600; margin-top: 2px; }
+.sc-green { color: var(--green); } .sc-red { color: var(--red); } .sc-prim { color: var(--primary); }
+
+/* ---------- Donut ---------- */
+.donut-wrap { display: flex; align-items: center; gap: 22px; margin-top: 14px; }
+.donut { width: 132px; height: 132px; min-width: 132px; transform: rotate(-90deg); }
+.donut circle { fill: none; stroke-width: 4.4; stroke-linecap: butt; transition: stroke var(--dur) var(--ease); }
+.legend { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+.legend-row { display: flex; align-items: center; gap: 10px; font-size: 13.5px; }
+.legend-dot { width: 10px; height: 10px; border-radius: 100px; }
+.legend-row .ln { flex: 1; color: var(--text); }
+.legend-row .lp { font-weight: 600; color: var(--text-2); }
+
+/* ---------- Progress bars ---------- */
+.bar {
+  height: 8px; border-radius: 100px;
+  background: var(--outline-strong);
+  overflow: hidden;
+}
+.bar > i {
+  display: block; height: 100%; border-radius: 100px;
+  transition: width 600ms var(--ease);
+}
+.bar-thin { height: 4px; }
+.fill-gold { background: linear-gradient(90deg, var(--gold), var(--gold)); opacity: 0.95; }
+.fill-green { background: var(--green); }
+.fill-red { background: var(--red); }
+.fill-prim { background: var(--primary); }
+
+/* ---------- Tonal chips ---------- */
+.tchip {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11.5px; font-weight: 700; letter-spacing: 0.4px;
+  padding: 4px 11px; border-radius: 100px;
+}
+.tchip.amber { background: var(--gold-cont); color: var(--gold); }
+.tchip.green { background: var(--green-cont); color: var(--green); }
+.tchip.red   { background: var(--red-cont); color: var(--red); }
+.tchip.prim  { background: var(--primary-cont); color: var(--on-prim-cont); }
+html[data-theme="dark"] .tchip.prim { background: rgba(173,198,255,0.14); color: var(--primary); }
+
+/* ---------- Debt screen ---------- */
+.hero-debt {
+  background: linear-gradient(140deg, var(--red-cont), var(--purple-cont));
+  border: 1px solid var(--outline-strong);
+  border-radius: 32px;
+  padding: 24px 22px; margin-bottom: 18px;
+  box-shadow: var(--shadow);
+}
+.debt-num {
+  font-family: 'Google Sans Display', sans-serif;
+  font-size: 38px; font-weight: 400; letter-spacing: -1px;
+  color: var(--red); margin: 6px 0 14px;
+}
+.freedom-box {
+  display: inline-flex; flex-direction: column; align-items: center;
+  background: var(--surface-high);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--outline);
+  border-radius: 16px;
+  padding: 10px 20px; margin-bottom: 16px;
+}
+.freedom-box b { font-family: 'Google Sans Display', sans-serif; font-size: 30px; font-weight: 500; line-height: 1.1; }
+.freedom-box span { font-size: 11.5px; color: var(--text-2); }
+.section-label {
+  font-size: 12px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase;
+  color: var(--text-2); margin: 20px 4px 10px;
+}
+.loan-row { display: flex; align-items: center; gap: 14px; }
+.loan-icon {
+  width: 46px; height: 46px; min-width: 46px; border-radius: 12px;
+  background: var(--primary-cont); color: var(--on-prim-cont);
+  display: flex; align-items: center; justify-content: center; font-size: 20px;
+}
+html[data-theme="dark"] .loan-icon { color: var(--primary); background: rgba(173,198,255,0.14); }
+.cc-scroll {
+  display: flex; gap: 10px; overflow-x: auto; padding: 2px 2px 10px;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+.cc-scroll::-webkit-scrollbar { display: none; }
+.cc-chip {
+  min-width: 150px; width: 150px;
+  background: var(--surface);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--outline);
+  border-radius: 16px;
+  padding: 14px;
+  box-shadow: var(--shadow);
+}
+.cc-chip.danger { border-color: var(--red); background: var(--red-cont); }
+.cc-chip .cc-name { font-size: 12.5px; font-weight: 600; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cc-chip .cc-util { font-family: 'Google Sans Display', sans-serif; font-size: 26px; font-weight: 500; margin: 4px 0 0; }
+.cc-chip .cc-util-cap { font-size: 9.5px; font-weight: 600; letter-spacing: 0.6px; text-transform: uppercase; color: var(--text-3); margin: 0 0 8px; }
+.cc-chip .cc-due { font-size: 11.5px; color: var(--text-2); margin-top: 8px; }
+.cc-chip .cc-due.urgent { color: var(--red); font-weight: 700; }
+.u-green { color: var(--green); } .u-gold { color: var(--gold); } .u-red { color: var(--red); }
+
+/* ---------- Segmented toggle (debt method, alert mode) ---------- */
+.seg-toggle {
+  display: flex; gap: 4px; padding: 4px;
+  background: var(--surface-high); border: 1px solid var(--outline);
+  border-radius: 100px;
+}
+.seg-opt {
+  flex: 1; min-height: 40px; border-radius: 100px;
+  font-size: 12.5px; font-weight: 600; color: var(--text-2);
+  transition: all var(--dur) var(--ease);
+}
+.seg-opt.active { background: var(--primary-cont); color: var(--on-prim-cont); }
+html[data-theme="dark"] .seg-opt.active { background: rgba(173,198,255,0.18); color: var(--primary); }
+
+/* Filter chips (investment buckets) */
+.filter-chips { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 12px; scrollbar-width: none; }
+.filter-chips::-webkit-scrollbar { display: none; }
+.filter-chip {
+  white-space: nowrap; min-height: 38px; padding: 0 16px; border-radius: 100px;
+  font-size: 13px; font-weight: 600; color: var(--text-2);
+  background: var(--surface); border: 1px solid var(--glass-edge);
+  -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+}
+.filter-chip.active { background: var(--primary-cont); color: var(--on-prim-cont); border-color: transparent; }
+html[data-theme="dark"] .filter-chip.active { background: rgba(173,198,255,0.18); color: var(--primary); }
+.bucket-label { font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-2); margin: 16px 4px 8px; }
+
+/* ---------- Debt attack list ---------- */
+.debt-item {
+  display: flex; align-items: center; gap: 13px;
+  background: var(--surface);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--outline);
+  border-radius: 16px; padding: 13px 15px; margin-bottom: 9px;
+  box-shadow: var(--shadow);
+}
+.debt-item.first { border-color: var(--primary); }
+.di-rank {
+  width: 28px; height: 28px; min-width: 28px; border-radius: 100px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+  background: var(--surface-high); color: var(--text-2); border: 1px solid var(--outline);
+}
+.debt-item.first .di-rank { background: var(--primary-cont); color: var(--on-prim-cont); }
+html[data-theme="dark"] .debt-item.first .di-rank { background: rgba(173,198,255,0.2); color: var(--primary); }
+.di-main { flex: 1; min-width: 0; }
+.di-name { font-size: 14.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.di-sub { font-size: 11.5px; color: var(--text-2); margin-top: 2px; }
+.di-right { text-align: right; }
+.di-bal { font-size: 15px; font-weight: 700; }
+.dt-target { display: inline-block; margin-top: 3px; font-size: 10px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; color: var(--primary); }
+
+/* Loan / card / subscription items + drill-down drawer */
+.li-card {
+  background: var(--surface);
+  -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-edge);
+  border-radius: 18px; padding: 14px 15px; margin-bottom: 10px;
+  box-shadow: var(--card-shadow);
+}
+.li-head { display: flex; align-items: center; gap: 12px; }
+.li-icon { width: 42px; height: 42px; min-width: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; background: var(--surface-high); border: 1px solid var(--glass-edge); }
+.li-main { flex: 1; min-width: 0; }
+.li-name { font-size: 14.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.li-sub { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+.li-right { text-align: right; }
+.li-amt { font-size: 14.5px; font-weight: 700; }
+.li-amt.red { color: var(--red); }
+.li-chev { font-size: 12px; color: var(--text-3); margin-left: 2px; transition: transform var(--dur) var(--ease); }
+.li-card.open .li-chev { transform: rotate(180deg); }
+.li-bar-wrap { margin-top: 11px; }
+.card-drawer { max-height: 0; overflow: hidden; transition: max-height var(--dur) var(--ease); }
+.li-card.open .card-drawer { max-height: 600px; }
+.drawer-inner { padding-top: 12px; margin-top: 12px; border-top: 1px solid var(--outline); }
+.drawer-label { font-size: 10.5px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-2); margin: 8px 0 6px; }
+.drawer-row { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; padding: 5px 0; }
+.drawer-row .dr-sub { font-size: 11px; color: var(--text-2); }
+.drawer-row .dr-amt { font-weight: 600; white-space: nowrap; }
+.drawer-empty { font-size: 12px; color: var(--text-3); padding: 4px 0; }
+.burn-tag { font-size: 11px; color: var(--text-2); }
+
+/* ---------- Alerts split sections ---------- */
+.alert-section-label { font-size: 11.5px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-2); margin: 16px 4px 9px; }
+
+/* Predict widgets */
+.pred-card { padding: 18px 20px; }
+.pred-head { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.pred-icon { width: 40px; height: 40px; min-width: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 19px; background: var(--surface-high); border: 1px solid var(--glass-edge); }
+.pred-sub { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+.pred-big { font-size: 30px; font-weight: 500; letter-spacing: -0.5px; margin: 6px 0 2px; }
+.pred-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 13.5px; padding: 6px 0; }
+.pred-line { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; padding: 5px 0; border-top: 1px solid var(--outline); }
+.pred-line:first-child { border-top: none; }
+.pred-line .pl-sub { color: var(--text-2); }
+.pred-line .pl-amt { font-weight: 600; }
+.pred-line.total { font-weight: 700; border-top: 1.5px solid var(--outline-strong); margin-top: 4px; padding-top: 8px; }
+.step-btn { width: 30px; height: 30px; border-radius: 100px; background: var(--surface-high); border: 1px solid var(--glass-edge); font-size: 17px; font-weight: 600; color: var(--text); vertical-align: middle; }
+.pred-row b { margin: 0 10px; }
+.ledger-row { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-top: 1px solid var(--outline); }
+.ledger-row:first-of-type { border-top: none; }
+.ledger-row label { flex: 1; font-size: 13.5px; font-weight: 500; }
+.ledger-row label .pred-sub { font-weight: 400; }
+.ledger-input { display: flex; align-items: center; gap: 4px; background: var(--surface-high); border: 1px solid var(--glass-edge); border-radius: 12px; padding: 0 12px; min-height: 42px; width: 130px; }
+.ledger-input span { color: var(--text-2); font-size: 14px; }
+.ledger-input input { width: 100%; background: none; border: none; outline: none; color: var(--text); font-size: 15px; font-weight: 600; text-align: right; -moz-appearance: textfield; }
+.ledger-input input::-webkit-outer-spin-button, .ledger-input input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.bill-pay-row { display: flex; gap: 8px; align-items: center; margin-top: 4px; }
+.alert-split-sub { font-size: 12px; color: var(--text-2); margin: 6px 2px 12px; }
+
+/* ---------- Investment goal tag ---------- */
+.goal-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10.5px; font-weight: 600;
+  padding: 2px 9px; border-radius: 100px; margin-top: 4px;
+  background: var(--purple-cont); color: var(--purple);
+  border: 1px solid var(--outline); cursor: pointer;
+}
+html[data-theme="dark"] .goal-tag { color: var(--purple); }
+.goal-tag.empty { background: transparent; color: var(--text-3); border-style: dashed; }
+
+/* ---------- Investments ---------- */
+.banner {
+  display: flex; align-items: center; gap: 12px;
+  border-radius: 16px; padding: 13px 16px; margin-bottom: 14px;
+  font-size: 13.5px; font-weight: 500;
+  border: 1px solid var(--outline);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+.banner.gold { background: var(--gold-cont); color: var(--gold); }
+.banner.green { background: var(--green-cont); color: var(--green); }
+.banner.red { background: var(--red-cont); color: var(--red); }
+.inv-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 15px 2px;
+  border-bottom: 1px solid var(--outline);
+}
+.inv-row:last-of-type { border-bottom: none; }
+.inv-row .iv-main { flex: 1; min-width: 0; }
+.inv-row .iv-name { font-size: 14.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.inv-row .iv-sub { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+.inv-row .iv-right { text-align: right; }
+.inv-row .iv-val { font-size: 15px; font-weight: 600; }
+.inv-row.muted .iv-name, .inv-row.muted .iv-val { color: var(--text-3); }
+.inv-total {
+  display: flex; justify-content: space-between; gap: 8px;
+  padding-top: 15px; margin-top: 2px;
+  border-top: 1.5px solid var(--outline-strong);
+  font-size: 12.5px;
+}
+.inv-total div { text-align: center; }
+.inv-total .t-label { color: var(--text-2); font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; }
+.inv-total .t-val { font-weight: 700; font-size: 14.5px; margin-top: 3px; }
+
+/* ---------- AI Advisor ---------- */
+.hero-ai {
+  background: linear-gradient(140deg, var(--purple-cont), var(--primary-cont));
+  border: 1px solid var(--outline-strong);
+  border-radius: 32px; padding: 22px; margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+.ai-top { display: flex; align-items: center; gap: 13px; margin-bottom: 16px; }
+.ai-iconbox {
+  width: 46px; height: 46px; min-width: 46px; border-radius: 14px;
+  background: linear-gradient(140deg, var(--purple), var(--primary));
+  display: flex; align-items: center; justify-content: center; font-size: 21px;
+}
+.ai-title { font-family: 'Google Sans Display', sans-serif; font-size: 18px; font-weight: 500; }
+.ai-sub { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+.advice-bubble {
+  background: var(--surface-high);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--outline);
+  border-radius: 16px;
+  padding: 16px; margin-bottom: 16px;
+}
+.advice-line { font-size: 13.8px; line-height: 1.55; padding: 6px 0; }
+.advice-line + .advice-line { border-top: 1px solid var(--outline); }
+.advice-line.tappable { cursor: pointer; }
+.adv-cta { display: block; font-size: 11px; font-weight: 600; color: var(--primary); margin-top: 3px; opacity: 0.85; }
+.ai-refresh-btn {
+  width: 100%; min-height: 50px;
+  border-radius: 100px;
+  background: linear-gradient(90deg, var(--purple), var(--primary));
+  color: #fff; font-size: 15px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+html[data-theme="dark"] .ai-refresh-btn { color: #0a0a14; }
+.ai-refresh-btn:active { transform: scale(0.98); }
+.ai-refresh-btn:disabled { opacity: 0.6; cursor: default; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.45; } }
+.pulsing { animation: pulse 1.3s ease-in-out infinite; }
+.chat-area { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.chat-bubble {
+  max-width: 84%; padding: 11px 15px; border-radius: 16px;
+  font-size: 13.8px; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word;
+  border: 1px solid var(--outline);
+}
+.chat-bubble.user {
+  align-self: flex-end;
+  background: var(--primary-cont); color: var(--on-prim-cont);
+  border-bottom-right-radius: 8px;
+}
+html[data-theme="dark"] .chat-bubble.user { color: var(--on-prim-cont); }
+.chat-bubble.ai {
+  align-self: flex-start;
+  background: var(--surface-high);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border-bottom-left-radius: 8px;
+}
+.chat-input-row { display: flex; gap: 8px; }
+.chat-input-row input {
+  flex: 1; min-height: 48px;
+  background: var(--surface-high);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--outline-strong);
+  border-radius: 100px;
+  padding: 0 18px; font-size: 14px; color: var(--text);
+  outline: none;
+}
+.chat-input-row input:focus { border-color: var(--primary); }
+.chat-send {
+  width: 48px; min-width: 48px; height: 48px;
+  border-radius: 100px;
+  background: var(--primary); color: var(--bg);
+  font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+}
+html[data-theme="light"] .chat-send { color: #fff; }
+
+/* ---------- Alerts ---------- */
+.alert-row {
+  display: flex; align-items: center; gap: 13px;
+  background: var(--surface);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--outline);
+  border-radius: 16px;
+  padding: 14px 16px; margin-bottom: 10px;
+  box-shadow: var(--shadow);
+}
+.alert-row.sev-red { background: var(--red-cont); border-color: var(--red); }
+.alert-row.sev-gold { background: var(--gold-cont); }
+.alert-row.sev-prim { background: var(--primary-cont); }
+html[data-theme="dark"] .alert-row.sev-prim { background: rgba(173,198,255,0.10); }
+.alert-icon {
+  width: 44px; height: 44px; min-width: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; font-size: 19px;
+  background: var(--surface-high); border: 1px solid var(--outline);
+}
+.alert-main { flex: 1; min-width: 0; }
+.alert-name { font-size: 14.5px; font-weight: 600; }
+.alert-sub { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+.alert-right { text-align: right; }
+.alert-amt { font-size: 15px; font-weight: 700; }
+.days-chip {
+  display: inline-block; margin-top: 4px;
+  font-size: 11px; font-weight: 700;
+  padding: 3px 9px; border-radius: 100px;
+  background: var(--surface-high); border: 1px solid var(--outline);
+  color: var(--text-2);
+}
+.days-chip.red { background: var(--red-cont); color: var(--red); border-color: var(--red); }
+.days-chip.gold { background: var(--gold-cont); color: var(--gold); }
+
+/* ---------- Tax ---------- */
+.regime-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.regime-card {
+  background: var(--surface);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--outline);
+  border-radius: 24px;
+  padding: 18px 16px;
+  box-shadow: var(--shadow);
+}
+.regime-card.winner { background: var(--green-cont); border-color: var(--green); }
+.regime-card { cursor: pointer; }
+.regime-card.selected { box-shadow: 0 0 0 2px var(--primary) inset, var(--shadow); }
+.regime-card .r-name { font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-2); }
+.regime-card .r-amt { font-family: 'Google Sans Display', sans-serif; font-size: 24px; font-weight: 500; margin-top: 8px; }
+.regime-card .r-save { font-size: 12px; font-weight: 700; color: var(--green); margin-top: 5px; }
+.tax-row { display: flex; justify-content: space-between; gap: 12px; padding: 10px 2px; font-size: 13.8px; border-bottom: 1px solid var(--outline); }
+.tax-row:last-child { border-bottom: none; }
+.tax-row .tr-label { color: var(--text-2); }
+.tax-row.total { font-weight: 700; }
+.tax-row.total .tr-label, .tax-row.total .tr-val { color: var(--green); font-size: 15px; }
+
+/* ---------- Bottom nav ---------- */
+.bottomnav {
+  position: fixed; z-index: 50;
+  left: 12px; right: 12px;
+  bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  max-width: 540px; margin: 0 auto;
+  display: flex; justify-content: space-around;
+  padding: 8px 6px;
+  background: var(--nav-bg);
+  -webkit-backdrop-filter: blur(22px) saturate(1.4);
+  backdrop-filter: blur(22px) saturate(1.4);
+  border: 1px solid var(--glass-edge);
+  border-radius: 40px;
+  box-shadow: var(--card-shadow);
+}
+.navbtn {
+  flex: 1; max-width: 88px;
+  min-height: 56px;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  font-size: 11.5px; font-weight: 600; color: var(--text-2);
+  transition: color var(--dur) var(--ease);
+  position: relative;
+}
+.navbtn .nicon {
+  font-size: 18px; line-height: 1;
+  padding: 4px 16px; border-radius: 100px;
+  transition: background var(--dur) var(--ease);
+}
+.navbtn.active { color: var(--text); }
+.navbtn.active .nicon { background: var(--primary-cont); }
+html[data-theme="dark"] .navbtn.active .nicon { background: rgba(173,198,255,0.18); }
+
+/* ---------- Setup wizard ---------- */
+.wizard {
+  position: fixed; inset: 0; z-index: 100;
+  background: var(--bg);
+  display: none; flex-direction: column; align-items: center; justify-content: center;
+  padding: 28px;
+  text-align: center;
+}
+.wizard.show { display: flex; }
+.wizard-card {
+  width: 100%; max-width: 420px;
+  background: var(--surface);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--outline);
+  border-radius: 32px;
+  padding: 32px 26px;
+  box-shadow: var(--shadow);
+  position: relative;
+}
+.wizard-step { display: none; }
+.wizard-step.active { display: block; animation: slideIn var(--dur) var(--ease); }
+.wiz-icon {
+  width: 76px; height: 76px; margin: 0 auto 18px; border-radius: 24px;
+  background: linear-gradient(140deg, var(--primary-cont), var(--purple-cont));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Google Sans Display', sans-serif; font-size: 38px; font-weight: 700; color: var(--primary);
+}
+.wiz-progress { font-size: 11.5px; font-weight: 700; letter-spacing: 1.4px; color: var(--text-2); margin-bottom: 8px; }
+.wiz-title { font-family: 'Google Sans Display', sans-serif; font-size: 23px; font-weight: 500; margin-bottom: 6px; }
+.wiz-sub { font-size: 13.5px; color: var(--text-2); margin-bottom: 22px; line-height: 1.5; }
+.wiz-input {
+  width: 100%; min-height: 50px;
+  background: var(--surface-high);
+  border: 1px solid var(--outline-strong);
+  border-radius: 16px;
+  padding: 0 16px; font-size: 14px; color: var(--text);
+  outline: none; margin-bottom: 8px;
+}
+.wiz-input:focus { border-color: var(--primary); }
+.wiz-helper { font-size: 12px; color: var(--text-3); margin-bottom: 20px; line-height: 1.5; }
+.wiz-helper a { color: var(--primary); text-decoration: none; font-weight: 600; }
+.wiz-btn {
+  width: 100%; min-height: 50px;
+  border-radius: 100px;
+  background: var(--primary); color: #fff;
+  font-size: 15px; font-weight: 600;
+  transition: transform var(--dur) var(--ease);
+}
+html[data-theme="dark"] .wiz-btn { color: #001945; }
+.wiz-btn:active { transform: scale(0.98); }
+.wiz-skip { display: block; margin: 14px auto 0; font-size: 13px; color: var(--text-2); min-height: 44px; }
+.wiz-summary {
+  text-align: left; font-size: 13.5px; line-height: 2;
+  background: var(--surface-high); border: 1px solid var(--outline);
+  border-radius: 16px; padding: 14px 18px; margin-bottom: 20px;
+}
+
+/* ---------- Pull to refresh ---------- */
+.ptr {
+  position: fixed; top: calc(64px + env(safe-area-inset-top, 0px));
+  left: 50%; transform: translate(-50%, -56px); z-index: 60;
+  width: 40px; height: 40px; border-radius: 100px;
+  background: var(--surface-high);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--outline-strong);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px; box-shadow: var(--shadow);
+  transition: transform 200ms var(--ease);
+}
+.ptr.spin { animation: spinAnim 0.9s linear infinite; }
+@keyframes spinAnim { to { transform: translate(-50%, 14px) rotate(360deg); } }
+
+.notice {
+  font-size: 13px; font-weight: 500; line-height: 1.5;
+  color: var(--gold); background: var(--gold-cont);
+  border: 1px solid var(--outline); border-radius: 16px;
+  padding: 11px 16px; margin: 0 0 14px;
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  display: none;
+}
+.notice.show { display: block; animation: slideIn var(--dur) var(--ease); }
+.climb-line {
+  margin-top: 12px; padding: 9px 13px; border-radius: 12px;
+  font-size: 12.5px; font-weight: 500; line-height: 1.45;
+  background: var(--surface-high); border: 1px solid var(--outline);
+  color: var(--on-prim-cont);
+}
+html[data-theme="dark"] .climb-line { color: var(--text); }
+
+/* ---------- Settings modal (glass sheet) ---------- */
+.modal {
+  position: fixed; inset: 0; z-index: 90;
+  display: none; align-items: flex-end; justify-content: center;
+  background: rgba(0,0,0,0.45);
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+}
+.modal.show { display: flex; animation: fadeIn 200ms var(--ease); }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal-sheet {
+  width: 100%; max-width: 560px;
+  max-height: 90vh; overflow-y: auto;
+  background: var(--surface-high);
+  -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-edge);
+  border-radius: 32px 32px 0 0;
+  padding: 12px 20px calc(28px + env(safe-area-inset-bottom, 0px));
+  box-shadow: var(--card-shadow);
+  animation: sheetUp 280ms var(--ease);
+}
+@keyframes sheetUp { from { transform: translateY(40px); opacity: 0.6; } to { transform: translateY(0); opacity: 1; } }
+.sheet-grip { width: 38px; height: 4px; border-radius: 100px; background: var(--outline-strong); margin: 4px auto 14px; }
+.modal-head { display: flex; align-items: center; margin-bottom: 8px; }
+.modal-head h2 { font-family: 'Google Sans Display', sans-serif; font-size: 21px; font-weight: 500; flex: 1; }
+.set-section { margin: 18px 0 8px; font-size: 11.5px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-2); }
+.set-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px; margin-bottom: 10px;
+  background: var(--surface); border: 1px solid var(--glass-edge);
+  border-radius: 18px;
+}
+.set-row .sr-main { flex: 1; min-width: 0; }
+.set-row .sr-label { font-size: 14.5px; font-weight: 600; }
+.set-row .sr-sub { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+.accent-dots { display: flex; gap: 12px; flex-wrap: wrap; padding: 4px 2px 8px; }
+.accent-dot {
+  width: 38px; height: 38px; border-radius: 100px; border: 2px solid transparent;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform var(--dur) var(--ease);
+}
+.accent-dot i { width: 26px; height: 26px; border-radius: 100px; display: block; }
+.accent-dot.active { border-color: var(--text); transform: scale(1.08); }
+.set-btn {
+  width: 100%; min-height: 48px; border-radius: 100px;
+  background: var(--primary); color: #fff; font-size: 14.5px; font-weight: 600;
+  margin-top: 6px;
+}
+html[data-theme="dark"] .set-btn { color: #001945; }
+.set-btn.ghost { background: var(--surface); color: var(--text); border: 1px solid var(--glass-edge); }
+html[data-theme="dark"] .set-btn.ghost { color: var(--text); }
+.set-btn.danger { background: var(--red-cont); color: var(--red); border: 1px solid var(--red); }
+html[data-theme="dark"] .set-btn.danger { color: var(--red); }
+/* iOS-style switch */
+.switch { width: 50px; height: 30px; border-radius: 100px; background: var(--outline-strong); position: relative; transition: background var(--dur) var(--ease); flex: 0 0 auto; }
+.switch.on { background: var(--primary); }
+.switch i { position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 100px; background: #fff; transition: left var(--dur) var(--ease); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+.switch.on i { left: 23px; }
+
+/* ---------- Lock screen + privacy mask ---------- */
+.lock {
+  position: fixed; inset: 0; z-index: 1000;
+  display: none; flex-direction: column; align-items: center; justify-content: center;
+  background: var(--bg);
+  padding: 32px;
+}
+.lock.show { display: flex; }
+.lock-glass {
+  position: absolute; inset: 0;
+  background: var(--surface);
+  -webkit-backdrop-filter: blur(28px) saturate(1.3); backdrop-filter: blur(28px) saturate(1.3);
+}
+.lock-inner { position: relative; z-index: 1; width: 100%; max-width: 320px; text-align: center; }
+.lock-logo {
+  width: 64px; height: 64px; margin: 0 auto 16px; border-radius: 20px;
+  background: linear-gradient(140deg, var(--primary-cont), var(--purple-cont));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Google Sans Display', sans-serif; font-size: 32px; font-weight: 700; color: var(--primary);
+}
+.lock-title { font-family: 'Google Sans Display', sans-serif; font-size: 21px; font-weight: 500; }
+.lock-sub { font-size: 13px; color: var(--text-2); margin: 6px 0 22px; min-height: 18px; }
+.pin-dots { display: flex; gap: 14px; justify-content: center; margin-bottom: 26px; }
+.pin-dot { width: 14px; height: 14px; border-radius: 100px; border: 2px solid var(--outline-strong); transition: all var(--dur) var(--ease); }
+.pin-dot.filled { background: var(--primary); border-color: var(--primary); }
+.lock.shake .pin-dots { animation: shake 0.4s; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-8px)} 40%,80%{transform:translateX(8px)} }
+.pin-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.pin-key {
+  height: 64px; border-radius: 100px;
+  background: var(--surface); border: 1px solid var(--glass-edge);
+  -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+  font-size: 24px; font-weight: 500; color: var(--text);
+  transition: transform 120ms var(--ease);
+}
+.pin-key:active { transform: scale(0.93); }
+.pin-key.blank { background: none; border: none; }
+.lock-bio-btn { margin-top: 18px; font-size: 14px; font-weight: 600; color: var(--primary); min-height: 44px; }
+.lock-reset-btn { margin-top: 8px; font-size: 12.5px; font-weight: 500; color: var(--text-3); min-height: 44px; }
+.privacy-mask {
+  position: fixed; inset: 0; z-index: 990; display: none;
+  background: var(--surface);
+  -webkit-backdrop-filter: blur(30px) saturate(1.2); backdrop-filter: blur(30px) saturate(1.2);
+  align-items: center; justify-content: center;
+  font-family: 'Google Sans Display', sans-serif; font-size: 22px; font-weight: 500; color: var(--text-2);
+}
+.privacy-mask.show { display: flex; }
+</style>
+</head>
+<body>
+
+<!-- ================= SETUP WIZARD ================= -->
+<div class="wizard" id="wizard">
+  <div class="wizard-card">
+
+    <div class="wizard-step active" id="wstep1">
+      <div class="wiz-icon">F</div>
+      <div class="wiz-progress">STEP 1 / 3</div>
+      <div class="wiz-title">Welcome to FinanceOS</div>
+      <div class="wiz-sub">Let's connect your data</div>
+      <input class="wiz-input" id="wizSheetId" type="text" autocomplete="off"
+             placeholder="Sheet ID — or private Web App link"
+             oninput="toggleTokenField()">
+      <input class="wiz-input" id="wizToken" type="text" autocomplete="off" style="display:none"
+             placeholder="App access token (CONFIG cell B8)">
+      <div class="wiz-helper" id="wizSheetWarn" style="display:none;color:var(--red)"></div>
+      <div class="wiz-helper">Simple mode: the long code in your Sheet's <b>address bar</b> URL, between <b>/d/</b> and <b>/edit</b> (not the 2PACX publish link).<br>
+      🔒 Private mode: paste your <b>Web App link</b> (starts with script.google.com) and the token from CONFIG cell B8 — see README section "Lock down your Sheet".</div>
+      <button class="wiz-btn" onclick="wizardNext(2)">Next</button>
+      <button class="wiz-skip" onclick="wizardSkip()">Skip for now — explore with sample data</button>
+    </div>
+
+    <div class="wizard-step" id="wstep2">
+      <div class="wiz-icon">✨</div>
+      <div class="wiz-progress">STEP 2 / 3</div>
+      <div class="wiz-title">Add your Gemini AI key</div>
+      <div class="wiz-sub">Free — powers your personal AI advisor</div>
+      <input class="wiz-input" id="wizGeminiKey" type="text" autocomplete="off"
+             placeholder="Paste your Gemini API key">
+      <div class="wiz-helper"><a href="https://aistudio.google.com" target="_blank" rel="noopener">Get a free key →</a> at aistudio.google.com (sign in, tap "Get API key")</div>
+      <button class="wiz-btn" onclick="wizardNext(3)">Next</button>
+      <button class="wiz-skip" onclick="wizardNext(3)">Skip — add it later in Settings</button>
+    </div>
+
+    <div class="wizard-step" id="wstep3">
+      <div class="wiz-icon">🎉</div>
+      <div class="wiz-progress">STEP 3 / 3</div>
+      <div class="wiz-title">You're all set, AB 🎉</div>
+      <div class="wiz-sub">Here's what was saved on this phone (and only this phone):</div>
+      <div class="wiz-summary" id="wizSummary"></div>
+      <button class="wiz-btn" onclick="wizardFinish()">Open Dashboard</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ================= SETTINGS MODAL ================= -->
+<div class="modal" id="settings" onclick="if(event.target===this)closeSettings()">
+  <div class="modal-sheet">
+    <div class="sheet-grip"></div>
+    <div class="modal-head">
+      <h2>Settings</h2>
+      <button class="iconbtn" aria-label="Close" onclick="closeSettings()">✕</button>
+    </div>
+
+    <div class="set-section">Appearance</div>
+    <div class="set-row">
+      <div class="sr-main"><div class="sr-label">Theme</div><div class="sr-sub">AMOLED black or crisp light</div></div>
+      <div class="seg-toggle" style="width:170px">
+        <button class="seg-opt" data-mode="dark" onclick="setMode('dark')">🌑 Dark</button>
+        <button class="seg-opt" data-mode="light" onclick="setMode('light')">☀️ Light</button>
+      </div>
+    </div>
+    <div class="set-section">Accent colour</div>
+    <div class="accent-dots" id="accentDots"><!-- populated by JS --></div>
+    <div class="set-row">
+      <div class="sr-main"><div class="sr-label">Dynamic hero graphics</div><div class="sr-sub">Time-of-day sky behind net worth</div></div>
+      <div class="switch" id="dynHeroSwitch" onclick="toggleDynHero()"><i></i></div>
+    </div>
+
+    <div class="set-section">Security · App lock</div>
+    <div class="set-row">
+      <div class="sr-main"><div class="sr-label">Lock FinanceOS</div><div class="sr-sub" id="lockModeSub">Off</div></div>
+      <div class="seg-toggle" style="width:210px">
+        <button class="seg-opt" data-lock="off" onclick="setLockMode('off')">Off</button>
+        <button class="seg-opt" data-lock="pin" onclick="setLockMode('pin')">PIN</button>
+        <button class="seg-opt" data-lock="bio" onclick="setLockMode('bio')">Biometric</button>
+      </div>
+    </div>
+    <button class="set-btn ghost" id="changePinBtn" style="display:none" onclick="startSetPin()">Change PIN</button>
+    <button class="set-btn danger" onclick="manualPurge()">🧨 Panic wipe — disconnect data now</button>
+    <p class="sr-sub" style="margin:-2px 4px 4px;text-align:center">Removes your Sheet, token &amp; AI key from this app. Also triggers automatically after 5 wrong PINs. Your data in Google Sheets stays safe.</p>
+
+    <div class="set-section">Data &amp; AI</div>
+    <button class="set-btn ghost" onclick="closeSettings();openDataWizard()">Reconnect Sheet / API key</button>
+
+    <div style="text-align:center;margin-top:18px;font-size:11px;color:var(--text-3)">FinanceOS · all data stays on this device</div>
+  </div>
+</div>
+
+<!-- ================= LOCK SCREEN ================= -->
+<div class="lock" id="lockScreen">
+  <div class="lock-glass"></div>
+  <div class="lock-inner">
+    <div class="lock-logo">F</div>
+    <div class="lock-title" id="lockTitle">FinanceOS locked</div>
+    <div class="lock-sub" id="lockSub">Enter your PIN</div>
+    <div class="pin-dots" id="pinDots"></div>
+    <div class="pin-pad" id="pinPad"></div>
+    <button class="lock-bio-btn" id="lockBioBtn" style="display:none" onclick="tryBiometric()">🔓 Use biometrics</button>
+    <button class="lock-reset-btn" id="lockResetBtn" style="display:none" onclick="lockScreenReset()">Forgot PIN? Reset app</button>
+  </div>
+</div>
+
+<!-- ================= PRIVACY MASK ================= -->
+<div class="privacy-mask" id="privacyMask">FinanceOS</div>
+
+<!-- ================= TOP BAR ================= -->
+<header class="topbar">
+  <div class="wordmark">Finance<span>OS</span></div>
+  <span class="offline-chip" id="offlineChip">● Offline</span>
+  <button class="iconbtn" aria-label="Refresh data" id="refreshBtn" onclick="manualRefresh()">⟳</button>
+  <button class="iconbtn" aria-label="Settings" onclick="openSettings()">⚙️</button>
+  <div class="avatar">AB</div>
+</header>
+
+<div class="ptr" id="ptr" style="display:none">⟳</div>
+
+<main id="main">
+<div class="notice" id="dataNotice">Could not load live data — showing sample data</div>
+
+<!-- ================= 1. HOME ================= -->
+<section class="screen active" id="screen-home">
+  <h1 class="page-title" id="greeting">Good morning, AB</h1>
+  <p class="page-sub" id="homeSub">Today · All figures live</p>
+
+  <div class="hero-networth">
+    <div class="eyebrow">Net Worth</div>
+    <div class="networth-num display" id="netWorthNum" style="cursor:pointer" onclick="toggleSparkline()">₹14,82,340</div>
+    <span class="delta-chip" id="netWorthDelta">↑ +₹23,410 this month</span>
+    <div class="climb-line" id="netWorthGap" style="display:none"></div>
+    <div id="nwSparkWrap" style="display:none;margin-top:12px"></div>
+    <div class="subchip-row">
+      <div class="subchip"><div class="sc-label">Assets</div><div class="sc-val sc-green" id="chipAssets">₹21.4L</div></div>
+      <div class="subchip"><div class="sc-label">Liabilities</div><div class="sc-val sc-red" id="chipLiab">₹6.9L</div></div>
+      <div class="subchip"><div class="sc-label">Liquid</div><div class="sc-val sc-prim" id="chipLiquid">₹1.8L</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="eyebrow">Asset Allocation</div>
+    <div class="donut-wrap">
+      <svg class="donut" viewBox="0 0 36 36" aria-label="Asset allocation donut chart">
+        <circle cx="18" cy="18" r="15.9155" stroke="var(--outline-strong)" stroke-width="4.4" fill="none"></circle>
+        <circle id="segEquity" style="cursor:pointer" onclick="filterFromChart('equity')" cx="18" cy="18" r="15.9155" stroke="var(--primary)" stroke-dasharray="45 55" stroke-dashoffset="0"></circle>
+        <circle id="segFixed"  style="cursor:pointer" onclick="filterFromChart('fixed')"  cx="18" cy="18" r="15.9155" stroke="var(--green)"   stroke-dasharray="27 73" stroke-dashoffset="-45"></circle>
+        <circle id="segGold"   style="cursor:pointer" onclick="filterFromChart('gold')"   cx="18" cy="18" r="15.9155" stroke="var(--gold)"    stroke-dasharray="18 82" stroke-dashoffset="-72"></circle>
+        <circle id="segCash"   style="cursor:pointer" onclick="filterFromChart('all')"    cx="18" cy="18" r="15.9155" stroke="var(--purple)"  stroke-dasharray="10 90" stroke-dashoffset="-90"></circle>
+      </svg>
+      <div class="legend">
+        <div class="legend-row" style="cursor:pointer" onclick="filterFromChart('equity')"><span class="legend-dot" style="background:var(--primary)"></span><span class="ln">Equity</span><span class="lp" id="lpEquity">45%</span></div>
+        <div class="legend-row" style="cursor:pointer" onclick="filterFromChart('fixed')"><span class="legend-dot" style="background:var(--green)"></span><span class="ln">PPF · RD · FD</span><span class="lp" id="lpFixed">27%</span></div>
+        <div class="legend-row" style="cursor:pointer" onclick="filterFromChart('gold')"><span class="legend-dot" style="background:var(--gold)"></span><span class="ln">Gold</span><span class="lp" id="lpGold">18%</span></div>
+        <div class="legend-row" style="cursor:pointer" onclick="filterFromChart('all')"><span class="legend-dot" style="background:var(--purple)"></span><span class="ln">Cash</span><span class="lp" id="lpCash">10%</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card li-card" id="efCard" style="cursor:pointer;margin-bottom:14px" onclick="toggleEF()">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div>
+        <div class="eyebrow">Emergency Fund</div>
+        <div class="display" style="font-size:24px;font-weight:500;color:var(--gold);margin-top:5px" id="efAmount">₹1,82,000</div>
+      </div>
+      <span class="tchip amber" id="efChip">VULNERABLE</span>
+    </div>
+    <div class="bar"><i class="fill-gold" id="efBar" style="width:51%"></i></div>
+    <p style="font-size:12.5px;color:var(--text-2);margin-top:9px" id="efSub">51% of 6× monthly obligations · Need ₹1.78L more <span class="li-chev">▾</span></p>
+    <div class="card-drawer"><div class="drawer-inner">
+      <div class="drawer-label">Where it's parked · cash-out time</div>
+      <div id="efBreakdown"></div>
+    </div></div>
+  </div>
+</section>
+
+<!-- ================= 2. DEBT ================= -->
+<section class="screen" id="screen-debt">
+  <h1 class="page-title">Debt Freedom</h1>
+  <p class="page-sub" id="debtSub">38% cleared — past the hardest stretch. Keep going.</p>
+
+  <div class="hero-debt">
+    <div class="eyebrow">Total Outstanding</div>
+    <div class="debt-num display" id="debtTotal">₹6,92,400</div>
+    <div class="freedom-box"><b class="display" id="debtMonths">18</b><span>months to freedom</span></div>
+    <div class="bar"><i class="fill-green" id="debtBar" style="width:38%"></i></div>
+    <p style="font-size:12.5px;color:var(--text-2);margin-top:9px" id="debtFreedomDate">Freedom date · December 2027</p>
+  </div>
+
+  <div class="section-label">Loans</div>
+  <div id="loansList"><!-- populated by JS --></div>
+
+  <div class="section-label">Credit Cards</div>
+  <p class="page-sub" style="margin:-2px 2px 10px">Tap a card to see its EMIs &amp; pay-in-full amount</p>
+  <div id="cardsList"><!-- populated by JS --></div>
+
+  <div class="section-label">Recurring Subscriptions</div>
+  <div class="card" id="subsBurnCard" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div class="eyebrow">Total Burn Rate</div>
+        <div class="display" style="font-size:24px;font-weight:500;color:var(--purple);margin-top:5px" id="subsBurnMonthly">₹0</div>
+      </div>
+      <div style="text-align:right">
+        <div class="sr-sub" id="subsBurnYearly">₹0 / year</div>
+        <div class="sr-sub" id="subsBurnCount">0 services</div>
+      </div>
+    </div>
+  </div>
+  <div id="subsList"><!-- populated by JS --></div>
+</section>
+
+<!-- ================= 3. INVESTMENTS ================= -->
+<section class="screen" id="screen-invest">
+  <h1 class="page-title">Investments</h1>
+  <p class="page-sub">Your portfolio at a glance</p>
+
+  <div class="banner gold" id="ppfBanner">⚠️&nbsp; PPF Account is dormant · Pay ₹500 to reactivate · 7.1% tax-free</div>
+
+  <div class="filter-chips" id="invFilters">
+    <button class="filter-chip active" data-bucket="all" onclick="setInvestFilter('all')">All</button>
+    <button class="filter-chip" data-bucket="equity" onclick="setInvestFilter('equity')">MF &amp; Stocks</button>
+    <button class="filter-chip" data-bucket="fixed" onclick="setInvestFilter('fixed')">Fixed &amp; PPF</button>
+    <button class="filter-chip" data-bucket="gold" onclick="setInvestFilter('gold')">ETF &amp; Gold</button>
+  </div>
+
+  <div id="invBuckets"><!-- populated by JS --></div>
+  <div class="card" id="invTotalCard" style="display:none">
+    <div class="inv-total" style="border-top:none;padding-top:0">
+      <div><div class="t-label">Invested</div><div class="t-val" id="invTotInvested">₹0</div></div>
+      <div><div class="t-label">Current</div><div class="t-val" id="invTotCurrent">₹0</div></div>
+      <div><div class="t-label">Overall</div><div class="t-val" id="invTotReturn">0%</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 4. AI ADVISOR ================= -->
+<section class="screen" id="screen-ai">
+  <h1 class="page-title">AI Advisor</h1>
+  <p class="page-sub">Gemini · reads your actual Sheet data</p>
+
+  <div class="hero-ai">
+    <div class="ai-top">
+      <div class="ai-iconbox">✨</div>
+      <div>
+        <div class="ai-title display" id="aiBriefTitle">Your Briefing</div>
+        <div class="ai-sub" id="aiLastAnalysed">Reads your live Sheet — not yet generated</div>
+      </div>
+    </div>
+    <div class="advice-bubble" id="adviceBubble">
+      <div class="advice-line">✨ Tap <b>Refresh with Live Data</b> for a briefing built from your real numbers — urgent dues, this month's priority, one smart move, and a health score.</div>
+    </div>
+    <button class="ai-refresh-btn" id="aiRefreshBtn" onclick="refreshAdvice()">✨ Refresh with Live Data</button>
+  </div>
+
+  <div class="chat-area" id="chatArea"></div>
+  <div class="chat-input-row">
+    <input type="text" id="chatInput" placeholder="Ask a follow-up question…"
+           onkeydown="if(event.key==='Enter')sendChat()">
+    <button class="chat-send" aria-label="Send" onclick="sendChat()">➤</button>
+  </div>
+</section>
+
+<!-- ================= 5. PREDICT ================= -->
+<section class="screen" id="screen-predict">
+  <h1 class="page-title">Predict</h1>
+  <p class="page-sub">Forecasts from your live numbers</p>
+
+  <div class="seg-toggle" style="margin-bottom:14px">
+    <button class="seg-opt active" data-view="forecasts" onclick="setPredictView('forecasts')">🔮 Forecasts</button>
+    <button class="seg-opt" data-view="cashflow" onclick="setPredictView('cashflow')">💸 Cash Flow</button>
+  </div>
+
+  <!-- ===== VIEW A: FORECASTS ===== -->
+  <div id="predForecasts">
+    <!-- Card bill this cycle -->
+    <div class="card pred-card">
+      <div class="pred-head"><span class="pred-icon">💳</span><div><div class="eyebrow">Card bill due this cycle</div><div class="pred-sub">Regular spend + this month's EMI installments</div></div></div>
+      <div class="display pred-big" id="predBillTotal">₹0</div>
+      <div id="predBillBreakdown"></div>
+    </div>
+
+    <!-- Debt Freedom Countdown -->
+    <div class="card pred-card">
+      <div class="pred-head"><span class="pred-icon">🏁</span><div><div class="eyebrow">Debt Freedom Countdown</div><div class="pred-sub">With your current EMIs + extra prepayment</div></div></div>
+      <div class="seg-toggle" style="margin:6px 0 10px">
+        <button class="seg-opt active" data-track="avalanche" onclick="setDebtTrack('avalanche')">Avalanche</button>
+        <button class="seg-opt" data-track="snowball" onclick="setDebtTrack('snowball')">Snowball</button>
+      </div>
+      <div class="pred-row"><span>Extra / month</span>
+        <span><button class="step-btn" onclick="bumpPrepay(-1000)">−</button>
+        <b id="prepayAmt">₹0</b>
+        <button class="step-btn" onclick="bumpPrepay(1000)">+</button></span></div>
+      <div class="display pred-big" id="predFreedomDate">—</div>
+      <div class="pred-sub" id="predFreedomMonths"></div>
+    </div>
+
+    <!-- Jobless Runway -->
+    <div class="card pred-card">
+      <div class="pred-head"><span class="pred-icon">🪂</span><div><div class="eyebrow">Jobless Runway</div><div class="pred-sub">If income stopped today</div></div></div>
+      <div class="display pred-big" id="predRunway">—</div>
+      <div class="bar" style="margin-top:8px"><i class="fill-prim" id="predRunwayBar" style="width:0%"></i></div>
+      <div class="pred-sub" id="predRunwaySub" style="margin-top:8px"></div>
+    </div>
+  </div>
+
+  <!-- ===== VIEW B: CASH FLOW ===== -->
+  <div id="predCashflow" style="display:none">
+    <!-- Core Fixed Expenses Ledger -->
+    <div class="card pred-card">
+      <div class="pred-head"><span class="pred-icon">🏠</span><div><div class="eyebrow">Core Fixed Expenses</div><div class="pred-sub">Your monthly living baseline · synced to your Sheet</div></div></div>
+      <div class="ledger-row"><label>Rent & Housing</label><div class="ledger-input"><span>₹</span><input type="number" inputmode="numeric" id="ceRent" oninput="saveCoreExpense('rent',this.value)" placeholder="0"></div></div>
+      <div class="ledger-row"><label>Utilities <span class="pred-sub">(power, water, internet, mobile)</span></label><div class="ledger-input"><span>₹</span><input type="number" inputmode="numeric" id="ceUtilities" oninput="saveCoreExpense('utilities',this.value)" placeholder="0"></div></div>
+      <div class="ledger-row"><label>Transport <span class="pred-sub">(fuel, transit, cabs)</span></label><div class="ledger-input"><span>₹</span><input type="number" inputmode="numeric" id="ceTransport" oninput="saveCoreExpense('transport',this.value)" placeholder="0"></div></div>
+      <div class="ledger-row"><label>Groceries & Household</label><div class="ledger-input"><span>₹</span><input type="number" inputmode="numeric" id="ceGroceries" oninput="saveCoreExpense('groceries',this.value)" placeholder="0"></div></div>
+      <div class="pred-line total"><span>Total core fixed / month</span><span id="ceTotal">₹0</span></div>
+      <div class="pred-sub" id="ceSyncNote" style="text-align:right;min-height:14px;color:var(--green)"></div>
+    </div>
+
+    <!-- Safe-to-Spend -->
+    <div class="card pred-card">
+      <div class="pred-head"><span class="pred-icon">🛟</span><div><div class="eyebrow">Safe-to-Spend</div><div class="pred-sub">Checking balance minus what's still due this cycle</div></div></div>
+      <div class="display pred-big" id="predSafeSpend">₹0</div>
+      <div id="predSafeBreakdown"></div>
+    </div>
+
+    <!-- Next Month Expense Forecast -->
+    <div class="card pred-card">
+      <div class="pred-head"><span class="pred-icon">📅</span><div><div class="eyebrow">Next Month's Expense Forecast</div><div class="pred-sub">Pre-allocated from known commitments</div></div></div>
+      <div class="display pred-big" id="predExpenseTotal">₹0</div>
+      <div id="predExpenseBreakdown"></div>
+    </div>
+
+    <!-- Upcoming payments -->
+    <div class="section-label">Upcoming payments</div>
+    <p class="page-sub" id="alertsSub" style="margin:-2px 2px 8px">—</p>
+    <div class="banner red" id="alertsBanner" style="display:none">🚨&nbsp; A payment is due within 3 days — act now</div>
+    <div class="seg-toggle">
+      <button class="seg-opt active" data-mode="min" onclick="setAlertMode('min')">Minimum to stay healthy</button>
+      <button class="seg-opt" data-mode="full" onclick="setAlertMode('full')">Pay in full</button>
+    </div>
+    <p class="alert-split-sub" id="alertSplitSub"></p>
+    <div id="alertsList"><!-- populated by JS --></div>
+  </div>
+</section>
+
+<!-- ================= 6. TAX ================= -->
+<section class="screen" id="screen-tax">
+  <h1 class="page-title">Tax Optimizer</h1>
+  <p class="page-sub">FY 2025-26</p>
+
+  <div class="banner green" id="taxBanner">🏆&nbsp; New Regime saves you ₹54,600 this financial year</div>
+
+  <div class="regime-grid">
+    <div class="regime-card" id="oldRegimeCard" onclick="selectRegime('old')">
+      <div class="r-name">Old Regime</div>
+      <div class="r-amt display" style="color:var(--red)" id="taxOldAmt">₹1,08,200</div>
+      <div class="r-save" id="taxOldSave" style="display:none"></div>
+    </div>
+    <div class="regime-card winner" id="newRegimeCard" onclick="selectRegime('new')">
+      <div class="r-name">New Regime</div>
+      <div class="r-amt display" style="color:var(--green)" id="taxNewAmt">₹53,600</div>
+      <div class="r-save" id="taxNewSave">Save ₹54,600</div>
+    </div>
+  </div>
+  <p class="page-sub" style="margin:-4px 0 14px;text-align:center">Tap a card to see its breakdown ↓</p>
+
+  <div class="card">
+    <div class="eyebrow" style="margin-bottom:8px" id="taxBreakdownTitle">New Regime Breakdown</div>
+    <div id="taxBreakdown">
+    <div class="tax-row"><span class="tr-label">Gross Salary</span><span class="tr-val">₹13,20,000</span></div>
+    <div class="tax-row"><span class="tr-label">Standard Deduction</span><span class="tr-val">−₹75,000</span></div>
+    <div class="tax-row"><span class="tr-label">Taxable Income</span><span class="tr-val">₹12,45,000</span></div>
+    <div class="tax-row"><span class="tr-label">₹4–8L @ 5%</span><span class="tr-val">₹20,000</span></div>
+    <div class="tax-row"><span class="tr-label">₹8–12L @ 10%</span><span class="tr-val">₹40,000</span></div>
+    <div class="tax-row"><span class="tr-label">₹12–12.45L @ 15%</span><span class="tr-val">₹6,750</span></div>
+    <div class="tax-row"><span class="tr-label">Health &amp; Education Cess 4%</span><span class="tr-val">₹2,670</span></div>
+    <div class="tax-row total"><span class="tr-label">Total Tax</span><span class="tr-val">₹53,600</span></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ================= BOTTOM NAV ================= -->
+<nav class="bottomnav">
+  <button class="navbtn active" data-screen="home"   onclick="goScreen('home')"><span class="nicon">🏠</span>Home</button>
+  <button class="navbtn" data-screen="debt"   onclick="goScreen('debt')"><span class="nicon">💳</span>Debt</button>
+  <button class="navbtn" data-screen="invest" onclick="goScreen('invest')"><span class="nicon">📈</span>Invest</button>
+  <button class="navbtn" data-screen="ai"     onclick="goScreen('ai')"><span class="nicon">✨</span>AI</button>
+  <button class="navbtn" data-screen="predict" onclick="goScreen('predict')"><span class="nicon">🔮</span>Predict</button>
+  <button class="navbtn" data-screen="tax"    onclick="goScreen('tax')"><span class="nicon">🧾</span>Tax</button>
+</nav>
+
+<script>
+/* ============================================================
+   FinanceOS app logic
+   ============================================================ */
+'use strict';
+
+const LS = {
+  theme: 'fos_theme',
+  sheetId: 'fos_sheet_id',
+  geminiKey: 'fos_gemini_key',
+  cachedData: 'fos_cached_data',
+  webapp: 'fos_webapp_url',
+  appToken: 'fos_app_token',
+  geminiModel: 'fos_gemini_model'
+};
+
+// Tried in order if the model list can't be fetched. "latest" aliases survive
+// Google's model retirements, so they go first.
+const GEMINI_FALLBACK_MODELS = [
+  'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-3.5-flash', 'gemini-2.5-flash-lite'
+];
+
+const SHEET_TABS = ['CONFIG','ACCOUNTS','EQUITY_MF','GOLD','FIXED_INCOME','LIABILITIES','SUBSCRIPTIONS','CORE_EXPENSES','NET_WORTH','TAX'];
+
+const GEMINI_SYSTEM_PROMPT =
+`You are a personal finance advisor for AB, an Indian professional.
+Analyse the financial data provided and give specific, actionable advice.
+Always use ₹ and Indian number formatting (lakhs/crores).
+Reference actual numbers from the data — never give generic advice.
+Do NOT give tax-liability or tax-buffer advice — a dedicated Tax Optimizer already covers that.
+Prioritise credit-card billing insight: use each card's limit, utilisation, and the
+Card EMIs listed in LIABILITIES. The pay-in-full amount = outstanding − remaining EMI
+balance. Flag the projected statement and keep utilisation under 30%.
+Format your response with exactly 4 lines starting with these emojis:
+🚨 for urgent actions, 📋 for this month priorities, 💡 for one smart move,
+📊 for health score out of 100 with one reason.
+Be direct. Maximum 2 sentences per line.`;
+
+let chatHistory = [];   // Gemini multi-turn: [{role:'user'|'model', parts:[{text}]}]
+let sheetData = {};     // tabName -> parsed rows
+
+/* ---------- Indian number formatting ---------- */
+function fmtINR(n) {
+  n = Math.round(Number(n) || 0);
+  const neg = n < 0; n = Math.abs(n);
+  let s = String(n);
+  if (s.length > 3) {
+    const last3 = s.slice(-3);
+    let rest = s.slice(0, -3);
+    rest = rest.replace(/\B(?=(\d{2})+(?!\d))/g, ',');
+    s = rest + ',' + last3;
+  }
+  return (neg ? '−₹' : '₹') + s;
+}
+function fmtCompact(n) {
+  n = Number(n) || 0;
+  const neg = n < 0; n = Math.abs(n);
+  let out;
+  if (n >= 1e7) out = '₹' + (n / 1e7).toFixed(1).replace(/\.0$/, '') + 'Cr';
+  else if (n >= 1e5) out = '₹' + (n / 1e5).toFixed(1).replace(/\.0$/, '') + 'L';
+  else out = fmtINR(n);
+  return (neg ? '−' : '') + out;
+}
+
+/* ---------- Theme ---------- */
+/* ---------- Material You accent palettes ---------- */
+const ACCENTS = {
+  indigo:     { name: 'Indigo',     light: { p: '#2d6bc6', c: '#d6e3ff', on: '#001945' }, dark: { p: '#adc6ff', c: '#1050a4', on: '#d6e3ff' }, dot: '#4f8ef7' },
+  emerald:    { name: 'Emerald',    light: { p: '#1a7f4b', c: '#b7f0d4', on: '#00210f' }, dark: { p: '#72dba4', c: '#0c5132', on: '#b7f0d4' }, dot: '#1a9b5a' },
+  terracotta: { name: 'Terracotta', light: { p: '#a23f1e', c: '#ffdbcf', on: '#3a0b00' }, dark: { p: '#ffb59b', c: '#7a2c10', on: '#ffdbcf' }, dot: '#c75b35' },
+  violet:     { name: 'Violet',     light: { p: '#6750a4', c: '#eaddff', on: '#21005d' }, dark: { p: '#d0bcff', c: '#4f378b', on: '#eaddff' }, dot: '#7c4dff' },
+  amber:      { name: 'Amber',      light: { p: '#8a5300', c: '#ffddb0', on: '#2c1600' }, dark: { p: '#ffb951', c: '#664300', on: '#ffddb0' }, dot: '#f5a623' }
+};
+
+function applyAccent(name) {
+  const a = ACCENTS[name] || ACCENTS.indigo;
+  const mode = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+  const v = a[mode];
+  const r = document.documentElement.style;
+  r.setProperty('--primary', v.p);
+  r.setProperty('--primary-cont', v.c);
+  r.setProperty('--on-prim-cont', v.on);
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', theme === 'dark' ? '#000000' : '#eef1fb');
+  applyAccent(localStorage.getItem('fos_accent') || 'indigo');
+  updateHeroMood();
+  syncSettingsControls();
+}
+function setMode(mode) {
+  localStorage.setItem(LS.theme, mode);
+  applyTheme(mode);
+}
+function setAccent(name) {
+  localStorage.setItem('fos_accent', name);
+  applyAccent(name);
+  updateHeroMood();
+  syncSettingsControls();
+}
+function toggleTheme() {
+  setMode(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+}
+
+/* ---------- Time-sensitive dynamic hero graphics ---------- */
+function heroGradientForNow_() {
+  const h = new Date().getHours();
+  // soft, minimal day-cycle gradients (no animation, no glow blobs)
+  if (h >= 5 && h < 11)  return 'linear-gradient(140deg, #ffe7b8 0%, var(--primary-cont) 70%)';      // morning sun
+  if (h >= 11 && h < 17) return 'linear-gradient(140deg, var(--primary-cont) 0%, #cfe0ff 100%)';      // bright day
+  if (h >= 17 && h < 21) return 'linear-gradient(140deg, #ffd0b0 0%, var(--purple-cont) 90%)';         // dusk
+  return 'linear-gradient(140deg, #0b1f4d 0%, #1a0f3d 100%)';                                          // night
+}
+function updateHeroMood() {
+  const hero = document.querySelector('.hero-networth');
+  if (!hero) return;
+  const on = localStorage.getItem('fos_dyn_hero') !== 'off'; // default on
+  const isNight = (() => { const h = new Date().getHours(); return h >= 21 || h < 5; })();
+  if (on) {
+    hero.style.background = heroGradientForNow_();
+    hero.classList.toggle('hero-night', isNight);
+  } else {
+    hero.style.background = '';
+    hero.classList.remove('hero-night');
+  }
+}
+
+applyTheme(localStorage.getItem(LS.theme) || 'dark');
+
+/* ---------- Greeting / date ---------- */
+function setGreeting() {
+  const h = new Date().getHours();
+  const part = h < 12 ? 'morning' : (h < 17 ? 'afternoon' : 'evening');
+  document.getElementById('greeting').textContent = 'Good ' + part + ', AB';
+  const opts = { weekday: 'long', day: 'numeric', month: 'long' };
+  document.getElementById('homeSub').textContent =
+    new Date().toLocaleDateString('en-IN', opts) + ' · All figures live';
+}
+setGreeting();
+
+/* ---------- Navigation (slide transitions) ---------- */
+const SCREEN_ORDER = ['home','debt','invest','ai','predict','tax'];
+let currentScreen = 'home';
+function goScreen(name) {
+  if (name === currentScreen) return;
+  const fromIdx = SCREEN_ORDER.indexOf(currentScreen);
+  const toIdx = SCREEN_ORDER.indexOf(name);
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active', 'slide-left'));
+  const el = document.getElementById('screen-' + name);
+  el.classList.add('active');
+  if (toIdx < fromIdx) el.classList.add('slide-left');
+  document.querySelectorAll('.navbtn').forEach(b =>
+    b.classList.toggle('active', b.dataset.screen === name));
+  currentScreen = name;
+  window.scrollTo({ top: 0 });
+  // First time the AI tab is opened in a session, generate a live briefing so
+  // the user never sees a stale placeholder that contradicts the other screens.
+  if (name === 'ai' && !aiAutoRan && localStorage.getItem(LS.geminiKey)) {
+    aiAutoRan = true;
+    refreshAdvice();
+  }
+  if (name === 'predict') renderPredictions_();
+}
+let aiAutoRan = false;
+
+// Tap a chart segment / legend → jump to Invest filtered to that bucket
+function filterFromChart(bucket) {
+  goScreen('invest');
+  setInvestFilter(bucket);
+}
+
+/* ---------- Sample data (works on first run, no Sheet needed) ---------- */
+const SAMPLE_CARDS = [
+  { name: 'ICICI Coral',  limit: 150000, util: 12, sev: 'green', due: 14, outstanding: 18000 },
+  { name: 'Amex',         limit: 300000, util: 44, sev: 'gold',  due: 5,  outstanding: 132000 },
+  { name: 'Bajaj',        limit: 100000, util: 71, sev: 'red',   due: 2,  outstanding: 71000 },
+  { name: 'Kotak',        limit: 200000, util: 8,  sev: 'green', due: 20, outstanding: 16000 },
+  { name: 'Amazon Pay',   limit: 80000,  util: 31, sev: 'gold',  due: 9,  outstanding: 24800 },
+  { name: 'Scapia',       limit: 50000,  util: 0,  sev: 'green', due: null, outstanding: 0 }
+];
+const SAMPLE_EMIS = [
+  { card: 'Amex',  desc: 'iPhone 15 Pro', installment: 8500, total: 12, paid: 3, roi: 0.16, monthsRemaining: 9, balance: 76500 },
+  { card: 'Bajaj', desc: 'Laptop',        installment: 5200, total: 9,  paid: 2, roi: 0.18, monthsRemaining: 7, balance: 36400 }
+];
+SAMPLE_CARDS.forEach(c => augmentCard_(c, SAMPLE_EMIS));
+const SAMPLE_ALERTS = [
+  { name: 'Bajaj Card',        sub: 'Credit card due',  amt: 18400, days: 2,  icon: '💳' },
+  { name: 'Amex Card',         sub: 'Credit card due',  amt: 8200,  days: 5,  icon: '💳' },
+  { name: 'Parag Parikh SIP',  sub: 'Monthly deduction',amt: 5000,  days: 9,  icon: '📈' },
+  { name: 'IndMoney EMI',      sub: 'Loan EMI',         amt: 12400, days: 12, icon: '🏦' },
+  { name: 'Recurring Deposit', sub: 'Monthly RD',       amt: 4200,  days: 15, icon: '🏛️' }
+];
+
+const CARD_APR = 0.40; // assumed revolving APR for cards (rates aren't in the sheet)
+const SAMPLE_LOANS = [
+  { name: 'Personal Loan', lender: 'IndMoney', principal: 700000, emi: 12400, roi: 0.14,
+    tenure: 60, paid: 17, remaining: 480000, monthsLeft: 43, freeDate: 'Dec 2027' }
+];
+const SAMPLE_SUBS = [
+  { name: 'Netflix', amount: 649, cycle: 'Monthly', day: 12, category: 'Entertainment', monthly: 649, nextDays: 4 },
+  { name: 'ChatGPT Plus', amount: 1700, cycle: 'Monthly', day: 20, category: 'Productivity', monthly: 1700, nextDays: 12 },
+  { name: 'Amazon Prime', amount: 1499, cycle: 'Annual', day: 8, category: 'Shopping', monthly: 125, nextDays: 26 }
+];
+
+// Render sample debt sections on first run (no live sheet yet)
+function renderSampleDebt_() {
+  renderLoans_(SAMPLE_LOANS);
+  renderCardsSection_(SAMPLE_CARDS);
+  renderSubscriptions_(SAMPLE_SUBS, []);
+}
+
+let lastAlerts = [], alertMode = 'min';
+
+// Credit-card minimum due ≈ 5% of outstanding, ₹200 floor (typical Indian cards)
+function cardMinDue_(outstanding) {
+  return Math.min(outstanding, Math.max(200, Math.round(outstanding * 0.05)));
+}
+function isCardAlert_(a) { return /credit card/i.test(a.sub || ''); }
+
+function setAlertMode(m) {
+  alertMode = m;
+  document.querySelectorAll('#screen-predict .seg-opt[data-mode]').forEach(b =>
+    b.classList.toggle('active', b.dataset.mode === m));
+  renderAlertsNow_();
+}
+
+function renderAlerts(alerts) {
+  lastAlerts = (alerts || []).slice().sort((a, b) => a.days - b.days);
+  renderAlertsNow_();
+}
+
+function alertAmount_(a) {
+  // Cards can be paid minimum or in full; fixed obligations are always their full amount
+  if (isCardAlert_(a) && alertMode === 'min') return cardMinDue_(a.amt);
+  return a.amt;
+}
+
+function renderAlertsNow_() {
+  const alerts = lastAlerts;
+  const cards = alerts.filter(isCardAlert_);
+  const fixed = alerts.filter(a => !isCardAlert_(a));
+  const total = alerts.reduce((s, a) => s + alertAmount_(a), 0);
+
+  document.getElementById('alertsSub').textContent =
+    `${alerts.length} payments · ${fmtINR(total)} ${alertMode === 'min' ? 'minimum' : 'in full'} this month`;
+
+  const cardFull = cards.reduce((s, a) => s + a.amt, 0);
+  const cardMin = cards.reduce((s, a) => s + cardMinDue_(a.amt), 0);
+  const fixedTotal = fixed.reduce((s, a) => s + a.amt, 0);
+  document.getElementById('alertSplitSub').innerHTML =
+    `Fixed obligations <b>${fmtINR(fixedTotal)}</b> · Cards <b>${fmtINR(alertMode === 'min' ? cardMin : cardFull)}</b>` +
+    (cardFull > cardMin ? ` <span style="color:var(--text-3)">(full balance ${fmtINR(cardFull)})</span>` : '');
+
+  const minDays = alerts.length ? alerts[0].days : 99;
+  const banner = document.getElementById('alertsBanner');
+  if (minDays <= 3) {
+    banner.className = 'banner red';
+    banner.innerHTML = '🚨&nbsp; A payment is due within 3 days — act now';
+    banner.style.display = '';
+  } else if (minDays <= 7) {
+    banner.className = 'banner gold';
+    banner.innerHTML = '⚠️&nbsp; A payment is due within 7 days';
+    banner.style.display = '';
+  } else {
+    banner.style.display = 'none';
+  }
+
+  const rowHtml = (a) => {
+    let sev = '', chip = '';
+    if (a.days <= 3) { sev = 'sev-red'; chip = 'red'; }
+    else if (a.days <= 7) { sev = 'sev-gold'; chip = 'gold'; }
+    else if (a.days <= 10) { sev = 'sev-prim'; chip = ''; }
+    const amt = alertAmount_(a);
+    const minTag = isCardAlert_(a) && alertMode === 'min' && a.amt > amt
+      ? `<div style="font-size:10.5px;color:var(--text-3)">min · full ${fmtINR(a.amt)}</div>` : '';
+    return `<div class="alert-row ${sev}">
+      <div class="alert-icon">${a.icon}</div>
+      <div class="alert-main">
+        <div class="alert-name">${a.name}</div>
+        <div class="alert-sub">${a.sub}</div>
+      </div>
+      <div class="alert-right">
+        <div class="alert-amt">${fmtINR(amt)}</div>${minTag}
+        <span class="days-chip ${chip}">${a.days} day${a.days === 1 ? '' : 's'}</span>
+      </div>
+    </div>`;
+  };
+
+  let html = '';
+  if (cards.length) html += '<div class="alert-section-label">Credit cards</div>' + cards.map(rowHtml).join('');
+  if (fixed.length) html += '<div class="alert-section-label">Fixed obligations · EMI · SIP · RD</div>' + fixed.map(rowHtml).join('');
+  document.getElementById('alertsList').innerHTML = html;
+}
+
+// (first-run sample rendering happens in the boot block at the end,
+//  after all module variables are declared)
+
+/* ---------- CSV parsing (handles quoted commas) ---------- */
+function parseCSV(text) {
+  const rows = []; let row = [], cur = '', inQ = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQ) {
+      if (c === '"') {
+        if (text[i + 1] === '"') { cur += '"'; i++; }
+        else inQ = false;
+      } else cur += c;
+    } else {
+      if (c === '"') inQ = true;
+      else if (c === ',') { row.push(cur); cur = ''; }
+      else if (c === '\n') { row.push(cur); rows.push(row); row = []; cur = ''; }
+      else if (c !== '\r') cur += c;
+    }
+  }
+  if (cur !== '' || row.length) { row.push(cur); rows.push(row); }
+  return rows;
+}
+function toNum(v) {
+  if (v == null) return NaN;
+  return parseFloat(String(v).replace(/[₹,\s%]/g, ''));
+}
+
+/* ---------- Sheet fetching ---------- */
+function sheetUrl(tab) {
+  const id = localStorage.getItem(LS.sheetId);
+  return `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tab)}`;
+}
+
+function looksLikePublishId(id) { return /^2PACX/i.test(id || ''); }
+
+/* JSONP fallback — loads the tab via a <script> tag, which works even when
+   fetch() is blocked (file:// pages, Brave Shields, strict ad-blockers). */
+function fetchTabJsonp_(tab) {
+  return new Promise((resolve, reject) => {
+    const id = localStorage.getItem(LS.sheetId);
+    const cbName = 'fosCb_' + tab.replace(/\W/g, '') + '_' + Date.now();
+    const script = document.createElement('script');
+    const timer = setTimeout(() => { cleanup(); reject(new Error('TIMEOUT')); }, 15000);
+    function cleanup() { try { delete window[cbName]; } catch (e) {} script.remove(); clearTimeout(timer); }
+    window[cbName] = (resp) => {
+      cleanup();
+      if (!resp || !resp.table) return reject(new Error('NOT_PUBLIC'));
+      const rows = [];
+      const labels = (resp.table.cols || []).map(c => c.label || '');
+      if (labels.some(l => l)) rows.push(labels);
+      (resp.table.rows || []).forEach(r => {
+        rows.push((r.c || []).map(c =>
+          c == null ? '' : (c.f != null ? String(c.f) : (c.v == null ? '' : String(c.v)))));
+      });
+      resolve(rows);
+    };
+    script.src = 'https://docs.google.com/spreadsheets/d/' + id +
+      '/gviz/tq?tqx=out:json;responseHandler:' + cbName + '&sheet=' + encodeURIComponent(tab);
+    script.onerror = () => { cleanup(); reject(new Error('SCRIPT_FAIL')); };
+    document.head.appendChild(script);
+  });
+}
+
+async function fetchTab_(tab) {
+  try {
+    const r = await fetch(sheetUrl(tab));
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const text = await r.text();
+    // A login/permission page comes back as HTML, not CSV
+    if (/^\s*</.test(text)) throw new Error('NOT_PUBLIC');
+    return { tab, rows: parseCSV(text) };
+  } catch (e) {
+    try { return { tab, rows: await fetchTabJsonp_(tab) }; }
+    catch (e2) { throw (e2.message === 'NOT_PUBLIC' ? e2 : e); }
+  }
+}
+
+/* ----- Private mode: personal Apps Script web app ----- */
+function webAppJsonp_(url) {
+  return new Promise((resolve, reject) => {
+    const cbName = 'fosWa_' + Date.now();
+    const script = document.createElement('script');
+    const timer = setTimeout(() => { cleanup(); reject(new Error('TIMEOUT')); }, 20000);
+    function cleanup() { try { delete window[cbName]; } catch (e) {} script.remove(); clearTimeout(timer); }
+    window[cbName] = (resp) => { cleanup(); resolve(resp); };
+    script.src = url + '&callback=' + cbName;
+    script.onerror = () => { cleanup(); reject(new Error('WEBAPP_FAIL')); };
+    document.head.appendChild(script);
+  });
+}
+
+async function fetchViaWebApp() {
+  const base = localStorage.getItem(LS.webapp);
+  const token = localStorage.getItem(LS.appToken) || '';
+  const url = base + '?token=' + encodeURIComponent(token);
+  let data;
+  try {
+    const r = await fetch(url, { redirect: 'follow' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const text = await r.text();
+    if (/^\s*</.test(text)) throw new Error('WEBAPP_FAIL');
+    data = JSON.parse(text);
+  } catch (e) {
+    data = await webAppJsonp_(url); // CORS/Shields/file:// fallback
+  }
+  if (data && (data.error === 'bad_token' || data.error === 'no_token_set')) throw new Error('BAD_TOKEN');
+  if (!data || !data.tabs) throw new Error('WEBAPP_FAIL');
+  sheetData = data.tabs;
+  try { localStorage.setItem(LS.cachedData, JSON.stringify(data.tabs)); } catch (e) {}
+  return sheetData;
+}
+
+async function fetchAllSheets() {
+  if (localStorage.getItem(LS.webapp)) return fetchViaWebApp();
+  const id = localStorage.getItem(LS.sheetId);
+  if (!id) throw new Error('NO_ID');
+  if (looksLikePublishId(id)) throw new Error('BAD_ID');
+  const results = await Promise.allSettled(SHEET_TABS.map(fetchTab_));
+  const data = {};
+  let ok = 0, notPublic = false;
+  results.forEach(r => {
+    if (r.status === 'fulfilled') { data[r.value.tab] = r.value.rows; ok++; }
+    else if (r.reason && r.reason.message === 'NOT_PUBLIC') notPublic = true;
+  });
+  if (ok === 0) throw new Error(notPublic ? 'NOT_PUBLIC' : 'FETCH_FAIL');
+  sheetData = data;
+  try { localStorage.setItem(LS.cachedData, JSON.stringify(data)); } catch (e) {}
+  return data;
+}
+
+function fetchErrorMessage(e) {
+  switch (e && e.message) {
+    case 'NO_ID':
+      return 'No Sheet ID yet — tap ⚙️ to add it';
+    case 'BAD_ID':
+      return 'That ID is the "Publish to web" link (starts with 2PACX). Tap ⚙️ and paste the ID from the Sheet’s address bar instead — the code between /d/ and /edit';
+    case 'NOT_PUBLIC':
+      return 'Google won’t let the app read the Sheet. In Google Sheets tap Share → under "General access" choose "Anyone with the link" (Viewer), then refresh';
+    case 'BAD_TOKEN':
+      return 'Private mode: the access token doesn’t match. In your Sheet run 💰 FinanceOS → 🔐 Generate App Token, then copy CONFIG cell B8 into ⚙️ Settings here';
+    case 'WEBAPP_FAIL':
+      return 'Private mode: couldn’t reach your web app. Check the script.google.com link in ⚙️ Settings (it must end in /exec)';
+    default:
+      return navigator.onLine
+        ? 'Could not reach Google Sheets. Check: ① Share → "Anyone with the link" (Viewer) is set, ② your ad-blocker / Brave Shields is off for this page'
+        : 'You’re offline — showing last saved data';
+  }
+}
+
+/* Find a row in NET_WORTH by label (col A), return col B as number */
+function nwValue(label) {
+  const rows = sheetData.NET_WORTH || [];
+  for (const r of rows) {
+    if (r[0] && r[0].toLowerCase().includes(label.toLowerCase())) return toNum(r[1]);
+  }
+  return NaN;
+}
+
+function setText(id, v) { const el = document.getElementById(id); if (el) el.textContent = v; }
+
+function applyLiveData() {
+  syncCoreFromSheet_();   // Sheet is source of truth for the baseline
+  applyHome_();
+  const loan = applyDebtAndAlerts_();
+  applyInvest_();
+  applyTax_();
+  renderPredictions_();
+  captureNetWorthHistory_();
+}
+
+/* ----- Home: hero, delta, donut, emergency fund ----- */
+function applyHome_() {
+  const nw = nwValue('NET WORTH');
+  const assets = nwValue('Total Assets');
+  const liabs = nwValue('Total Liabilities');
+  const liquid = nwValue('Total Liquid Cash');
+  if (!isNaN(nw)) {
+    setText('netWorthNum', fmtINR(nw));
+    // Delta vs a baseline stored at the first sync of each month
+    const chip = document.getElementById('netWorthDelta');
+    try {
+      const ym = new Date().toISOString().slice(0, 7);
+      let base = JSON.parse(localStorage.getItem('fos_nw_baseline') || 'null');
+      if (!base || base.ym !== ym) {
+        base = { ym, v: nw };
+        localStorage.setItem('fos_nw_baseline', JSON.stringify(base));
+      }
+      const delta = nw - base.v;
+      if (delta === 0) chip.style.display = 'none';
+      else {
+        chip.style.display = '';
+        chip.textContent = (delta > 0 ? '↑ +' : '↓ −') + fmtINR(Math.abs(delta)) + ' this month';
+        chip.style.background = delta > 0 ? '' : 'var(--red-cont)';
+        chip.style.color = delta > 0 ? '' : 'var(--red)';
+      }
+      // "Show both": when net worth is negative, add a calm climb-goal line
+      const gap = document.getElementById('netWorthGap');
+      if (nw < 0) {
+        let msg = '🧗 ₹' + fmtINR(-nw).replace('₹', '') + ' to reach positive net worth';
+        if (delta > 0) msg += ' · ' + fmtINR(delta) + ' closer this month — keep climbing';
+        else msg += ' · every EMI shrinks this gap';
+        gap.innerHTML = msg;
+        gap.style.display = '';
+      } else {
+        gap.style.display = 'none';
+      }
+    } catch (e) {}
+  }
+  if (!isNaN(assets)) setText('chipAssets', fmtCompact(assets));
+  if (!isNaN(liabs)) {
+    setText('chipLiab', fmtCompact(liabs));
+    setText('debtTotal', fmtINR(liabs));
+  }
+  if (!isNaN(liquid)) setText('chipLiquid', fmtCompact(liquid));
+  // Emergency fund headline = available-now money only (excludes FD)
+  let avail = availableNow_();
+  if (isNaN(avail)) avail = isNaN(liquid) ? NaN : liquid;
+  if (!isNaN(avail)) setText('efAmount', fmtINR(avail));
+  // Donut from the four asset components
+  const eqV = nwValue('Total Equity'), goldV = nwValue('Total Gold'), fixV = nwValue('Total Fixed Income');
+  if (![eqV, goldV, fixV, liquid].some(isNaN)) {
+    const segs = [
+      ['segEquity', 'lpEquity', Math.max(0, eqV)],
+      ['segFixed', 'lpFixed', Math.max(0, fixV)],
+      ['segGold', 'lpGold', Math.max(0, goldV)],
+      ['segCash', 'lpCash', Math.max(0, liquid)]
+    ];
+    const sum = segs.reduce((s, x) => s + x[2], 0);
+    if (sum > 0) {
+      let off = 0;
+      const GAP = 1.2; // small gap between slices for definition
+      segs.forEach(([cid, lid, v]) => {
+        const pct = v / sum * 100;
+        const c = document.getElementById(cid);
+        // shrink the visible arc by GAP so a sliver of track shows between slices
+        const arc = Math.max(0, pct - (pct > GAP ? GAP : 0));
+        c.setAttribute('stroke-dasharray', arc + ' ' + (100 - arc));
+        c.setAttribute('stroke-dashoffset', String(-off));
+        setText(lid, Math.round(pct) + '%');
+        off += pct;
+      });
+    }
+  }
+  // Emergency fund — scored on available-now money (savings + liquid funds, not FD)
+  const efTarget = nwValue('Emergency Fund Target');
+  if (!isNaN(avail) && !isNaN(efTarget) && efTarget > 0) {
+    const pctRaw = avail / efTarget * 100;
+    const pct = Math.min(100, Math.round(pctRaw));
+    document.getElementById('efBar').style.width = pct + '%';
+    const need = Math.max(0, efTarget - avail);
+    document.getElementById('efSub').innerHTML =
+      `${pct}% of 6× obligations · ${need > 0 ? 'Need ' + fmtCompact(need) + ' more' : 'fully funded'} · instant cash only <span class="li-chev">▾</span>`;
+    const chip = document.getElementById('efChip');
+    if (pctRaw >= 100) { chip.textContent = 'SAFE'; chip.className = 'tchip green'; }
+    else if (pctRaw >= 50) { chip.textContent = 'VULNERABLE'; chip.className = 'tchip amber'; }
+    else { chip.textContent = 'CRITICAL'; chip.className = 'tchip red'; }
+  }
+  renderEFBreakdown_();
+}
+
+function toggleEF() { document.getElementById('efCard').classList.toggle('open'); }
+
+/* ----- Net worth history + sparkline ----- */
+function captureNetWorthHistory_() {
+  const nw = nwValue('NET WORTH');
+  if (isNaN(nw)) return;
+  let hist;
+  try { hist = JSON.parse(localStorage.getItem('fos_nw_history') || '[]'); } catch (e) { hist = []; }
+  const today = new Date().toISOString().slice(0, 10);
+  if (hist.length && hist[hist.length - 1].d === today) hist[hist.length - 1].v = nw;
+  else hist.push({ d: today, v: nw });
+  if (hist.length > 90) hist = hist.slice(-90);
+  try { localStorage.setItem('fos_nw_history', JSON.stringify(hist)); } catch (e) {}
+}
+function toggleSparkline() {
+  const wrap = document.getElementById('nwSparkWrap');
+  if (wrap.style.display !== 'none') { wrap.style.display = 'none'; return; }
+  let hist;
+  try { hist = JSON.parse(localStorage.getItem('fos_nw_history') || '[]'); } catch (e) { hist = []; }
+  wrap.style.display = '';
+  if (hist.length < 2) {
+    wrap.innerHTML = '<div class="climb-line">📈 Your net-worth trend builds here — check in over the coming weeks and this becomes a chart.</div>';
+    return;
+  }
+  const vals = hist.map(h => h.v), min = Math.min(...vals), max = Math.max(...vals);
+  const W = 280, H = 64, pad = 4, span = (max - min) || 1;
+  const pts = hist.map((h, i) => {
+    const x = pad + i / (hist.length - 1) * (W - 2 * pad);
+    const y = H - pad - (h.v - min) / span * (H - 2 * pad);
+    return x.toFixed(1) + ',' + y.toFixed(1);
+  });
+  const first = vals[0], last = vals[vals.length - 1], up = last >= first;
+  const col = up ? 'var(--green)' : 'var(--red)';
+  wrap.innerHTML =
+    `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" preserveAspectRatio="none" style="display:block">
+      <polyline points="${pts.join(' ')}" fill="none" stroke="${col}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="pred-sub" style="display:flex;justify-content:space-between;margin-top:4px">
+      <span>${hist.length} check-ins</span><span style="color:${col}">${up ? '▲' : '▼'} ${fmtINR(Math.abs(last - first))} overall</span></div>`;
+}
+
+function renderEFBreakdown_() {
+  const el = document.getElementById('efBreakdown');
+  if (!el) return;
+  const LIQUIDATION = [
+    { match: /saving/i, time: 'Instant' },
+    { match: /liquid/i, time: 'T+1 day' },
+    { match: /\bfd\b|fixed deposit/i, time: '1–2 days (premature)' }
+  ];
+  const rows = sheetData.ACCOUNTS || [];
+  const now = [], backup = [];
+  rows.forEach((r, i) => {
+    if (i === 0) return;
+    const name = (r[0] || '').trim();
+    const bal = toNum(r[3]);
+    if (!name || isNaN(bal) || bal <= 0) return;
+    const type = (r[2] || '').trim();
+    const tag = type + ' ' + name;
+    const isFD = /\bfd\b|fixed deposit/i.test(tag);
+    const liq = LIQUIDATION.find(l => l.match.test(type) || l.match.test(name));
+    const item = { name, bank: (r[1] || '').trim(), bal, type, time: liq ? liq.time : '—' };
+    (isFD ? backup : now).push(item);
+  });
+  if (!now.length && !backup.length) { el.innerHTML = '<div class="drawer-empty">Add accounts in your Sheet to see the breakdown</div>'; return; }
+  const rowHtml = a => `<div class="drawer-row"><div><div>${escapeHtml(a.name)}${a.bank ? ' · ' + escapeHtml(a.bank) : ''}</div><div class="dr-sub">${escapeHtml(a.type)} · cash-out ${a.time}</div></div><div class="dr-amt">${fmtINR(a.bal)}</div></div>`;
+  let html = '<div class="drawer-label">Available now (counts toward fund)</div>';
+  html += now.length ? now.map(rowHtml).join('') : '<div class="drawer-empty">No instant cash — keep some in savings</div>';
+  if (backup.length) {
+    html += '<div class="drawer-label">Backup — not counted (1–2 day access)</div>' + backup.map(rowHtml).join('');
+  }
+  el.innerHTML = html;
+}
+
+/* ----- LIABILITIES parsing: cards section, then loans section ----- */
+function parseLiabilities_() {
+  const rows = sheetData.LIABILITIES || [];
+  const cards = [], loans = [], emis = [];
+  let section = 'cards';
+  for (const r of rows) {
+    const name = (r[0] || '').trim();
+    if (/^card emis?\b/i.test(name)) { section = 'emis'; continue; }  // "Card EMIs" marker
+    if (/^loan$/i.test(name)) { section = 'loans'; continue; }
+    if (/^card$/i.test(name)) { section = 'cards'; continue; }
+    if (/^on card$/i.test(name)) continue;                            // EMI column-header row
+    if (!name) continue;                                              // blank separator
+    if (section === 'cards') {
+      const limit = toNum(r[2]), outst = toNum(r[3]), days = toNum(r[7]);
+      if (isNaN(limit) || limit <= 0) continue;
+      const util = Math.round((outst / limit) * 100);
+      const sev = util >= 60 ? 'red' : (util >= 30 ? 'gold' : 'green');
+      cards.push({ name, limit, util, sev, due: isNaN(days) ? null : days, outstanding: outst, lastPaid: (r[9] || '').trim() });
+    } else if (section === 'loans') {
+      const principal = toNum(r[2]);
+      if (isNaN(principal) || principal <= 0) continue;
+      let roi = toNum(r[3]);
+      if (!isNaN(roi) && roi > 1) roi = roi / 100; // "14.0%" → 0.14
+      loans.push({
+        name, lender: (r[1] || '').trim(),
+        principal, roi, emi: toNum(r[4]), start: (r[5] || '').trim(),
+        tenure: toNum(r[6]), paid: toNum(r[7]), remaining: toNum(r[8]),
+        monthsLeft: toNum(r[9]), freeDate: (r[10] || '').trim()
+      });
+    } else if (section === 'emis') {
+      const inst = toNum(r[2]);
+      if (isNaN(inst) || inst <= 0) continue;
+      const total = toNum(r[3]), paid = toNum(r[4]);
+      const remMonths = Math.max(0, (isNaN(total) ? 0 : total) - (isNaN(paid) ? 0 : paid));
+      let roi = toNum(r[5]); if (!isNaN(roi) && roi > 1) roi = roi / 100;
+      emis.push({
+        card: name, desc: (r[1] || '').trim(), installment: inst,
+        total, paid, roi, monthsRemaining: remMonths, balance: inst * remMonths
+      });
+    }
+  }
+  cards.forEach(c => augmentCard_(c, emis));
+  return { cards, loans, loan: loans[0] || null, emis };
+}
+
+// Derive each card's EMI load and the "pay in full" swipe amount (no swipes tab needed):
+//   pay-in-full = Outstanding − remaining EMI balance on that card
+function augmentCard_(c, emis) {
+  const mine = emis.filter(e => e.card.toLowerCase() === (c.name || '').toLowerCase());
+  c.emis = mine;
+  // One month's EMI installment(s) — what's billed THIS cycle
+  c.emiInstallment = mine.reduce((s, e) => s + (e.monthsRemaining > 0 ? e.installment : 0), 0);
+  // Full remaining EMI balance — spread over the coming months, part of total outstanding
+  c.emiRemaining = mine.reduce((s, e) => s + e.balance, 0);
+  // Outstanding INCLUDES the full EMI balance. Regular (pay-in-full now) = the non-EMI part.
+  c.payInFull = Math.max(0, c.outstanding - c.emiRemaining);
+  // This month's actual bill = regular pay-in-full + one EMI installment (not the whole balance)
+  c.billThisCycle = c.payInFull + c.emiInstallment;
+  return c;
+}
+
+/* ----- Parsers for the new sheet tabs ----- */
+function parseSubscriptions_() {
+  const rows = sheetData.SUBSCRIPTIONS || [];
+  const subs = [];
+  rows.forEach((r, i) => {
+    if (i === 0) return;
+    const name = (r[0] || '').trim();
+    if (!name) return;
+    const amount = toNum(r[1]);
+    if (isNaN(amount)) return;
+    const cycle = (r[2] || 'Monthly').trim();
+    const day = toNum(r[3]);
+    const monthly = /annual/i.test(cycle) ? amount / 12 : amount;
+    subs.push({
+      name, amount, cycle, day: isNaN(day) ? null : day,
+      category: (r[4] || '').trim(), monthly,
+      nextDays: isNaN(day) ? null : nextDueDays_(day)
+    });
+  });
+  return subs;
+}
+function emisForCard_(name) { return parseLiabilities_().emis.filter(e => e.card.toLowerCase() === name.toLowerCase()); }
+
+// Log a bill payment → writes to the Sheet (private mode only), then re-pulls
+async function logCardPayment(name, outstanding, idx) {
+  const base = localStorage.getItem(LS.webapp), token = localStorage.getItem(LS.appToken);
+  if (!base || !token) { showDataNotice('Logging a payment writes to your Sheet — switch on private mode (web app) in ⚙️ Settings first.', true); return; }
+  const inp = document.getElementById('billPaid' + idx);
+  let paid = parseInt((inp && inp.value) || '', 10);
+  if (isNaN(paid) || paid <= 0) paid = outstanding;
+  if (!confirm(`Log ${fmtINR(paid)} paid on ${name}?\n\nThis subtracts it from the card's outstanding and advances any active EMI by one month — in your Sheet.`)) return;
+  const url = base + '?action=logPayment&token=' + encodeURIComponent(token) +
+    '&card=' + encodeURIComponent(name) + '&paid=' + paid;
+  try {
+    const r = await webAppJsonp_(url);
+    if (r && r.ok) { showDataNotice('Bill logged ✓ refreshing from your Sheet…'); await refreshData(true); }
+    else throw new Error((r && r.detail) || (r && r.error) || 'write failed');
+  } catch (e) { showDataNotice('Could not log payment — ' + (e.message || e), true); }
+}
+
+function nextDueDays_(dayOfMonth) {
+  const now = new Date();
+  const todayMid = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  let due = new Date(now.getFullYear(), now.getMonth(), dayOfMonth);
+  if (due < todayMid) due = new Date(now.getFullYear(), now.getMonth() + 1, dayOfMonth);
+  return Math.round((due - todayMid) / 86400000);
+}
+
+/* ----- Debt screen + card chips + alerts ----- */
+function renderLoans_(loans) {
+  const el = document.getElementById('loansList');
+  if (!el) return;
+  el.innerHTML = loans.length ? loans.map(l => {
+    const prog = l.tenure > 0 && !isNaN(l.paid) ? Math.min(100, Math.round(l.paid / l.tenure * 100)) : 0;
+    const rem = isNaN(l.remaining) ? l.principal : l.remaining;
+    return `<div class="li-card">
+      <div class="li-head">
+        <div class="li-icon">🏦</div>
+        <div class="li-main"><div class="li-name">${escapeHtml((l.lender ? l.lender + ' ' : '') + l.name)}</div>
+          <div class="li-sub">EMI ${fmtINR(l.emi)}${isNaN(l.roi) ? '' : ' · ' + (l.roi * 100).toFixed(0) + '% p.a.'}${isNaN(l.monthsLeft) ? '' : ' · ' + Math.round(l.monthsLeft) + ' mo left'}</div></div>
+        <div class="li-right"><div class="li-amt red">${fmtCompact(rem)}</div><div class="li-sub">remaining</div></div>
+      </div>
+      <div class="li-bar-wrap"><div class="bar"><i class="fill-prim" style="width:${prog}%"></i></div></div>
+    </div>`;
+  }).join('') : '<p class="drawer-empty" style="text-align:center">No loans 🎉</p>';
+}
+
+function renderCardsSection_(cards) {
+  const el = document.getElementById('cardsList');
+  if (!el) return;
+  const sevClass = { green: 'u-green', gold: 'u-gold', red: 'u-red' };
+  const fillClass = { green: 'fill-green', gold: 'fill-gold', red: 'fill-red' };
+  el.innerHTML = cards.length ? cards.map((c, i) => {
+    const emis = c.emis || emisForCard_(c.name);
+    // "Paid on <date>" when paid within the last ~31 days
+    const paidDate = c.lastPaid ? new Date(c.lastPaid) : null;
+    const paidRecent = paidDate && !isNaN(paidDate.getTime()) && (Date.now() - paidDate.getTime()) < 32 * 86400000;
+    const paidStr = paidRecent ? paidDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '';
+    const dueTxt = paidRecent ? `✓ Paid on ${paidStr}`
+      : (c.due === null ? 'No dues' : (c.due <= 2 ? `Due in ${c.due}d !` : `Due in ${c.due}d`));
+    const emiHtml = emis.length ? emis.map(e =>
+      `<div class="drawer-row"><div><div>${escapeHtml(e.desc || 'EMI')}</div><div class="dr-sub">${fmtINR(e.installment)}/mo · ${e.monthsRemaining} of ${isNaN(e.total) ? '?' : e.total} left${isNaN(e.roi) ? '' : ' · ' + (e.roi * 100).toFixed(0) + '%'}</div></div><div class="dr-amt">${fmtINR(e.balance)}</div></div>`
+    ).join('') : '<div class="drawer-empty">No active EMIs on this card</div>';
+    // Total outstanding = regular (pay-in-full) + full EMI balance.
+    // This month's bill = regular + ONE installment (you don't pay the whole EMI at once).
+    const billHtml =
+      `<div class="drawer-row"><div><div>Regular spend (pay in full)</div><div class="dr-sub">${fmtINR(c.outstanding)} outstanding − ${fmtINR(c.emiRemaining || 0)} EMI balance</div></div><div class="dr-amt">${fmtINR(c.payInFull || 0)}</div></div>` +
+      (c.emiRemaining ? `<div class="drawer-row"><div><div>EMI balance (spread over months)</div><div class="dr-sub">${fmtINR(c.emiInstallment)}/mo × remaining</div></div><div class="dr-amt">${fmtINR(c.emiRemaining)}</div></div>` : '') +
+      `<div class="drawer-row" style="font-weight:600"><div>Total outstanding</div><div class="dr-amt">${fmtINR(c.outstanding)}</div></div>` +
+      `<div class="drawer-row" style="font-weight:600;border-top:1px dashed var(--outline-strong);margin-top:4px;padding-top:8px"><div>Due this month <div class="dr-sub" style="font-weight:400">regular + 1 EMI installment</div></div><div class="dr-amt" style="color:var(--primary)">${fmtINR(c.billThisCycle || 0)}</div></div>`;
+    return `<div class="li-card" id="cardItem${i}">
+      <div class="li-head" onclick="toggleCardDrawer(${i})" style="cursor:pointer">
+        <div class="li-icon">💳</div>
+        <div class="li-main"><div class="li-name">${escapeHtml(c.name)}</div>
+          <div class="li-sub ${paidRecent ? 'u-green' : (c.due !== null && c.due <= 2 ? 'u-red' : '')}">${dueTxt}</div></div>
+        <div class="li-right"><div class="li-amt">${fmtINR(c.outstanding)}</div>
+          <div class="li-sub ${sevClass[c.sev]}">${c.util}% utilisation <span class="li-chev">▾</span></div></div>
+      </div>
+      <div class="li-bar-wrap"><div class="bar bar-thin"><i class="${fillClass[c.sev]}" style="width:${Math.max(c.util, 2)}%"></i></div></div>
+      <div class="card-drawer"><div class="drawer-inner">
+        <div class="drawer-label">Running EMIs</div>${emiHtml}
+        <div class="drawer-label">This statement's bill, split</div>${billHtml}
+        <div class="drawer-label">Log a bill payment</div>
+        <div class="bill-pay-row">
+          <div class="ledger-input" style="flex:1"><span>₹</span><input type="number" inputmode="numeric" id="billPaid${i}" placeholder="${c.outstanding}"></div>
+          <button class="set-btn" style="width:auto;padding:0 18px;min-height:42px;margin-top:0" onclick="logCardPayment('${escapeHtml(c.name).replace(/'/g, '&#39;')}', ${c.outstanding}, ${i})">Mark paid</button>
+        </div>
+        <div class="dr-sub" style="margin-top:6px">Subtracts from outstanding &amp; advances any EMI by a month — written to your Sheet.</div>
+      </div></div>
+    </div>`;
+  }).join('') : '<p class="drawer-empty" style="text-align:center">No credit cards</p>';
+}
+
+function applyDebtAndAlerts_() {
+  if (!sheetData.LIABILITIES) return null;
+  const { cards, loans, emis } = parseLiabilities_();
+  const subs = parseSubscriptions_();
+  const alerts = [];
+
+  // ----- Debt hero: total debt + true freedom date (loans + cards + EMI schedules) -----
+  const totalLoanRem = loans.reduce((s, l) => s + (isNaN(l.remaining) ? l.principal : l.remaining), 0);
+  const totalCardOut = cards.reduce((s, c) => s + c.outstanding, 0);
+  setText('debtTotal', fmtINR(totalLoanRem + totalCardOut));
+  const months = simulateDebtFreedom_(loans, cards, 'avalanche', getPrepay_(), emis).months;
+  const prog = debtScheduleProgress_(loans, emis);
+  document.getElementById('debtBar').style.width = prog + '%';
+  if (totalLoanRem + totalCardOut <= 0) {
+    setText('debtMonths', '0'); setText('debtFreedomDate', 'Debt-free 🎉'); setText('debtSub', 'No outstanding debt — beautiful.');
+  } else {
+    setText('debtMonths', String(months));
+    const fd = new Date(); fd.setMonth(fd.getMonth() + months);
+    setText('debtFreedomDate', 'Freedom date · ' + fd.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }));
+    setText('debtSub',
+      months <= 6 ? months + ' months to go — the finish line is in sight.' :
+      months <= 18 ? months + ' months to freedom · ' + prog + '% of installments done. Keep going.' :
+                     months + ' months out · ' + prog + '% done. Steady wins this.');
+  }
+
+  // ----- Section 1: Loans -----
+  renderLoans_(loans);
+
+  // EMI reminders from each loan's start-date day-of-month
+  loans.forEach(l => {
+    const d = new Date(l.start);
+    if (!isNaN(l.emi) && l.emi > 0 && !isNaN(d.getTime())) {
+      alerts.push({ name: (l.lender || 'Loan') + ' EMI', sub: 'Loan EMI', amt: l.emi, days: nextDueDays_(d.getDate()), icon: '🏦' });
+    }
+  });
+
+  // ----- Section 2: Credit cards (clickable drill-down) -----
+  renderCardsSection_(cards);
+
+  cards.forEach(c => {
+    if (c.due !== null && c.due >= 0 && c.due <= 31 && c.outstanding > 0) {
+      alerts.push({ name: c.name + ' Card', sub: 'Credit card due', amt: c.outstanding, days: c.due, icon: '💳' });
+    }
+  });
+
+  // ----- Section 3: Recurring subscriptions + burn widget -----
+  renderSubscriptions_(subs, alerts);
+
+  // RD reminder from FIXED_INCOME
+  (sheetData.FIXED_INCOME || []).forEach((r, i) => {
+    if (i === 0) return;
+    if (!/^RD$/i.test((r[0] || '').trim())) return;
+    const amt = toNum(r[2]);
+    const d = new Date((r[4] || '').trim());
+    const status = (r[10] || '').toUpperCase();
+    if (!isNaN(amt) && amt > 0 && !isNaN(d.getTime()) && status.indexOf('MATURED') === -1) {
+      alerts.push({ name: 'Recurring Deposit', sub: 'Monthly RD', amt, days: nextDueDays_(d.getDate()), icon: '🏛️' });
+    }
+  });
+
+  renderAlerts(alerts);
+  return leadLoan;
+}
+
+function toggleCardDrawer(i) {
+  const el = document.getElementById('cardItem' + i);
+  if (el) el.classList.toggle('open');
+}
+
+function renderSubscriptions_(subs, alerts) {
+  const burnCard = document.getElementById('subsBurnCard');
+  const list = document.getElementById('subsList');
+  if (!subs.length) {
+    burnCard.style.display = 'none';
+    list.innerHTML = '<p class="drawer-empty" style="text-align:center">No subscriptions yet — add a SUBSCRIPTIONS tab to your Sheet</p>';
+    return;
+  }
+  const monthly = subs.reduce((s, x) => s + x.monthly, 0);
+  burnCard.style.display = '';
+  setText('subsBurnMonthly', fmtINR(monthly) + '/mo');
+  setText('subsBurnYearly', fmtINR(monthly * 12) + ' / year');
+  setText('subsBurnCount', subs.length + ' service' + (subs.length === 1 ? '' : 's'));
+
+  list.innerHTML = subs.slice().sort((a, b) => (a.nextDays ?? 99) - (b.nextDays ?? 99)).map(s => {
+    const countdown = s.nextDays === null ? '' :
+      (s.nextDays === 0 ? 'Bills today' : `Next bill in ${s.nextDays}d`);
+    return `<div class="li-card"><div class="li-head">
+      <div class="li-icon">🔁</div>
+      <div class="li-main"><div class="li-name">${escapeHtml(s.name)}</div>
+        <div class="li-sub">${escapeHtml(s.category || s.cycle)}${countdown ? ' · ' + countdown : ''}</div></div>
+      <div class="li-right"><div class="li-amt">${fmtINR(s.amount)}</div>
+        <div class="li-sub">${/annual/i.test(s.cycle) ? fmtINR(s.monthly) + '/mo' : 'monthly'}</div></div>
+    </div></div>`;
+  }).join('');
+
+  // subscription billing reminders (within 31 days)
+  subs.forEach(s => {
+    if (s.nextDays !== null && s.nextDays <= 31) {
+      alerts.push({ name: s.name, sub: 'Subscription', amt: /annual/i.test(s.cycle) ? s.amount : s.monthly, days: s.nextDays, icon: '🔁' });
+    }
+  });
+}
+
+/* ----- Investments screen from EQUITY_MF + GOLD + FIXED_INCOME ----- */
+/* ----- Investment goal tags (stored on this device) ----- */
+function getGoals_() {
+  try { return JSON.parse(localStorage.getItem('fos_goal_tags') || '{}'); } catch (e) { return {}; }
+}
+function goalChipHtml_(name) {
+  const g = getGoals_()[name];
+  const safeName = escapeHtml(name).replace(/'/g, '&#39;');
+  if (g) return `<span class="goal-tag" onclick="editGoal('${safeName}')">🎯 ${escapeHtml(g)}</span>`;
+  return `<span class="goal-tag empty" onclick="editGoal('${safeName}')">＋ tag a goal</span>`;
+}
+function editGoal(name) {
+  const goals = getGoals_();
+  const cur = goals[name] || '';
+  const v = prompt('Goal for "' + name + '" (e.g. Retirement, Travel, House).\nLeave blank to clear:', cur);
+  if (v === null) return;
+  if (v.trim()) goals[name] = v.trim().slice(0, 24); else delete goals[name];
+  try { localStorage.setItem('fos_goal_tags', JSON.stringify(goals)); } catch (e) {}
+  applyInvest_(); // re-render with the new tag
+}
+
+const BUCKETS = [
+  { key: 'equity', label: 'MF SIPs & Stocks' },
+  { key: 'fixed',  label: 'PPF · RD · Fixed Deposits' },
+  { key: 'gold',   label: 'ETFs & Digital Gold' }
+];
+let investFilter = 'all', lastInvestItems = null, lastInvestTotals = null, lastInvestDormant = false;
+
+function buildInvestItems_() {
+  const eq = sheetData.EQUITY_MF, gold = sheetData.GOLD, fixed = sheetData.FIXED_INCOME;
+  if (!eq && !gold && !fixed) return null;
+  const items = [];
+  let invested = 0, current = 0, dormant = false;
+
+  (eq || []).forEach((r, i) => {
+    if (i === 0) return;
+    const name = (r[0] || '').trim();
+    if (!name) return;
+    const type = (r[1] || '').trim();
+    const inv = toNum(r[6]), cur = toNum(r[7]), ret = toNum(r[8]);
+    if (isNaN(cur) || cur <= 0) return;
+    invested += isNaN(inv) ? cur : inv;
+    current += cur;
+    // ETFs group with digital gold; MFs/SIPs/stocks are the equity bucket
+    const bucket = /etf/i.test(type) ? 'gold' : 'equity';
+    items.push({ name, sub: type, val: cur, ret: isNaN(ret) ? null : ret, kind: 'equity', bucket });
+  });
+
+  let gGrams = 0, gInv = 0, gCur = 0, gRate = NaN;
+  (gold || []).forEach((r, i) => {
+    if (i === 0) return;
+    if (!(r[0] || '').trim()) return;
+    const cur = toNum(r[6]);
+    if (isNaN(cur) || cur <= 0) return;
+    gGrams += toNum(r[1]) || 0;
+    gInv += toNum(r[4]) || 0;
+    gCur += cur;
+    const rate = toNum(r[5]);
+    if (!isNaN(rate)) gRate = rate;
+  });
+  if (gCur > 0) {
+    invested += gInv || gCur;
+    current += gCur;
+    items.push({
+      name: 'Digital Gold', sub: (Math.round(gGrams * 10) / 10) + 'g' + (isNaN(gRate) ? '' : ' · ' + fmtINR(gRate) + '/g'),
+      val: gCur, ret: gInv > 0 ? (gCur - gInv) / gInv * 100 : null, kind: 'equity', bucket: 'gold'
+    });
+  }
+
+  (fixed || []).forEach((r, i) => {
+    if (i === 0) return;
+    const name = (r[0] || '').trim();
+    if (!name) return;
+    const bal = toNum(r[6]);
+    if (isNaN(bal) || bal <= 0) return;
+    const status = (r[10] || '').toUpperCase();
+    const isDormant = status.indexOf('DORMANT') !== -1;
+    if (isDormant) dormant = true;
+    const rate = toNum(r[3]), months = toNum(r[9]);
+    invested += bal;
+    current += bal;
+    items.push({
+      name: name + ((r[1] || '').trim() ? ' · ' + (r[1] || '').trim() : ''),
+      sub: isDormant ? 'Dormant' : (isNaN(months) ? 'Fixed income' : 'Matures ' + Math.round(months) + ' months'),
+      val: bal, ret: isNaN(rate) ? null : rate, kind: 'fixed', muted: isDormant, bucket: 'fixed'
+    });
+  });
+
+  return { items, invested, current, dormant };
+}
+
+function setInvestFilter(bucket) {
+  investFilter = bucket;
+  document.querySelectorAll('#invFilters .filter-chip').forEach(b =>
+    b.classList.toggle('active', b.dataset.bucket === bucket));
+  renderInvestBuckets_();
+}
+
+function rowHtml_(it) {
+  let chip = '';
+  if (it.ret !== null) {
+    if (it.kind === 'fixed') chip = `<span class="tchip amber" style="margin-top:4px">${it.ret.toFixed(1)}%</span>`;
+    else { const pos = it.ret >= 0; chip = `<span class="tchip ${pos ? 'green' : 'red'}" style="margin-top:4px">${pos ? '+' : ''}${it.ret.toFixed(1)}%</span>`; }
+  }
+  return `<div class="inv-row ${it.muted ? 'muted' : ''}">
+    <div class="iv-main"><div class="iv-name">${escapeHtml(it.name)}</div><div class="iv-sub"${it.muted ? ' style="color:var(--gold)"' : ''}>${escapeHtml(it.sub)}</div>${goalChipHtml_(it.name)}</div>
+    <div class="iv-right"><div class="iv-val">${fmtINR(it.val)}</div>${chip}</div>
+  </div>`;
+}
+
+function renderInvestBuckets_() {
+  if (!lastInvestItems) return;
+  const wrap = document.getElementById('invBuckets');
+  let html = '';
+  BUCKETS.forEach(b => {
+    if (investFilter !== 'all' && investFilter !== b.key) return;
+    const rows = lastInvestItems.filter(it => it.bucket === b.key);
+    if (!rows.length) return;
+    const bucketTotal = rows.reduce((s, it) => s + it.val, 0);
+    html += `<div class="bucket-label">${b.label} · ${fmtCompact(bucketTotal)}</div>`;
+    html += `<div class="card" style="padding:6px 18px">${rows.map(rowHtml_).join('')}</div>`;
+  });
+  wrap.innerHTML = html || '<p class="drawer-empty" style="text-align:center">Nothing in this bucket</p>';
+
+  const t = lastInvestTotals;
+  if (t) {
+    const overall = t.invested > 0 ? (t.current - t.invested) / t.invested * 100 : 0;
+    document.getElementById('invTotalCard').style.display = '';
+    setText('invTotInvested', fmtINR(t.invested));
+    setText('invTotCurrent', fmtINR(t.current));
+    const rt = document.getElementById('invTotReturn');
+    rt.textContent = (overall >= 0 ? '+' : '') + overall.toFixed(1) + '%';
+    rt.style.color = 'var(--' + (overall >= 0 ? 'green' : 'red') + ')';
+  }
+  document.getElementById('ppfBanner').style.display = lastInvestDormant ? '' : 'none';
+}
+
+function applyInvest_() {
+  const built = buildInvestItems_();
+  if (!built || !built.items.length) return;
+  lastInvestItems = built.items;
+  lastInvestTotals = { invested: built.invested, current: built.current };
+  lastInvestDormant = built.dormant;
+  renderInvestBuckets_();
+}
+
+// Sample buckets for first run (no live sheet)
+function renderSampleInvest_() {
+  lastInvestItems = [
+    { name: 'Parag Parikh Flexi Cap', sub: 'MF-SIP', val: 214300, ret: 31.2, kind: 'equity', bucket: 'equity' },
+    { name: 'Mirae Asset Large Cap', sub: 'MF-Lumpsum', val: 98400, ret: 18.7, kind: 'equity', bucket: 'equity' },
+    { name: 'NIFTYBEES', sub: 'ETF', val: 22100, ret: 23.8, kind: 'equity', bucket: 'gold' },
+    { name: 'Digital Gold', sub: '14.2g · ₹7,240/g', val: 102800, ret: 24.1, kind: 'equity', bucket: 'gold' },
+    { name: 'Recurring Deposit · HDFC', sub: 'Matures 8 months', val: 84000, ret: 7.2, kind: 'fixed', bucket: 'fixed' },
+    { name: 'PPF Account · SBI', sub: 'Dormant', val: 42000, ret: 7.1, kind: 'fixed', muted: true, bucket: 'fixed' }
+  ];
+  lastInvestTotals = { invested: 449400, current: 563600 };
+  lastInvestDormant = true;
+  renderInvestBuckets_();
+}
+
+/* ============================================================
+   PREDICT — forecasting engine
+   ============================================================ */
+let debtTrack = 'avalanche';
+function getPrepay_() { return parseInt(localStorage.getItem('fos_prepay') || '0', 10) || 0; }
+function getVarSpend_() { const v = localStorage.getItem('fos_var_spend'); return v === null ? 20000 : (parseInt(v, 10) || 0); }
+
+/* ----- Core Fixed Expenses ledger ----- */
+// Device-cached for instant edits; mirrored to the Sheet (CORE_EXPENSES tab) so a
+// panic-wipe never loses it — the Sheet is the source of truth on reconnect.
+const CORE_FIELDS = ['rent', 'utilities', 'transport', 'groceries'];
+function getCoreExpenses_() {
+  let o; try { o = JSON.parse(localStorage.getItem('fos_core_expenses') || '{}'); } catch (e) { o = {}; }
+  const out = {};
+  CORE_FIELDS.forEach(f => { out[f] = Number(o[f]) || 0; });
+  return out;
+}
+function totalCoreFixed_() { const c = getCoreExpenses_(); return CORE_FIELDS.reduce((s, f) => s + c[f], 0); }
+function saveCoreExpense(field, value) {
+  const o = getCoreExpenses_();
+  o[field] = Math.max(0, parseInt(value, 10) || 0);
+  try { localStorage.setItem('fos_core_expenses', JSON.stringify(o)); } catch (e) {}
+  setText('ceTotal', fmtINR(totalCoreFixed_()));
+  renderPredictions_();
+  pushCoreExpenses_();          // mirror to the Sheet (debounced)
+}
+function renderCoreLedger_() {
+  const c = getCoreExpenses_();
+  CORE_FIELDS.forEach(f => {
+    const el = document.getElementById('ce' + f.charAt(0).toUpperCase() + f.slice(1));
+    if (el && c[f] > 0 && document.activeElement !== el) el.value = c[f];
+  });
+  setText('ceTotal', fmtINR(totalCoreFixed_()));
+}
+
+// Debounced push of the baseline to the Sheet via the private web app (token-protected).
+let coreyPushTimer = null;
+function pushCoreExpenses_() {
+  const base = localStorage.getItem(LS.webapp);
+  const token = localStorage.getItem(LS.appToken);
+  if (!base || !token) return; // only available in private (web app) mode
+  clearTimeout(coreyPushTimer);
+  coreyPushTimer = setTimeout(() => {
+    const c = getCoreExpenses_();
+    const url = base + '?action=saveCore&token=' + encodeURIComponent(token) +
+      '&rent=' + c.rent + '&utilities=' + c.utilities + '&transport=' + c.transport + '&groceries=' + c.groceries;
+    // JSONP keeps it CORS-free and lets us confirm the write
+    webAppJsonp_(url).then(r => {
+      if (r && r.ok) { const n = document.getElementById('ceSyncNote'); if (n) { n.textContent = 'Synced to your Sheet ✓'; setTimeout(() => { n.textContent = ''; }, 2500); } }
+    }).catch(() => {});
+  }, 900);
+}
+
+// Sheet is source of truth: pull CORE_EXPENSES into the local cache on each load.
+function syncCoreFromSheet_() {
+  const rows = sheetData.CORE_EXPENSES;
+  if (!rows || rows.length < 2) return;
+  const map = { rent: /rent|housing/i, utilities: /utilit/i, transport: /transport|fuel|commute/i, groceries: /grocer|household/i };
+  const o = getCoreExpenses_();
+  let any = false;
+  rows.forEach((r, i) => {
+    if (i === 0) return;
+    const label = (r[0] || ''); const amt = toNum(r[1]);
+    if (isNaN(amt)) return;
+    for (const key in map) { if (map[key].test(label)) { o[key] = amt; any = true; } }
+  });
+  if (any) {
+    try { localStorage.setItem('fos_core_expenses', JSON.stringify(o)); } catch (e) {}
+    CORE_FIELDS.forEach(f => { const el = document.getElementById('ce' + f.charAt(0).toUpperCase() + f.slice(1)); if (el && document.activeElement !== el) el.value = o[f] > 0 ? o[f] : ''; });
+    setText('ceTotal', fmtINR(totalCoreFixed_()));
+  }
+}
+// Checking balance = sum of savings/current accounts (fallback to liquid / sample)
+// Emergency-fund "available now" = savings + liquid funds only (NOT fixed deposits,
+// which take a day+ to break). Investments are never here — only the ACCOUNTS tab.
+function availableNow_() {
+  const rows = sheetData.ACCOUNTS;
+  if (!rows || !rows.length) return Object.keys(sheetData).length ? NaN : 182000; // sample
+  let sum = 0, found = false;
+  rows.forEach((r, i) => {
+    if (i === 0) return;
+    const tag = (r[2] || '') + ' ' + (r[0] || '');
+    const bal = toNum(r[3]) || 0;
+    if (/\bfd\b|fixed deposit/i.test(tag)) return;              // FD = backup, not "now"
+    if (/saving|current|checking|salary|liquid|wallet/i.test(tag)) { sum += bal; found = true; }
+  });
+  return found ? sum : NaN;
+}
+// Checking balance = sum of savings/current accounts (fallback to sample)
+function checkingBalance_() {
+  const rows = sheetData.ACCOUNTS;
+  if (rows && rows.length) {
+    let sum = 0, found = false;
+    rows.forEach((r, i) => {
+      if (i === 0) return;
+      if (/saving|current|checking|salary/i.test((r[2] || '') + (r[0] || ''))) { sum += toNum(r[3]) || 0; found = true; }
+    });
+    if (found) return sum;
+  }
+  return Object.keys(sheetData).length ? 0 : 95000; // sample checking on first run
+}
+
+function predInputs_() {
+  const live = Object.keys(sheetData).length > 0;
+  if (live) {
+    const { cards, loans, emis } = parseLiabilities_();
+    const liqV = nwValue('Total Liquid Cash');
+    const obV = nwValue('Monthly Obligations');
+    return {
+      cards, loans, emis, subs: parseSubscriptions_(),
+      liquid: isNaN(liqV) ? 0 : liqV, monthlyObligations: isNaN(obV) ? NaN : obV
+    };
+  }
+  return {
+    cards: SAMPLE_CARDS, loans: SAMPLE_LOANS, emis: SAMPLE_EMIS, subs: SAMPLE_SUBS,
+    liquid: 182000, monthlyObligations: NaN
+  };
+}
+
+function setPredictView(v) {
+  document.querySelectorAll('#screen-predict .seg-opt[data-view]').forEach(b =>
+    b.classList.toggle('active', b.dataset.view === v));
+  document.getElementById('predForecasts').style.display = v === 'forecasts' ? '' : 'none';
+  document.getElementById('predCashflow').style.display = v === 'cashflow' ? '' : 'none';
+  window.scrollTo({ top: 0 });
+}
+
+function setDebtTrack(t) {
+  debtTrack = t;
+  document.querySelectorAll('#screen-predict .seg-opt[data-track]').forEach(b =>
+    b.classList.toggle('active', b.dataset.track === t));
+  renderPredictions_();
+}
+function bumpPrepay(d) {
+  localStorage.setItem('fos_prepay', String(Math.max(0, getPrepay_() + d)));
+  renderPredictions_();
+}
+
+// Month-by-month debt simulation. Revolving debts = loans + each card's non-EMI
+// (pay-in-full) balance. Card EMIs run a FIXED schedule, so you can't be debt-free
+// before the longest active EMI ends — that's the floor.
+function simulateDebtFreedom_(loans, cards, track, extra, emis) {
+  let debts = [];
+  loans.forEach(l => {
+    const bal = isNaN(l.remaining) ? l.principal : l.remaining;
+    if (bal > 0) debts.push({ bal, rate: (isNaN(l.roi) ? 0.14 : l.roi) / 12, min: isNaN(l.emi) ? bal * 0.02 : l.emi });
+  });
+  // Only the revolving (non-EMI) part of each card is "payable faster"; the EMI part
+  // is handled by the floor below, so don't double-count it here.
+  cards.forEach(c => {
+    const rev = c.payInFull || 0;
+    if (rev > 0) debts.push({ bal: rev, rate: CARD_APR / 12, min: Math.max(cardMinDue_(rev), rev / 6) });
+  });
+  let months = 0;
+  while (debts.some(d => d.bal > 0.5) && months < 600) {
+    months++;
+    debts.forEach(d => { if (d.bal > 0) d.bal *= (1 + d.rate); });          // accrue interest
+    debts.forEach(d => { if (d.bal > 0) d.bal = Math.max(0, d.bal - d.min); }); // minimums
+    let pool = extra;                                                        // extra prepayment
+    const order = debts.filter(d => d.bal > 0).sort((a, b) =>
+      track === 'snowball' ? a.bal - b.bal : b.rate - a.rate);
+    for (const d of order) { if (pool <= 0) break; const pay = Math.min(pool, d.bal); d.bal -= pay; pool -= pay; }
+  }
+  // Floor: active EMIs finish on their own schedule, you're not free until then
+  const emiFloor = (emis || []).reduce((m, e) => Math.max(m, e.monthsRemaining || 0), 0);
+  return { months: Math.max(months, emiFloor) };
+}
+
+// Overall schedule progress = installments paid ÷ total scheduled (loans + card EMIs)
+function debtScheduleProgress_(loans, emis) {
+  let paid = 0, total = 0;
+  loans.forEach(l => { if (!isNaN(l.paid) && !isNaN(l.tenure) && l.tenure > 0) { paid += l.paid; total += l.tenure; } });
+  (emis || []).forEach(e => { if (!isNaN(e.paid) && !isNaN(e.total) && e.total > 0) { paid += e.paid; total += e.total; } });
+  return total > 0 ? Math.min(100, Math.round(paid / total * 100)) : 0;
+}
+
+function renderPredictions_() {
+  const inp = predInputs_();
+
+  // ---- Widget 1: credit-card statement projection ----
+  // Swipe / pay-in-full is DERIVED: outstanding − remaining EMI balance per card.
+  const payInFull = inp.cards.reduce((s, c) => s + (c.payInFull || 0), 0);
+  const cardEmiInstall = inp.cards.reduce((s, c) => s + (c.emiInstallment || 0), 0);
+  const billTotal = payInFull + cardEmiInstall;
+  setText('predBillTotal', fmtINR(billTotal));
+  document.getElementById('predBillBreakdown').innerHTML =
+    `<div class="pred-line"><span class="pl-sub">Regular spend (pay in full)</span><span class="pl-amt">${fmtINR(payInFull)}</span></div>` +
+    `<div class="pred-line"><span class="pl-sub">EMI installments this cycle</span><span class="pl-amt">${fmtINR(cardEmiInstall)}</span></div>` +
+    `<div class="pred-line total"><span>Total card bill this cycle</span><span>${fmtINR(billTotal)}</span></div>`;
+
+  // ---- Widget 2: debt freedom countdown ----
+  const prepay = getPrepay_();
+  setText('prepayAmt', fmtINR(prepay));
+  const sim = simulateDebtFreedom_(inp.loans, inp.cards, debtTrack, prepay, inp.emis);
+  if (sim.months > 0 && sim.months < 600) {
+    const d = new Date(); d.setMonth(d.getMonth() + sim.months);
+    setText('predFreedomDate', d.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' }));
+    setText('predFreedomMonths', sim.months + ' month' + (sim.months === 1 ? '' : 's') + ' away · ' +
+      (debtTrack === 'avalanche' ? 'highest-rate first (saves most interest)' : 'smallest balance first (fastest wins)'));
+  } else if (sim.months === 0) {
+    setText('predFreedomDate', 'Debt-free 🎉'); setText('predFreedomMonths', 'No outstanding debt');
+  } else {
+    setText('predFreedomDate', '60+ yrs'); setText('predFreedomMonths', 'Minimums barely cover interest — add extra prepayment');
+  }
+
+  // shared monthly aggregates
+  const subBurn = inp.subs.reduce((s, x) => s + x.monthly, 0);
+  const loanEmi = inp.loans.reduce((s, l) => s + (isNaN(l.emi) ? 0 : l.emi), 0);
+  const cardEmi = cardEmiInstall;               // card EMI installments (from widget 1)
+  const core = totalCoreFixed_();
+  const ce = getCoreExpenses_();
+  renderCoreLedger_();
+
+  // ---- Pre-Flight Liquidity Check (Safe-to-Spend) ----
+  const checking = checkingBalance_();
+  const dueThisCycle = ce.rent + ce.utilities + loanEmi + cardEmi + subBurn;
+  const safe = checking - dueThisCycle;
+  const safeEl = document.getElementById('predSafeSpend');
+  safeEl.textContent = fmtINR(safe);
+  safeEl.style.color = safe < 0 ? 'var(--red)' : (safe < checking * 0.15 ? 'var(--gold)' : 'var(--green)');
+  document.getElementById('predSafeBreakdown').innerHTML =
+    `<div class="pred-line"><span class="pl-sub">Checking balance</span><span class="pl-amt">${fmtINR(checking)}</span></div>` +
+    `<div class="pred-line"><span class="pl-sub">− Rent & housing</span><span class="pl-amt">${fmtINR(ce.rent)}</span></div>` +
+    `<div class="pred-line"><span class="pl-sub">− Utilities</span><span class="pl-amt">${fmtINR(ce.utilities)}</span></div>` +
+    `<div class="pred-line"><span class="pl-sub">− Active EMIs (loan + card)</span><span class="pl-amt">${fmtINR(loanEmi + cardEmi)}</span></div>` +
+    `<div class="pred-line"><span class="pl-sub">− Scheduled subscriptions</span><span class="pl-amt">${fmtINR(subBurn)}</span></div>` +
+    `<div class="pred-line total"><span>Safe to spend this cycle</span><span>${fmtINR(safe)}</span></div>`;
+
+  // ---- Jobless runway: reserves ÷ (core fixed + loan EMIs + subscriptions) ----
+  const essentials = core + loanEmi + subBurn;
+  const runwayMonths = essentials > 0 ? inp.liquid / essentials : 0;
+  setText('predRunway', runwayMonths >= 0.1 ? runwayMonths.toFixed(1) + ' months' : (essentials === 0 ? 'Set your baseline ↑' : '—'));
+  document.getElementById('predRunwayBar').style.width = Math.min(100, runwayMonths / 12 * 100) + '%';
+  setText('predRunwaySub', essentials > 0
+    ? `${fmtINR(inp.liquid)} reserves ÷ ${fmtINR(Math.round(essentials))}/mo essentials` +
+      (runwayMonths < 6 ? ' · aim for 6+ months' : ' · healthy cushion')
+    : 'Add your Core Fixed Expenses above to compute runway');
+
+  // ---- Next month's expense forecast ----
+  // Variable spend proxy = this cycle's derived pay-in-full (non-EMI card spend)
+  const useAuto = payInFull > 0;
+  const variable = useAuto ? payInFull : getVarSpend_();
+  const expTotal = core + loanEmi + cardEmi + subBurn + variable;
+  setText('predExpenseTotal', fmtINR(expTotal));
+  const varLine = useAuto
+    ? `<div class="pred-line"><span class="pl-sub">Variable CC spend (recent avg)</span><span class="pl-amt">${fmtINR(variable)}</span></div>`
+    : `<div class="pred-line"><span class="pl-sub">Variable / lifestyle (est.) <button class="step-btn" onclick="bumpVar(-2500)">−</button> <button class="step-btn" onclick="bumpVar(2500)">+</button></span><span class="pl-amt">${fmtINR(variable)}</span></div>`;
+  document.getElementById('predExpenseBreakdown').innerHTML =
+    `<div class="pred-line"><span class="pl-sub">Core fixed expenses</span><span class="pl-amt">${fmtINR(core)}</span></div>` +
+    `<div class="pred-line"><span class="pl-sub">Loan EMIs</span><span class="pl-amt">${fmtINR(loanEmi)}</span></div>` +
+    `<div class="pred-line"><span class="pl-sub">Card EMIs</span><span class="pl-amt">${fmtINR(cardEmi)}</span></div>` +
+    `<div class="pred-line"><span class="pl-sub">Subscriptions</span><span class="pl-amt">${fmtINR(subBurn)}</span></div>` +
+    varLine +
+    `<div class="pred-line total"><span>Forecast total</span><span>${fmtINR(expTotal)}</span></div>`;
+}
+function bumpVar(d) {
+  localStorage.setItem('fos_var_spend', String(Math.max(0, getVarSpend_() + d)));
+  renderPredictions_();
+}
+
+/* ----- Tax screen from the TAX tab ----- */
+function taxValue_(label) {
+  const rows = sheetData.TAX || [];
+  for (const r of rows) {
+    if ((r[0] || '').toLowerCase().includes(label.toLowerCase())) return r[1];
+  }
+  return null;
+}
+function lakh_(n) { return String(Math.round(n / 1000) / 100).replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, ''); }
+
+// Computed breakdowns for both regimes + which is cheaper. Filled by applyTax_.
+let taxBreakdowns = null;
+
+function buildNewBreakdown_(gross, newT) {
+  const taxable = Math.max(0, gross - 75000);
+  const rows = [
+    ['Gross Salary', fmtINR(gross)],
+    ['Standard Deduction', '−' + fmtINR(75000)],
+    ['Taxable Income', fmtINR(taxable)]
+  ];
+  const slabs = [
+    [400000, 800000, 0.05], [800000, 1200000, 0.10], [1200000, 1600000, 0.15],
+    [1600000, 2000000, 0.20], [2000000, 2400000, 0.25], [2400000, Infinity, 0.30]
+  ];
+  let tax = 0;
+  slabs.forEach(([lo, hi, rate]) => {
+    const amt = Math.max(0, Math.min(taxable, hi) - lo);
+    if (amt > 0) {
+      tax += amt * rate;
+      rows.push(['₹' + lakh_(lo) + '–' + lakh_(Math.min(taxable, hi)) + 'L @ ' + Math.round(rate * 100) + '%', fmtINR(amt * rate)]);
+    }
+  });
+  if (taxable <= 1200000 && tax > 0) rows.push(['87A Rebate (income ≤ ₹12L)', '−' + fmtINR(tax)]);
+  rows.push(['Health & Education Cess 4%', fmtINR((taxable <= 1200000 ? 0 : tax) * 0.04)]);
+  return rows;
+}
+
+// Old regime: read the line items the sheet already computed (they sit before
+// the new-regime rows, so taxValue_ returns the old-regime value for each).
+function buildOldBreakdown_(gross) {
+  const rows = [['Gross Salary', fmtINR(gross)]];
+  const std = toNum(taxValue_('Standard Deduction'));
+  if (!isNaN(std)) rows.push(['Standard Deduction', '−' + fmtINR(std)]);
+  const hra = toNum(taxValue_('HRA Exemption'));
+  if (!isNaN(hra) && hra > 0) rows.push(['HRA Exemption', '−' + fmtINR(hra)]);
+  const c80 = toNum(taxValue_('80C')); if (!isNaN(c80) && c80 > 0) rows.push(['80C Investments', '−' + fmtINR(Math.min(c80, 150000))]);
+  const d80 = toNum(taxValue_('80D')); if (!isNaN(d80) && d80 > 0) rows.push(['80D Health Premium', '−' + fmtINR(d80)]);
+  const s24 = toNum(taxValue_('Section 24')); if (!isNaN(s24) && s24 > 0) rows.push(['Sec 24 Home Loan Interest', '−' + fmtINR(Math.min(s24, 200000))]);
+  const taxable = toNum(taxValue_('Taxable Income'));
+  if (!isNaN(taxable)) rows.push(['Taxable Income', fmtINR(taxable)]);
+  const slabTax = toNum(taxValue_('Tax (slabs)'));
+  if (!isNaN(slabTax)) rows.push(['Tax (slabs 0/5/20/30)', fmtINR(slabTax)]);
+  const reb = toNum(taxValue_('87A Rebate'));
+  if (!isNaN(reb) && reb !== 0) rows.push(['87A Rebate (taxable ≤ ₹5L)', '−' + fmtINR(Math.abs(reb))]);
+  const cess = toNum(taxValue_('Cess 4%'));
+  if (!isNaN(cess)) rows.push(['Health & Education Cess 4%', fmtINR(cess)]);
+  return rows;
+}
+
+function selectRegime(which) {
+  if (!taxBreakdowns) return;
+  const b = taxBreakdowns;
+  const isNew = which === 'new';
+  document.getElementById('newRegimeCard').classList.toggle('selected', isNew);
+  document.getElementById('oldRegimeCard').classList.toggle('selected', !isNew);
+  setText('taxBreakdownTitle', (isNew ? 'New' : 'Old') + ' Regime Breakdown');
+  const rows = isNew ? b.newRows : b.oldRows;
+  const total = isNew ? b.newT : b.oldT;
+  document.getElementById('taxBreakdown').innerHTML =
+    rows.map(r => `<div class="tax-row"><span class="tr-label">${escapeHtml(r[0])}</span><span class="tr-val">${r[1]}</span></div>`).join('') +
+    `<div class="tax-row total"><span class="tr-label">Total Tax</span><span class="tr-val">${fmtINR(total)}</span></div>`;
+}
+
+function applyTax_() {
+  if (!sheetData.TAX) return;
+  const oldT = toNum(taxValue_('OLD REGIME TOTAL TAX'));
+  const newT = toNum(taxValue_('NEW REGIME TOTAL TAX'));
+  const gross = toNum(taxValue_('Gross CTC'));
+  if (isNaN(oldT) || isNaN(newT) || isNaN(gross)) return;
+  setText('taxOldAmt', fmtINR(oldT));
+  setText('taxNewAmt', fmtINR(newT));
+  const newWins = newT <= oldT;
+  const save = Math.abs(oldT - newT);
+  document.getElementById('newRegimeCard').classList.toggle('winner', newWins);
+  document.getElementById('oldRegimeCard').classList.toggle('winner', !newWins);
+  const newSave = document.getElementById('taxNewSave'), oldSave = document.getElementById('taxOldSave');
+  newSave.style.display = newWins ? '' : 'none';
+  oldSave.style.display = newWins ? 'none' : '';
+  (newWins ? newSave : oldSave).textContent = 'Save ' + fmtINR(save);
+  document.getElementById('taxBanner').innerHTML =
+    '🏆&nbsp; ' + (newWins ? 'New' : 'Old') + ' Regime saves you ' + fmtINR(save) + ' this financial year';
+
+  taxBreakdowns = {
+    newRows: buildNewBreakdown_(gross, newT), oldRows: buildOldBreakdown_(gross),
+    newT, oldT
+  };
+  selectRegime(newWins ? 'new' : 'old'); // default to the winning regime
+}
+
+function showDataNotice(msg, sticky) {
+  const n = document.getElementById('dataNotice');
+  n.textContent = msg;
+  n.classList.add('show');
+  clearTimeout(showDataNotice._t);
+  showDataNotice._t = setTimeout(() => n.classList.remove('show'), sticky ? 15000 : 6000);
+}
+
+function hasDataSource_() {
+  return !!(localStorage.getItem(LS.webapp) || localStorage.getItem(LS.sheetId));
+}
+
+async function refreshData(silent) {
+  if (!hasDataSource_()) return false;
+  try {
+    await fetchAllSheets();
+    applyLiveData();
+    return true;
+  } catch (e) {
+    // fall back to cached copy
+    try {
+      const cached = localStorage.getItem(LS.cachedData);
+      if (cached) { sheetData = JSON.parse(cached); applyLiveData(); }
+    } catch (e2) {}
+    if (!silent) showDataNotice(fetchErrorMessage(e), true);
+    return false;
+  }
+}
+
+async function manualRefresh() {
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('pulsing');
+  if (!hasDataSource_()) {
+    showDataNotice(fetchErrorMessage(new Error('NO_ID')), true);
+  } else {
+    const ok = await refreshData(false);
+    if (ok) showDataNotice('Live data loaded from your Sheet ✓');
+  }
+  btn.classList.remove('pulsing');
+}
+
+/* ---------- Gemini ---------- */
+function buildContext() {
+  let ctx = 'FINANCIAL DATA FROM GOOGLE SHEET (CSV per tab):\n\n';
+  let any = false;
+  for (const tab of SHEET_TABS) {
+    const rows = sheetData[tab];
+    if (!rows || !rows.length) continue;
+    any = true;
+    ctx += `=== ${tab} ===\n`;
+    ctx += rows.slice(0, 40).map(r => r.join(' | ')).join('\n') + '\n\n';
+  }
+  if (!any) {
+    ctx += `(Live sheet unavailable — using app sample data)
+Net worth ₹14,82,340 (up ₹23,410 this month). Assets ₹21.4L, Liabilities ₹6.92L, Liquid ₹1.82L.
+Emergency fund 51% of 6× monthly obligations target, need ₹1.78L more — VULNERABLE.
+Debt: IndMoney personal loan ₹4.8L remaining at 14% p.a., EMI ₹12,400, 18 months to freedom (Dec 2027), 38% cleared.
+Credit cards: Bajaj ₹71,000 outstanding 71% utilisation DUE IN 2 DAYS (min due ₹18,400); Amex ₹1,32,000 / 44% due 5d; Amazon Pay ₹24,800 / 31% due 9d; ICICI Coral ₹18,000 / 12% due 14d; Kotak ₹16,000 / 8% due 20d; Scapia ₹0.
+Investments: Parag Parikh Flexi Cap ₹2,14,300 (+31.2%, SIP ₹5,000/mo); Mirae Large Cap ₹98,400 (+18.7%); Gold ₹1,02,800 (+24.1%); RD ₹84,000 (+7.2%); PPF ₹42,000 DORMANT (needs ₹500 to reactivate).
+Tax FY2025-26: New regime ₹53,600 vs old ₹1,08,200 — new saves ₹54,600. Gross salary ₹13,20,000.\n`;
+  }
+  return ctx;
+}
+
+// Rank a model name — higher is better. Prefers plain "flash" over "lite",
+// and newer version numbers, so we pick the best model the key can use.
+function scoreGeminiModel(name) {
+  let s = 0;
+  if (/flash/.test(name)) s += 100;
+  if (/latest/.test(name)) s += 40;
+  if (/lite/.test(name)) s -= 30;
+  if (/preview|exp|thinking|tts|image|vision/.test(name)) s -= 60;
+  const m = name.match(/gemini-(\d+(?:\.\d+)?)/);
+  if (m) s += parseFloat(m[1]) * 5;
+  return s;
+}
+
+// Asks Google which models this key may call, and caches the best Flash one.
+async function resolveGeminiModel(key) {
+  const cached = localStorage.getItem(LS.geminiModel);
+  if (cached) return cached;
+  try {
+    const r = await fetchTimeout('https://generativelanguage.googleapis.com/v1beta/models?key=' +
+      encodeURIComponent(key), {}, 20000);
+    if (r.ok) {
+      const data = await r.json();
+      const usable = (data.models || [])
+        .filter(m => (m.supportedGenerationMethods || []).includes('generateContent'))
+        .map(m => m.name.replace(/^models\//, ''))
+        .filter(n => /gemini/.test(n))
+        .sort((a, b) => scoreGeminiModel(b) - scoreGeminiModel(a));
+      if (usable.length) {
+        localStorage.setItem(LS.geminiModel, usable[0]);
+        return usable[0];
+      }
+    } else if (r.status === 400 || r.status === 403) {
+      throw new Error('BAD_KEY');
+    }
+  } catch (e) {
+    if (e.message === 'BAD_KEY') throw e;
+    // network/CORS — fall through to the fallback list
+  }
+  return GEMINI_FALLBACK_MODELS[0];
+}
+
+// fetch() that can't hang forever
+async function fetchTimeout(url, opts, ms) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), ms || 60000);
+  try {
+    return await fetch(url, Object.assign({}, opts, { signal: ctrl.signal }));
+  } catch (e) {
+    if (e.name === 'AbortError') throw new Error('TIMEOUT');
+    throw e;
+  } finally { clearTimeout(timer); }
+}
+
+function isKeyError_(msg) {
+  return /api[\s_]?key|api key not valid|permission|credential|unauthor|forbidden/i.test(msg || '');
+}
+
+async function callGeminiModel(model, key, contents, noThink) {
+  const gen = { maxOutputTokens: 2048, temperature: 0.4 };
+  // Disable the "thinking" step — a 4-line briefing doesn't need it, and leaving
+  // it on makes newer Flash models slow (sometimes minutes) and can truncate.
+  if (!noThink) gen.thinkingConfig = { thinkingBudget: 0 };
+
+  const res = await fetchTimeout(
+    'https://generativelanguage.googleapis.com/v1beta/models/' + model +
+    ':generateContent?key=' + encodeURIComponent(key),
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: GEMINI_SYSTEM_PROMPT }] },
+        contents,
+        generationConfig: gen
+      })
+    },
+    60000
+  );
+  if (!res.ok) {
+    let msg = 'HTTP ' + res.status;
+    try { const b = await res.json(); if (b.error && b.error.message) msg = b.error.message; } catch (e) {}
+    // If this model doesn't accept thinkingConfig, retry once without it
+    if (res.status === 400 && !noThink && /thinking|unknown name|not supported|invalid/i.test(msg)) {
+      return callGeminiModel(model, key, contents, true);
+    }
+    const err = new Error(msg);
+    err.status = res.status;
+    throw err;
+  }
+  const data = await res.json();
+  const cand = data && data.candidates && data.candidates[0];
+  const text = cand && cand.content && cand.content.parts &&
+    cand.content.parts.map(p => p.text || '').join('').trim();
+  if (!text) {
+    if (cand && cand.finishReason === 'MAX_TOKENS') throw new Error('Reply too long — try again');
+    throw new Error('Gemini returned an empty response');
+  }
+  return text;
+}
+
+async function callGemini(contents) {
+  const key = localStorage.getItem(LS.geminiKey);
+  if (!key) throw new Error('NO_KEY');
+  let model = await resolveGeminiModel(key).catch(e => {
+    if (e.message === 'BAD_KEY') throw e;
+    return GEMINI_FALLBACK_MODELS[0];
+  });
+
+  // Try the resolved model; if it's been retired (404), walk the fallback list
+  const tried = new Set();
+  const queue = [model, ...GEMINI_FALLBACK_MODELS].filter(m => {
+    if (tried.has(m)) return false; tried.add(m); return true;
+  });
+  let lastErr;
+  for (const m of queue) {
+    try {
+      const reply = await callGeminiModel(m, key, contents);
+      localStorage.setItem(LS.geminiModel, m); // remember what worked
+      return reply;
+    } catch (e) {
+      lastErr = e;
+      if ((e.status === 400 || e.status === 403) && isKeyError_(e.message)) {
+        localStorage.removeItem(LS.geminiModel);
+        throw new Error('BAD_KEY');
+      }
+      if (e.status === 404) { localStorage.removeItem(LS.geminiModel); continue; }
+      throw e; // timeout / network / other — don't keep hammering
+    }
+  }
+  throw lastErr || new Error('No usable Gemini model');
+}
+
+async function refreshAdvice() {
+  const btn = document.getElementById('aiRefreshBtn');
+  const bubble = document.getElementById('adviceBubble');
+  btn.disabled = true;
+  const oldHtml = bubble.innerHTML;
+  bubble.innerHTML = '<div class="advice-line pulsing">✨ Analysing your finances…</div>';
+  try {
+    // 1-2. fetch all tabs (non-fatal if it fails — falls back to sample context)
+    try { await fetchAllSheets(); applyLiveData(); } catch (e) {}
+    // 3-4. build context, call Gemini
+    const userMsg = buildContext() +
+      '\nGive me my monthly financial briefing in the required 4-line format.';
+    const reply = await callGemini([{ role: 'user', parts: [{ text: userMsg }] }]);
+    chatHistory = [
+      { role: 'user', parts: [{ text: userMsg }] },
+      { role: 'model', parts: [{ text: reply }] }
+    ];
+    // 5. display response — each line tappable to drill into exact steps
+    const lines = reply.split('\n').map(l => l.trim()).filter(Boolean);
+    bubble.innerHTML = lines.map(l =>
+      `<div class="advice-line tappable" onclick="askAboutLine(this.dataset.q)" data-q="${escapeHtml(l)}">${escapeHtml(l)}<span class="adv-cta">Tap for exact steps →</span></div>`).join('');
+    // 6. timestamp
+    document.getElementById('aiLastAnalysed').textContent = 'Last analysed · Just now';
+    const monthName = new Date().toLocaleDateString('en-IN', { month: 'long' });
+    document.getElementById('aiBriefTitle').textContent = monthName + ' Briefing';
+  } catch (e) {
+    bubble.innerHTML = oldHtml;
+    showDataNotice(geminiErrorMessage(e), true);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function geminiErrorMessage(e) {
+  const m = e && e.message;
+  if (m === 'NO_KEY') return 'AI unavailable — add your free Gemini key in Settings (⚙️)';
+  if (m === 'BAD_KEY') return 'AI unavailable — that Gemini key was rejected. Get a fresh one at aistudio.google.com and paste it in ⚙️ Settings';
+  if (m === 'TIMEOUT') return 'AI timed out — Gemini took too long. Tap Refresh to try again';
+  if (m && /quota|rate|429/i.test(m)) return 'AI unavailable — Gemini free-tier limit hit. Wait a minute and try again';
+  return 'AI unavailable — ' + (m || 'unknown error') + '. Check your connection or key in ⚙️ Settings';
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+// Tap an AI insight → ask the advisor for concrete steps on just that point
+function askAboutLine(line) {
+  if (!line) return;
+  const input = document.getElementById('chatInput');
+  input.value = 'Give me the exact steps for this: ' + line.replace(/^[^\w₹]+/, '');
+  sendChat();
+  document.getElementById('chatArea').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+async function sendChat() {
+  const input = document.getElementById('chatInput');
+  const q = input.value.trim();
+  if (!q) return;
+  input.value = '';
+  const area = document.getElementById('chatArea');
+  area.insertAdjacentHTML('beforeend',
+    `<div class="chat-bubble user">${escapeHtml(q)}</div>`);
+  const thinkingId = 'th' + Date.now();
+  area.insertAdjacentHTML('beforeend',
+    `<div class="chat-bubble ai pulsing" id="${thinkingId}">Thinking…</div>`);
+  area.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  try {
+    // Ensure context exists for first question
+    let contents;
+    if (chatHistory.length === 0) {
+      try { await fetchAllSheets(); } catch (e) {}
+      const ctxMsg = buildContext() + '\nQuestion: ' + q +
+        '\n(For follow-up questions you may answer naturally — the 4-line format is only for briefings.)';
+      contents = [{ role: 'user', parts: [{ text: ctxMsg }] }];
+      chatHistory.push({ role: 'user', parts: [{ text: ctxMsg }] });
+    } else {
+      chatHistory.push({ role: 'user', parts: [{ text: q }] });
+      contents = chatHistory.slice();
+    }
+    const reply = await callGemini(contents);
+    chatHistory.push({ role: 'model', parts: [{ text: reply }] });
+    const el = document.getElementById(thinkingId);
+    el.classList.remove('pulsing');
+    el.textContent = reply;
+    el.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  } catch (e) {
+    const el = document.getElementById(thinkingId);
+    el.classList.remove('pulsing');
+    el.textContent = geminiErrorMessage(e);
+  }
+}
+
+/* ---------- Setup wizard ---------- */
+function toggleTokenField() {
+  const v = document.getElementById('wizSheetId').value;
+  document.getElementById('wizToken').style.display =
+    v.includes('script.google.com') ? '' : 'none';
+}
+
+function wizardNext(step) {
+  if (step === 2) {
+    const v = document.getElementById('wizSheetId').value.trim();
+    const warn = document.getElementById('wizSheetWarn');
+    if (v.includes('script.google.com')) {
+      // 🔒 Private mode: web app URL + token, sheet stays Restricted
+      const base = v.split('?')[0];
+      if (!/\/exec\/?$/.test(base)) {
+        warn.textContent = '⚠️ That link doesn\'t end in /exec. Copy the "Web app URL" from Deploy → Manage deployments.';
+        warn.style.display = 'block';
+        return;
+      }
+      const tok = document.getElementById('wizToken').value.trim();
+      if (!tok) {
+        warn.textContent = '⚠️ Private mode needs the access token too — copy it from CONFIG cell B8 in your Sheet.';
+        warn.style.display = 'block';
+        return;
+      }
+      warn.style.display = 'none';
+      localStorage.setItem(LS.webapp, base.replace(/\/$/, ''));
+      localStorage.setItem(LS.appToken, tok);
+    } else if (v) {
+      const id = extractSheetId(v);
+      if (looksLikePublishId(id)) {
+        warn.textContent = '⚠️ That\'s the "Publish to web" link. Open your Sheet normally and copy the code from the address bar — between /d/ and /edit.';
+        warn.style.display = 'block';
+        return; // stay on this step until a usable ID is pasted
+      }
+      warn.style.display = 'none';
+      localStorage.setItem(LS.sheetId, id);
+      localStorage.removeItem(LS.webapp); // switching back to simple mode
+      localStorage.removeItem(LS.appToken);
+    }
+  }
+  if (step === 3) {
+    const k = document.getElementById('wizGeminiKey').value.trim();
+    if (k) localStorage.setItem(LS.geminiKey, k);
+    const wa = localStorage.getItem(LS.webapp);
+    const sid = localStorage.getItem(LS.sheetId);
+    const gk = localStorage.getItem(LS.geminiKey);
+    document.getElementById('wizSummary').innerHTML =
+      (wa
+        ? `🔒 Private mode · <b>web app</b> connected, Sheet stays Restricted<br>`
+        : `📄 Sheet ID · ${sid ? '<b>' + escapeHtml(sid.slice(0, 8)) + '…</b> saved' : 'not set (sample data)'}<br>`) +
+      `✨ Gemini key · ${gk ? '<b>' + escapeHtml(gk.slice(0, 6)) + '…</b> saved' : 'not set (add later)'}<br>` +
+      `🔒 Stored on this phone only — never sent anywhere`;
+  }
+  document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('wstep' + step).classList.add('active');
+}
+function extractSheetId(v) {
+  // Accept either a bare ID or a full URL pasted by mistake
+  // (handles both /d/ID/edit and the published /d/e/2PACX… form)
+  const m = v.match(/\/d\/(?:e\/)?([a-zA-Z0-9-_]{20,})/);
+  return m ? m[1] : v;
+}
+function wizardSkip() { wizardNext(3); }
+function wizardFinish() {
+  localStorage.setItem('fos_setup_done', '1');
+  document.getElementById('wizard').classList.remove('show');
+  manualRefresh(); // immediate feedback: success tick or a specific fix-it message
+}
+function openDataWizard() {
+  document.getElementById('wizSheetId').value =
+    localStorage.getItem(LS.webapp) || localStorage.getItem(LS.sheetId) || '';
+  document.getElementById('wizToken').value = localStorage.getItem(LS.appToken) || '';
+  toggleTokenField();
+  document.getElementById('wizGeminiKey').value = localStorage.getItem(LS.geminiKey) || '';
+  document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('wstep1').classList.add('active');
+  document.getElementById('wizard').classList.add('show');
+}
+
+/* ---------- Settings modal ---------- */
+function openSettings() {
+  buildAccentDots_();
+  syncSettingsControls();
+  document.getElementById('settings').classList.add('show');
+}
+function closeSettings() { document.getElementById('settings').classList.remove('show'); }
+
+function buildAccentDots_() {
+  const cur = localStorage.getItem('fos_accent') || 'indigo';
+  document.getElementById('accentDots').innerHTML = Object.keys(ACCENTS).map(k =>
+    `<button class="accent-dot ${k === cur ? 'active' : ''}" data-accent="${k}" aria-label="${ACCENTS[k].name}" onclick="setAccent('${k}')"><i style="background:${ACCENTS[k].dot}"></i></button>`
+  ).join('');
+}
+
+function syncSettingsControls() {
+  const mode = document.documentElement.getAttribute('data-theme');
+  document.querySelectorAll('#settings .seg-opt[data-mode]').forEach(b =>
+    b.classList.toggle('active', b.dataset.mode === mode));
+  const acc = localStorage.getItem('fos_accent') || 'indigo';
+  document.querySelectorAll('#settings .accent-dot').forEach(b =>
+    b.classList.toggle('active', b.dataset.accent === acc));
+  document.getElementById('dynHeroSwitch').classList.toggle('on',
+    localStorage.getItem('fos_dyn_hero') !== 'off');
+  const lm = localStorage.getItem('fos_lock_mode') || 'off';
+  document.querySelectorAll('#settings .seg-opt[data-lock]').forEach(b =>
+    b.classList.toggle('active', b.dataset.lock === lm));
+  document.getElementById('lockModeSub').textContent =
+    lm === 'off' ? 'Off' : (lm === 'pin' ? 'PIN required' : 'Biometric + PIN fallback');
+  document.getElementById('changePinBtn').style.display = lm === 'off' ? 'none' : '';
+}
+
+function toggleDynHero() {
+  const on = localStorage.getItem('fos_dyn_hero') !== 'off';
+  localStorage.setItem('fos_dyn_hero', on ? 'off' : 'on');
+  updateHeroMood();
+  syncSettingsControls();
+}
+if (!localStorage.getItem('fos_setup_done')) {
+  document.getElementById('wizard').classList.add('show');
+}
+
+/* ---------- Offline indicator ---------- */
+function updateOnline() {
+  document.getElementById('offlineChip').classList.toggle('show', !navigator.onLine);
+}
+window.addEventListener('online', updateOnline);
+window.addEventListener('offline', updateOnline);
+updateOnline();
+
+/* ---------- Pull to refresh ---------- */
+(function () {
+  let startY = 0, pulling = false, dist = 0;
+  const ptr = document.getElementById('ptr');
+  document.addEventListener('touchstart', (e) => {
+    if (window.scrollY <= 0 && !document.getElementById('wizard').classList.contains('show')) {
+      startY = e.touches[0].clientY; pulling = true; dist = 0;
+    }
+  }, { passive: true });
+  document.addEventListener('touchmove', (e) => {
+    if (!pulling) return;
+    dist = e.touches[0].clientY - startY;
+    if (dist > 12) {
+      ptr.style.display = 'flex';
+      const t = Math.min(dist * 0.45, 70) - 56;
+      ptr.style.transform = `translate(-50%, ${t}px) rotate(${dist * 2}deg)`;
+    }
+  }, { passive: true });
+  document.addEventListener('touchend', async () => {
+    if (!pulling) return;
+    pulling = false;
+    if (dist > 110) {
+      ptr.classList.add('spin');
+      ptr.style.transform = 'translate(-50%, 14px)';
+      await refreshData(false);
+      setGreeting();
+      ptr.classList.remove('spin');
+    }
+    ptr.style.transform = 'translate(-50%, -56px)';
+    setTimeout(() => { ptr.style.display = 'none'; }, 250);
+  }, { passive: true });
+})();
+
+/* ---------- Service worker ---------- */
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  navigator.serviceWorker.register('sw.js').then(async (reg) => {
+    // Periodic background sync (30 min) where supported
+    try {
+      if ('periodicSync' in reg) {
+        await reg.periodicSync.register('financeos-refresh', { minInterval: 30 * 60 * 1000 });
+      }
+    } catch (e) { /* permission denied — page timer covers it */ }
+  }).catch(() => {});
+  navigator.serviceWorker.addEventListener('message', (e) => {
+    if (e.data && e.data.type === 'OFFLINE_DATA') {
+      const chip = document.getElementById('offlineChip');
+      chip.textContent = '● Offline — showing last data';
+      chip.classList.add('show');
+    }
+    if (e.data && e.data.type === 'SHEETS_REFRESHED') refreshData(true);
+  });
+}
+// Universal fallback: refresh Sheet data every 30 min while the app is open
+setInterval(() => { if (navigator.onLine) refreshData(true); }, 30 * 60 * 1000);
+
+/* ============================================================
+   APP LOCK — WebAuthn biometric + PIN fallback + auto-lock
+   ============================================================ */
+let isLocked = false, authInProgress = false;
+let pinMode = 'unlock';   // 'unlock' | 'set' | 'confirm'
+let pinBuffer = '', pinFirst = '', pinTargetLen = 4;
+
+function lockMode_() { return localStorage.getItem('fos_lock_mode') || 'off'; }
+
+/* ----- PIN hashing (salted SHA-256) ----- */
+function buf2hex_(buf) { return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join(''); }
+async function hashPin_(pin, salt) {
+  const data = new TextEncoder().encode(salt + ':' + pin);
+  return buf2hex_(await crypto.subtle.digest('SHA-256', data));
+}
+async function savePin_(pin) {
+  const salt = buf2hex_(crypto.getRandomValues(new Uint8Array(16)));
+  localStorage.setItem('fos_pin_salt', salt);
+  localStorage.setItem('fos_pin_hash', await hashPin_(pin, salt));
+  localStorage.setItem('fos_pin_len', String(pin.length));
+}
+async function verifyPin_(pin) {
+  const salt = localStorage.getItem('fos_pin_salt');
+  const hash = localStorage.getItem('fos_pin_hash');
+  if (!salt || !hash) return false;
+  return (await hashPin_(pin, salt)) === hash;
+}
+
+/* ----- WebAuthn (platform biometric) ----- */
+function b64url_(buf) { return btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+function fromB64url_(s) { s = s.replace(/-/g, '+').replace(/_/g, '/'); const bin = atob(s); const a = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i); return a; }
+
+async function biometricAvailable_() {
+  try {
+    return !!window.PublicKeyCredential &&
+      await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+  } catch (e) { return false; }
+}
+async function registerBiometric_() {
+  if (!window.PublicKeyCredential) throw new Error('No WebAuthn');
+  authInProgress = true;
+  try {
+  const cred = await navigator.credentials.create({
+    publicKey: {
+      challenge: crypto.getRandomValues(new Uint8Array(32)),
+      rp: { name: 'FinanceOS', id: location.hostname },
+      user: { id: crypto.getRandomValues(new Uint8Array(16)), name: 'AB', displayName: 'AB' },
+      pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+      authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required' },
+      timeout: 60000
+    }
+  });
+  localStorage.setItem('fos_webauthn_id', b64url_(cred.rawId));
+  } finally { setTimeout(() => { authInProgress = false; }, 800); }
+}
+async function verifyBiometric_() {
+  const id = localStorage.getItem('fos_webauthn_id');
+  if (!id || !window.PublicKeyCredential) throw new Error('No credential');
+  authInProgress = true;
+  try {
+    await navigator.credentials.get({
+      publicKey: {
+        challenge: crypto.getRandomValues(new Uint8Array(32)),
+        allowCredentials: [{ id: fromB64url_(id), type: 'public-key' }],
+        userVerification: 'required',
+        timeout: 60000
+      }
+    });
+    return true; // resolves only if device verification passed
+  } finally { setTimeout(() => { authInProgress = false; }, 800); }
+}
+
+/* ----- Enabling a lock mode from Settings ----- */
+async function setLockMode(mode) {
+  if (mode === 'off') {
+    if (lockMode_() !== 'off' && !confirm('Turn off the app lock?')) { syncSettingsControls(); return; }
+    ['fos_lock_mode', 'fos_pin_salt', 'fos_pin_hash', 'fos_pin_len', 'fos_webauthn_id'].forEach(k => localStorage.removeItem(k));
+    syncSettingsControls();
+    return;
+  }
+  // PIN is the foundation for both modes (fallback for biometric)
+  if (!localStorage.getItem('fos_pin_hash')) {
+    pendingLockMode = mode;
+    startSetPin();
+    return;
+  }
+  if (mode === 'bio') {
+    try {
+      if (!await biometricAvailable_()) { alert('This device has no biometric/Face/fingerprint sensor available to the browser. Keeping PIN lock.'); mode = 'pin'; }
+      else await registerBiometric_();
+    } catch (e) { alert('Could not set up biometrics: ' + (e.message || e) + '. Keeping PIN lock.'); mode = 'pin'; }
+  }
+  localStorage.setItem('fos_lock_mode', mode);
+  syncSettingsControls();
+}
+let pendingLockMode = null;
+
+/* ----- PIN pad UI ----- */
+function renderPinPad_() {
+  const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'bio', '0', 'del'];
+  document.getElementById('pinPad').innerHTML = keys.map(k => {
+    if (k === 'bio') return `<button class="pin-key blank" data-k="bio" aria-hidden="true"></button>`;
+    if (k === 'del') return `<button class="pin-key" data-k="del" aria-label="Delete">⌫</button>`;
+    return `<button class="pin-key" data-k="${k}">${k}</button>`;
+  }).join('');
+  document.querySelectorAll('#pinPad .pin-key').forEach(b => {
+    if (b.dataset.k === 'bio') return;
+    b.onclick = () => pinPress_(b.dataset.k);
+  });
+}
+function renderPinDots_() {
+  let html = '';
+  for (let i = 0; i < pinTargetLen; i++) html += `<span class="pin-dot ${i < pinBuffer.length ? 'filled' : ''}"></span>`;
+  document.getElementById('pinDots').innerHTML = html;
+}
+function pinPress_(k) {
+  if (k === 'del') { pinBuffer = pinBuffer.slice(0, -1); renderPinDots_(); return; }
+  if (pinBuffer.length >= 6) return;
+  pinBuffer += k;
+  renderPinDots_();
+  // auto-submit at target length
+  if (pinBuffer.length >= pinTargetLen) setTimeout(onPinComplete_, 120);
+}
+
+async function onPinComplete_() {
+  if (pinMode === 'set') {
+    if (pinBuffer.length < 4) return;
+    pinFirst = pinBuffer; pinBuffer = ''; pinMode = 'confirm';
+    document.getElementById('lockSub').textContent = 'Re-enter to confirm';
+    renderPinDots_();
+    return;
+  }
+  if (pinMode === 'confirm') {
+    if (pinBuffer === pinFirst) {
+      await savePin_(pinFirst);
+      const mode = pendingLockMode || 'pin'; pendingLockMode = null;
+      if (mode === 'bio') {
+        try {
+          if (await biometricAvailable_()) await registerBiometric_();
+          else { alert('No biometric sensor available — using PIN.'); }
+        } catch (e) { alert('Biometric setup failed — using PIN.'); localStorage.setItem('fos_lock_mode', 'pin'); finishSetPin_(); return; }
+      }
+      localStorage.setItem('fos_lock_mode', localStorage.getItem('fos_webauthn_id') ? mode : 'pin');
+      finishSetPin_();
+    } else {
+      shakeLock_(); pinBuffer = ''; pinFirst = ''; pinMode = 'set';
+      document.getElementById('lockSub').textContent = 'PINs didn\'t match — set a new one';
+      renderPinDots_();
+    }
+    return;
+  }
+  // unlock mode
+  if (await verifyPin_(pinBuffer)) { pinFails = 0; unlockApp_(); }
+  else {
+    pinFails++;
+    pinBuffer = ''; renderPinDots_();
+    if (pinFails >= 5) { purgeData_(); return; } // duress / forgot-PIN safety wipe
+    shakeLock_();
+    document.getElementById('lockSub').textContent = 'Wrong PIN — try again';
+  }
+}
+let pinFails = 0;
+
+/* Panic / duress wipe — disconnects all data sources from this device.
+   The Google Sheet itself is untouched; the app just forgets how to reach it. */
+function purgeData_() {
+  ['fos_sheet_id', 'fos_webapp_url', 'fos_app_token', 'fos_gemini_key', 'fos_gemini_model',
+   'fos_cached_data', 'fos_goal_tags', 'fos_nw_baseline', 'fos_lock_mode', 'fos_pin_salt',
+   'fos_pin_hash', 'fos_pin_len', 'fos_webauthn_id', 'fos_setup_done'
+  ].forEach(k => localStorage.removeItem(k));
+  // Reload to a clean, unconfigured app (shows the setup wizard — looks fresh)
+  location.reload();
+}
+function manualPurge() {
+  if (!confirm('Disconnect your Sheet, token and AI key from this app?\n\nYour data in Google Sheets stays safe — you can reconnect anytime. The app will reset to first-run setup.')) return;
+  purgeData_();
+}
+// Reachable from the lock screen without unlocking — forgot-PIN recovery / panic escape
+function lockScreenReset() {
+  if (!confirm('Reset FinanceOS on this device?\n\nThis removes your PIN, Sheet, token and AI key from the app and returns to first-run setup. Your data in Google Sheets is NOT affected.')) return;
+  purgeData_();
+}
+
+function shakeLock_() {
+  const l = document.getElementById('lockScreen');
+  l.classList.add('shake'); setTimeout(() => l.classList.remove('shake'), 450);
+}
+
+/* Set/Change PIN flow (opens the lock screen in 'set' mode) */
+function startSetPin() {
+  closeSettings();
+  pinMode = 'set'; pinBuffer = ''; pinFirst = '';
+  pinTargetLen = 4;
+  document.getElementById('lockTitle').textContent = 'Set a PIN';
+  document.getElementById('lockSub').textContent = 'Choose a 4-digit PIN';
+  document.getElementById('lockBioBtn').style.display = 'none';
+  document.getElementById('lockResetBtn').style.display = 'none';
+  renderPinPad_(); renderPinDots_();
+  document.getElementById('lockScreen').classList.add('show');
+}
+function finishSetPin_() {
+  document.getElementById('lockScreen').classList.remove('show');
+  openSettings();
+}
+
+/* ----- Lock / unlock ----- */
+function lockApp_(triggerBio) {
+  if (lockMode_() === 'off') return;
+  isLocked = true;
+  pinMode = 'unlock'; pinBuffer = '';
+  pinTargetLen = parseInt(localStorage.getItem('fos_pin_len') || '4', 10);
+  document.getElementById('lockTitle').textContent = 'FinanceOS locked';
+  document.getElementById('lockSub').textContent = 'Enter your PIN';
+  document.getElementById('lockBioBtn').style.display =
+    (lockMode_() === 'bio' && localStorage.getItem('fos_webauthn_id')) ? '' : 'none';
+  document.getElementById('lockResetBtn').style.display = '';
+  renderPinPad_(); renderPinDots_();
+  document.getElementById('lockScreen').classList.add('show');
+  // Only prompt biometric while the app is actually on-screen
+  if (triggerBio && lockMode_() === 'bio' && !document.hidden) tryBiometric();
+}
+function unlockApp_() {
+  isLocked = false;
+  document.getElementById('lockScreen').classList.remove('show');
+}
+async function tryBiometric() {
+  document.getElementById('lockSub').textContent = 'Verifying…';
+  try { await verifyBiometric_(); unlockApp_(); }
+  catch (e) { document.getElementById('lockSub').textContent = 'Use your PIN instead'; }
+}
+
+/* ----- Auto-lock: lock the moment the app leaves the foreground ----- */
+function lockScreenShown_() { return document.getElementById('lockScreen').classList.contains('show'); }
+
+function handleHidden_() {
+  // Don't fight the OS biometric/credential sheet (it briefly hides the page)
+  if (authInProgress) return;
+  if (lockMode_() !== 'off' && !isLocked && !lockScreenShown_()) lockApp_(false);
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    handleHidden_();
+  } else if (isLocked && lockMode_() === 'bio' && localStorage.getItem('fos_webauthn_id')) {
+    tryBiometric(); // re-prompt biometric on return
+  }
+});
+// Extra safety nets for platforms where visibilitychange is unreliable
+window.addEventListener('pagehide', handleHidden_);
+window.addEventListener('blur', () => { setTimeout(() => { if (document.hidden) handleHidden_(); }, 50); });
+
+/* ---------- Boot ---------- */
+// First-run sample rendering (now safe — all module vars are declared above)
+renderSampleDebt_();
+renderSampleInvest_();
+renderAlerts(SAMPLE_ALERTS.slice());
+renderPredictions_();
+
+// Lock immediately on launch if enabled (before any data shows)
+if (lockMode_() !== 'off') lockApp_(true);
+
+// Try cached data instantly, then go live
+try {
+  const cached = localStorage.getItem(LS.cachedData);
+  if (cached) { sheetData = JSON.parse(cached); applyLiveData(); }
+} catch (e) {}
+refreshData(true);
+</script>
+</body>
+</html>
