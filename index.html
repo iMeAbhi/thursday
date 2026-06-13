@@ -876,8 +876,15 @@ const LS = {
   geminiKey: 'fos_gemini_key',
   cachedData: 'fos_cached_data',
   webapp: 'fos_webapp_url',
-  appToken: 'fos_app_token'
+  appToken: 'fos_app_token',
+  geminiModel: 'fos_gemini_model'
 };
+
+// Tried in order if the model list can't be fetched. "latest" aliases survive
+// Google's model retirements, so they go first.
+const GEMINI_FALLBACK_MODELS = [
+  'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-3.5-flash', 'gemini-2.5-flash-lite'
+];
 
 const SHEET_TABS = ['CONFIG','ACCOUNTS','EQUITY_MF','GOLD','FIXED_INCOME','LIABILITIES','NET_WORTH','TAX'];
 
@@ -1571,12 +1578,51 @@ Tax FY2025-26: New regime ₹53,600 vs old ₹1,08,200 — new saves ₹54,600. 
   return ctx;
 }
 
-async function callGemini(contents) {
-  const key = localStorage.getItem(LS.geminiKey);
-  if (!key) throw new Error('NO_KEY');
+// Rank a model name — higher is better. Prefers plain "flash" over "lite",
+// and newer version numbers, so we pick the best model the key can use.
+function scoreGeminiModel(name) {
+  let s = 0;
+  if (/flash/.test(name)) s += 100;
+  if (/latest/.test(name)) s += 40;
+  if (/lite/.test(name)) s -= 30;
+  if (/preview|exp|thinking|tts|image|vision/.test(name)) s -= 60;
+  const m = name.match(/gemini-(\d+(?:\.\d+)?)/);
+  if (m) s += parseFloat(m[1]) * 5;
+  return s;
+}
+
+// Asks Google which models this key may call, and caches the best Flash one.
+async function resolveGeminiModel(key) {
+  const cached = localStorage.getItem(LS.geminiModel);
+  if (cached) return cached;
+  try {
+    const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models?key=' +
+      encodeURIComponent(key));
+    if (r.ok) {
+      const data = await r.json();
+      const usable = (data.models || [])
+        .filter(m => (m.supportedGenerationMethods || []).includes('generateContent'))
+        .map(m => m.name.replace(/^models\//, ''))
+        .filter(n => /gemini/.test(n))
+        .sort((a, b) => scoreGeminiModel(b) - scoreGeminiModel(a));
+      if (usable.length) {
+        localStorage.setItem(LS.geminiModel, usable[0]);
+        return usable[0];
+      }
+    } else if (r.status === 400 || r.status === 403) {
+      throw new Error('BAD_KEY');
+    }
+  } catch (e) {
+    if (e.message === 'BAD_KEY') throw e;
+    // network/CORS — fall through to the fallback list
+  }
+  return GEMINI_FALLBACK_MODELS[0];
+}
+
+async function callGeminiModel(model, key, contents) {
   const res = await fetch(
-    'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' +
-    encodeURIComponent(key),
+    'https://generativelanguage.googleapis.com/v1beta/models/' + model +
+    ':generateContent?key=' + encodeURIComponent(key),
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1587,13 +1633,51 @@ async function callGemini(contents) {
       })
     }
   );
-  if (!res.ok) throw new Error('HTTP ' + res.status);
+  if (!res.ok) {
+    let msg = 'HTTP ' + res.status;
+    try { const b = await res.json(); if (b.error && b.error.message) msg = b.error.message; } catch (e) {}
+    const err = new Error(msg);
+    err.status = res.status;
+    throw err;
+  }
   const data = await res.json();
   const text = data && data.candidates && data.candidates[0] &&
     data.candidates[0].content && data.candidates[0].content.parts &&
     data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text;
-  if (!text) throw new Error('EMPTY');
+  if (!text) throw new Error('Gemini returned an empty response');
   return text.trim();
+}
+
+async function callGemini(contents) {
+  const key = localStorage.getItem(LS.geminiKey);
+  if (!key) throw new Error('NO_KEY');
+  let model = await resolveGeminiModel(key).catch(e => {
+    if (e.message === 'BAD_KEY') throw e;
+    return GEMINI_FALLBACK_MODELS[0];
+  });
+
+  // Try the resolved model; if it's been retired (404), walk the fallback list
+  const tried = new Set();
+  const queue = [model, ...GEMINI_FALLBACK_MODELS].filter(m => {
+    if (tried.has(m)) return false; tried.add(m); return true;
+  });
+  let lastErr;
+  for (const m of queue) {
+    try {
+      const reply = await callGeminiModel(m, key, contents);
+      localStorage.setItem(LS.geminiModel, m); // remember what worked
+      return reply;
+    } catch (e) {
+      lastErr = e;
+      if (e.status === 400 || e.status === 403) {
+        localStorage.removeItem(LS.geminiModel);
+        throw new Error('BAD_KEY');
+      }
+      if (e.status === 404) { localStorage.removeItem(LS.geminiModel); continue; }
+      throw e; // network / other — don't keep hammering
+    }
+  }
+  throw lastErr || new Error('No usable Gemini model');
 }
 
 async function refreshAdvice() {
@@ -1623,12 +1707,18 @@ async function refreshAdvice() {
     document.getElementById('aiBriefTitle').textContent = monthName + ' Briefing';
   } catch (e) {
     bubble.innerHTML = oldHtml;
-    showDataNotice(e.message === 'NO_KEY'
-      ? 'AI unavailable — add your API key in Settings (⚙️)'
-      : 'AI unavailable — check your API key in Settings');
+    showDataNotice(geminiErrorMessage(e), true);
   } finally {
     btn.disabled = false;
   }
+}
+
+function geminiErrorMessage(e) {
+  const m = e && e.message;
+  if (m === 'NO_KEY') return 'AI unavailable — add your free Gemini key in Settings (⚙️)';
+  if (m === 'BAD_KEY') return 'AI unavailable — that Gemini key was rejected. Get a fresh one at aistudio.google.com and paste it in ⚙️ Settings';
+  if (m && /quota|rate|429/i.test(m)) return 'AI unavailable — Gemini free-tier limit hit. Wait a minute and try again';
+  return 'AI unavailable — ' + (m || 'unknown error') + '. Check your connection or key in ⚙️ Settings';
 }
 
 function escapeHtml(s) {
@@ -1671,9 +1761,7 @@ async function sendChat() {
   } catch (e) {
     const el = document.getElementById(thinkingId);
     el.classList.remove('pulsing');
-    el.textContent = e.message === 'NO_KEY'
-      ? 'AI unavailable — add your free Gemini API key in Settings (⚙️).'
-      : 'AI unavailable — check your API key in Settings.';
+    el.textContent = geminiErrorMessage(e);
   }
 }
 
