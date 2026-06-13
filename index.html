@@ -20,10 +20,14 @@
    ============================================================ */
 :root,
 html[data-theme="light"] {
-  --bg: #f8f9ff;
+  --bg: #eef1fb;
   --bg2: #f8f9ff;
-  --surface: rgba(255,255,255,0.72);
-  --surface-high: rgba(255,255,255,0.88);
+  /* Liquid Glass surfaces */
+  --surface: rgba(255,255,255,0.45);
+  --surface-high: rgba(255,255,255,0.62);
+  --glass-edge: rgba(255,255,255,0.65);
+  --glass-blur: blur(16px) saturate(1.2);
+  --card-shadow: 0 8px 30px rgba(20,30,60,0.10);
   --primary: #2d6bc6;
   --primary-cont: #d6e3ff;
   --on-prim-cont: #001945;
@@ -35,21 +39,25 @@ html[data-theme="light"] {
   --gold-cont: #ffdea8;
   --purple: #6750a4;
   --purple-cont: #eaddff;
-  --outline: rgba(0,0,0,0.08);
-  --outline-strong: rgba(0,0,0,0.14);
+  --outline: rgba(0,0,0,0.07);
+  --outline-strong: rgba(0,0,0,0.13);
   --text: #1a1c22;
   --text-2: rgba(26,28,34,0.62);
   --text-3: rgba(26,28,34,0.42);
   --shadow: 0 1px 3px rgba(20,30,60,0.10);
-  --nav-bg: rgba(248,249,255,0.82);
+  --nav-bg: rgba(255,255,255,0.55);
   --ease: cubic-bezier(0.2, 0, 0, 1);
   --dur: 280ms;
 }
 html[data-theme="dark"] {
   --bg: #000000;
   --bg2: #0a0a0a;
-  --surface: rgba(255,255,255,0.055);
-  --surface-high: rgba(255,255,255,0.09);
+  /* Liquid Glass surfaces over true AMOLED black */
+  --surface: rgba(30,30,30,0.45);
+  --surface-high: rgba(48,48,48,0.55);
+  --glass-edge: rgba(255,255,255,0.14);
+  --glass-blur: blur(16px) saturate(1.2);
+  --card-shadow: 0 8px 32px rgba(0,0,0,0.55);
   --primary: #adc6ff;
   --primary-cont: #1050a4;
   --on-prim-cont: #d6e3ff;
@@ -61,13 +69,13 @@ html[data-theme="dark"] {
   --gold-cont: rgba(255,185,93,0.10);
   --purple: #d0bcff;
   --purple-cont: rgba(103,80,164,0.22);
-  --outline: rgba(255,255,255,0.07);
-  --outline-strong: rgba(255,255,255,0.12);
+  --outline: rgba(255,255,255,0.10);
+  --outline-strong: rgba(255,255,255,0.16);
   --text: #e7e9f2;
   --text-2: rgba(231,233,242,0.62);
   --text-3: rgba(231,233,242,0.40);
   --shadow: 0 1px 2px rgba(0,0,0,0.6);
-  --nav-bg: rgba(0,0,0,0.82);
+  --nav-bg: rgba(10,10,10,0.55);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -91,8 +99,8 @@ input { font-family: inherit; }
   padding: 12px 18px;
   padding-top: calc(12px + env(safe-area-inset-top, 0px));
   background: var(--nav-bg);
-  -webkit-backdrop-filter: blur(24px) saturate(1.8);
-  backdrop-filter: blur(24px) saturate(1.8);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
   border-bottom: 1px solid var(--outline);
   transition: background var(--dur) var(--ease);
 }
@@ -145,7 +153,7 @@ input { font-family: inherit; }
 /* ---------- Layout / screens ---------- */
 main {
   max-width: 560px; margin: 0 auto;
-  padding: 18px 16px 110px;
+  padding: 18px 16px calc(120px + env(safe-area-inset-bottom, 0px));
   overflow-x: hidden;
 }
 .screen { display: none; }
@@ -168,13 +176,13 @@ main {
 /* ---------- Cards (Liquid Glass) ---------- */
 .card {
   background: var(--surface);
-  -webkit-backdrop-filter: blur(24px) saturate(1.8);
-  backdrop-filter: blur(24px) saturate(1.8);
-  border: 1px solid var(--outline);
-  border-radius: 24px;
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-edge);
+  border-radius: 28px;
   padding: 20px;
   margin-bottom: 14px;
-  box-shadow: var(--shadow);
+  box-shadow: var(--card-shadow);
   transition: background var(--dur) var(--ease), border var(--dur) var(--ease);
 }
 .eyebrow {
@@ -185,12 +193,25 @@ main {
 /* ---------- Hero cards ---------- */
 .hero-networth {
   background: linear-gradient(140deg, var(--primary-cont), var(--purple-cont));
-  border: 1px solid var(--outline-strong);
+  border: 1px solid var(--glass-edge);
   border-radius: 32px;
   padding: 24px 22px;
   margin-bottom: 14px;
-  box-shadow: var(--shadow);
+  box-shadow: var(--card-shadow);
+  transition: background var(--dur) var(--ease);
 }
+/* Night dynamic hero: dark sky + faint static stars, light text */
+.hero-networth.hero-night {
+  background-image:
+    radial-gradient(1.2px 1.2px at 18% 30%, rgba(255,255,255,0.9), transparent),
+    radial-gradient(1px 1px at 62% 22%, rgba(255,255,255,0.7), transparent),
+    radial-gradient(1.4px 1.4px at 82% 48%, rgba(255,255,255,0.8), transparent),
+    radial-gradient(1px 1px at 38% 64%, rgba(255,255,255,0.6), transparent),
+    linear-gradient(140deg, #0b1f4d 0%, #1a0f3d 100%) !important;
+}
+.hero-networth.hero-night .eyebrow,
+.hero-networth.hero-night .networth-num,
+.hero-networth.hero-night .climb-line { color: #eaf0ff !important; }
 .hero-networth .eyebrow { color: var(--on-prim-cont); opacity: 0.75; }
 html[data-theme="dark"] .hero-networth .eyebrow { color: var(--text-2); opacity: 1; }
 .networth-num {
@@ -211,8 +232,8 @@ html[data-theme="light"] .delta-chip { background: rgba(183,240,212,0.85); }
 .subchip {
   flex: 1; min-height: 56px;
   background: var(--surface-high);
-  -webkit-backdrop-filter: blur(24px) saturate(1.8);
-  backdrop-filter: blur(24px) saturate(1.8);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
   border: 1px solid var(--outline);
   border-radius: 16px;
   padding: 9px 11px;
@@ -275,8 +296,8 @@ html[data-theme="dark"] .tchip.prim { background: rgba(173,198,255,0.14); color:
 .freedom-box {
   display: inline-flex; flex-direction: column; align-items: center;
   background: var(--surface-high);
-  -webkit-backdrop-filter: blur(24px) saturate(1.8);
-  backdrop-filter: blur(24px) saturate(1.8);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
   border: 1px solid var(--outline);
   border-radius: 16px;
   padding: 10px 20px; margin-bottom: 16px;
@@ -302,8 +323,8 @@ html[data-theme="dark"] .loan-icon { color: var(--primary); background: rgba(173
 .cc-chip {
   min-width: 150px; width: 150px;
   background: var(--surface);
-  -webkit-backdrop-filter: blur(24px) saturate(1.8);
-  backdrop-filter: blur(24px) saturate(1.8);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
   border: 1px solid var(--outline);
   border-radius: 16px;
   padding: 14px;
@@ -335,8 +356,8 @@ html[data-theme="dark"] .seg-opt.active { background: rgba(173,198,255,0.18); co
 .debt-item {
   display: flex; align-items: center; gap: 13px;
   background: var(--surface);
-  -webkit-backdrop-filter: blur(24px) saturate(1.8);
-  backdrop-filter: blur(24px) saturate(1.8);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
   border: 1px solid var(--outline);
   border-radius: 16px; padding: 13px 15px; margin-bottom: 9px;
   box-shadow: var(--shadow);
@@ -378,8 +399,8 @@ html[data-theme="dark"] .goal-tag { color: var(--purple); }
   border-radius: 16px; padding: 13px 16px; margin-bottom: 14px;
   font-size: 13.5px; font-weight: 500;
   border: 1px solid var(--outline);
-  -webkit-backdrop-filter: blur(24px) saturate(1.8);
-  backdrop-filter: blur(24px) saturate(1.8);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
 }
 .banner.gold { background: var(--gold-cont); color: var(--gold); }
 .banner.green { background: var(--green-cont); color: var(--green); }
@@ -423,8 +444,8 @@ html[data-theme="dark"] .goal-tag { color: var(--purple); }
 .ai-sub { font-size: 12px; color: var(--text-2); margin-top: 2px; }
 .advice-bubble {
   background: var(--surface-high);
-  -webkit-backdrop-filter: blur(24px) saturate(1.8);
-  backdrop-filter: blur(24px) saturate(1.8);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
   border: 1px solid var(--outline);
   border-radius: 16px;
   padding: 16px; margin-bottom: 16px;
@@ -461,16 +482,16 @@ html[data-theme="dark"] .chat-bubble.user { color: var(--on-prim-cont); }
 .chat-bubble.ai {
   align-self: flex-start;
   background: var(--surface-high);
-  -webkit-backdrop-filter: blur(24px) saturate(1.8);
-  backdrop-filter: blur(24px) saturate(1.8);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
   border-bottom-left-radius: 8px;
 }
 .chat-input-row { display: flex; gap: 8px; }
 .chat-input-row input {
   flex: 1; min-height: 48px;
   background: var(--surface-high);
-  -webkit-backdrop-filter: blur(24px) saturate(1.8);
-  backdrop-filter: blur(24px) saturate(1.8);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
   border: 1px solid var(--outline-strong);
   border-radius: 100px;
   padding: 0 18px; font-size: 14px; color: var(--text);
@@ -490,8 +511,8 @@ html[data-theme="light"] .chat-send { color: #fff; }
 .alert-row {
   display: flex; align-items: center; gap: 13px;
   background: var(--surface);
-  -webkit-backdrop-filter: blur(24px) saturate(1.8);
-  backdrop-filter: blur(24px) saturate(1.8);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
   border: 1px solid var(--outline);
   border-radius: 16px;
   padding: 14px 16px; margin-bottom: 10px;
@@ -525,8 +546,8 @@ html[data-theme="dark"] .alert-row.sev-prim { background: rgba(173,198,255,0.10)
 .regime-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
 .regime-card {
   background: var(--surface);
-  -webkit-backdrop-filter: blur(24px) saturate(1.8);
-  backdrop-filter: blur(24px) saturate(1.8);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
   border: 1px solid var(--outline);
   border-radius: 24px;
   padding: 18px 16px;
@@ -546,13 +567,18 @@ html[data-theme="dark"] .alert-row.sev-prim { background: rgba(173,198,255,0.10)
 
 /* ---------- Bottom nav ---------- */
 .bottomnav {
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+  position: fixed; z-index: 50;
+  left: 12px; right: 12px;
+  bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  max-width: 540px; margin: 0 auto;
   display: flex; justify-content: space-around;
-  padding: 8px 4px calc(10px + env(safe-area-inset-bottom, 0px));
+  padding: 8px 6px;
   background: var(--nav-bg);
-  -webkit-backdrop-filter: blur(24px) saturate(1.8);
-  backdrop-filter: blur(24px) saturate(1.8);
-  border-top: 1px solid var(--outline);
+  -webkit-backdrop-filter: blur(22px) saturate(1.4);
+  backdrop-filter: blur(22px) saturate(1.4);
+  border: 1px solid var(--glass-edge);
+  border-radius: 40px;
+  box-shadow: var(--card-shadow);
 }
 .navbtn {
   flex: 1; max-width: 88px;
@@ -583,8 +609,8 @@ html[data-theme="dark"] .navbtn.active .nicon { background: rgba(173,198,255,0.1
 .wizard-card {
   width: 100%; max-width: 420px;
   background: var(--surface);
-  -webkit-backdrop-filter: blur(24px) saturate(1.8);
-  backdrop-filter: blur(24px) saturate(1.8);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
   border: 1px solid var(--outline);
   border-radius: 32px;
   padding: 32px 26px;
@@ -635,8 +661,8 @@ html[data-theme="dark"] .wiz-btn { color: #001945; }
   left: 50%; transform: translate(-50%, -56px); z-index: 60;
   width: 40px; height: 40px; border-radius: 100px;
   background: var(--surface-high);
-  -webkit-backdrop-filter: blur(24px) saturate(1.8);
-  backdrop-filter: blur(24px) saturate(1.8);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
   border: 1px solid var(--outline-strong);
   display: flex; align-items: center; justify-content: center;
   font-size: 17px; box-shadow: var(--shadow);
@@ -650,8 +676,8 @@ html[data-theme="dark"] .wiz-btn { color: #001945; }
   color: var(--gold); background: var(--gold-cont);
   border: 1px solid var(--outline); border-radius: 16px;
   padding: 11px 16px; margin: 0 0 14px;
-  -webkit-backdrop-filter: blur(24px) saturate(1.8);
-  backdrop-filter: blur(24px) saturate(1.8);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
   display: none;
 }
 .notice.show { display: block; animation: slideIn var(--dur) var(--ease); }
@@ -662,6 +688,108 @@ html[data-theme="dark"] .wiz-btn { color: #001945; }
   color: var(--on-prim-cont);
 }
 html[data-theme="dark"] .climb-line { color: var(--text); }
+
+/* ---------- Settings modal (glass sheet) ---------- */
+.modal {
+  position: fixed; inset: 0; z-index: 90;
+  display: none; align-items: flex-end; justify-content: center;
+  background: rgba(0,0,0,0.45);
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+}
+.modal.show { display: flex; animation: fadeIn 200ms var(--ease); }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal-sheet {
+  width: 100%; max-width: 560px;
+  max-height: 90vh; overflow-y: auto;
+  background: var(--surface-high);
+  -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-edge);
+  border-radius: 32px 32px 0 0;
+  padding: 12px 20px calc(28px + env(safe-area-inset-bottom, 0px));
+  box-shadow: var(--card-shadow);
+  animation: sheetUp 280ms var(--ease);
+}
+@keyframes sheetUp { from { transform: translateY(40px); opacity: 0.6; } to { transform: translateY(0); opacity: 1; } }
+.sheet-grip { width: 38px; height: 4px; border-radius: 100px; background: var(--outline-strong); margin: 4px auto 14px; }
+.modal-head { display: flex; align-items: center; margin-bottom: 8px; }
+.modal-head h2 { font-family: 'Google Sans Display', sans-serif; font-size: 21px; font-weight: 500; flex: 1; }
+.set-section { margin: 18px 0 8px; font-size: 11.5px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-2); }
+.set-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px; margin-bottom: 10px;
+  background: var(--surface); border: 1px solid var(--glass-edge);
+  border-radius: 18px;
+}
+.set-row .sr-main { flex: 1; min-width: 0; }
+.set-row .sr-label { font-size: 14.5px; font-weight: 600; }
+.set-row .sr-sub { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+.accent-dots { display: flex; gap: 12px; flex-wrap: wrap; padding: 4px 2px 8px; }
+.accent-dot {
+  width: 38px; height: 38px; border-radius: 100px; border: 2px solid transparent;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform var(--dur) var(--ease);
+}
+.accent-dot i { width: 26px; height: 26px; border-radius: 100px; display: block; }
+.accent-dot.active { border-color: var(--text); transform: scale(1.08); }
+.set-btn {
+  width: 100%; min-height: 48px; border-radius: 100px;
+  background: var(--primary); color: #fff; font-size: 14.5px; font-weight: 600;
+  margin-top: 6px;
+}
+html[data-theme="dark"] .set-btn { color: #001945; }
+.set-btn.ghost { background: var(--surface); color: var(--text); border: 1px solid var(--glass-edge); }
+/* iOS-style switch */
+.switch { width: 50px; height: 30px; border-radius: 100px; background: var(--outline-strong); position: relative; transition: background var(--dur) var(--ease); flex: 0 0 auto; }
+.switch.on { background: var(--primary); }
+.switch i { position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 100px; background: #fff; transition: left var(--dur) var(--ease); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+.switch.on i { left: 23px; }
+
+/* ---------- Lock screen + privacy mask ---------- */
+.lock {
+  position: fixed; inset: 0; z-index: 1000;
+  display: none; flex-direction: column; align-items: center; justify-content: center;
+  background: var(--bg);
+  padding: 32px;
+}
+.lock.show { display: flex; }
+.lock-glass {
+  position: absolute; inset: 0;
+  background: var(--surface);
+  -webkit-backdrop-filter: blur(28px) saturate(1.3); backdrop-filter: blur(28px) saturate(1.3);
+}
+.lock-inner { position: relative; z-index: 1; width: 100%; max-width: 320px; text-align: center; }
+.lock-logo {
+  width: 64px; height: 64px; margin: 0 auto 16px; border-radius: 20px;
+  background: linear-gradient(140deg, var(--primary-cont), var(--purple-cont));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Google Sans Display', sans-serif; font-size: 32px; font-weight: 700; color: var(--primary);
+}
+.lock-title { font-family: 'Google Sans Display', sans-serif; font-size: 21px; font-weight: 500; }
+.lock-sub { font-size: 13px; color: var(--text-2); margin: 6px 0 22px; min-height: 18px; }
+.pin-dots { display: flex; gap: 14px; justify-content: center; margin-bottom: 26px; }
+.pin-dot { width: 14px; height: 14px; border-radius: 100px; border: 2px solid var(--outline-strong); transition: all var(--dur) var(--ease); }
+.pin-dot.filled { background: var(--primary); border-color: var(--primary); }
+.lock.shake .pin-dots { animation: shake 0.4s; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-8px)} 40%,80%{transform:translateX(8px)} }
+.pin-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.pin-key {
+  height: 64px; border-radius: 100px;
+  background: var(--surface); border: 1px solid var(--glass-edge);
+  -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+  font-size: 24px; font-weight: 500; color: var(--text);
+  transition: transform 120ms var(--ease);
+}
+.pin-key:active { transform: scale(0.93); }
+.pin-key.blank { background: none; border: none; }
+.lock-bio-btn { margin-top: 18px; font-size: 14px; font-weight: 600; color: var(--primary); min-height: 44px; }
+.privacy-mask {
+  position: fixed; inset: 0; z-index: 990; display: none;
+  background: var(--surface);
+  -webkit-backdrop-filter: blur(30px) saturate(1.2); backdrop-filter: blur(30px) saturate(1.2);
+  align-items: center; justify-content: center;
+  font-family: 'Google Sans Display', sans-serif; font-size: 22px; font-weight: 500; color: var(--text-2);
+}
+.privacy-mask.show { display: flex; }
 </style>
 </head>
 <body>
@@ -669,11 +797,6 @@ html[data-theme="dark"] .climb-line { color: var(--text); }
 <!-- ================= SETUP WIZARD ================= -->
 <div class="wizard" id="wizard">
   <div class="wizard-card">
-    <button class="theme-pill" id="themeToggle" aria-label="Toggle theme" onclick="toggleTheme()"
-            style="position:absolute;top:14px;right:14px">
-      <span class="tp-opt" id="tpLight">☀️</span>
-      <span class="tp-opt" id="tpDark">🌑</span>
-    </button>
 
     <div class="wizard-step active" id="wstep1">
       <div class="wiz-icon">F</div>
@@ -715,6 +838,64 @@ html[data-theme="dark"] .climb-line { color: var(--text); }
 
   </div>
 </div>
+
+<!-- ================= SETTINGS MODAL ================= -->
+<div class="modal" id="settings" onclick="if(event.target===this)closeSettings()">
+  <div class="modal-sheet">
+    <div class="sheet-grip"></div>
+    <div class="modal-head">
+      <h2>Settings</h2>
+      <button class="iconbtn" aria-label="Close" onclick="closeSettings()">✕</button>
+    </div>
+
+    <div class="set-section">Appearance</div>
+    <div class="set-row">
+      <div class="sr-main"><div class="sr-label">Theme</div><div class="sr-sub">AMOLED black or crisp light</div></div>
+      <div class="seg-toggle" style="width:170px">
+        <button class="seg-opt" data-mode="dark" onclick="setMode('dark')">🌑 Dark</button>
+        <button class="seg-opt" data-mode="light" onclick="setMode('light')">☀️ Light</button>
+      </div>
+    </div>
+    <div class="set-section">Accent colour</div>
+    <div class="accent-dots" id="accentDots"><!-- populated by JS --></div>
+    <div class="set-row">
+      <div class="sr-main"><div class="sr-label">Dynamic hero graphics</div><div class="sr-sub">Time-of-day sky behind net worth</div></div>
+      <div class="switch" id="dynHeroSwitch" onclick="toggleDynHero()"><i></i></div>
+    </div>
+
+    <div class="set-section">Security · App lock</div>
+    <div class="set-row">
+      <div class="sr-main"><div class="sr-label">Lock FinanceOS</div><div class="sr-sub" id="lockModeSub">Off</div></div>
+      <div class="seg-toggle" style="width:210px">
+        <button class="seg-opt" data-lock="off" onclick="setLockMode('off')">Off</button>
+        <button class="seg-opt" data-lock="pin" onclick="setLockMode('pin')">PIN</button>
+        <button class="seg-opt" data-lock="bio" onclick="setLockMode('bio')">Biometric</button>
+      </div>
+    </div>
+    <button class="set-btn ghost" id="changePinBtn" style="display:none" onclick="startSetPin()">Change PIN</button>
+
+    <div class="set-section">Data &amp; AI</div>
+    <button class="set-btn ghost" onclick="closeSettings();openDataWizard()">Reconnect Sheet / API key</button>
+
+    <div style="text-align:center;margin-top:18px;font-size:11px;color:var(--text-3)">FinanceOS · all data stays on this device</div>
+  </div>
+</div>
+
+<!-- ================= LOCK SCREEN ================= -->
+<div class="lock" id="lockScreen">
+  <div class="lock-glass"></div>
+  <div class="lock-inner">
+    <div class="lock-logo">F</div>
+    <div class="lock-title" id="lockTitle">FinanceOS locked</div>
+    <div class="lock-sub" id="lockSub">Enter your PIN</div>
+    <div class="pin-dots" id="pinDots"></div>
+    <div class="pin-pad" id="pinPad"></div>
+    <button class="lock-bio-btn" id="lockBioBtn" style="display:none" onclick="tryBiometric()">🔓 Use biometrics</button>
+  </div>
+</div>
+
+<!-- ================= PRIVACY MASK ================= -->
+<div class="privacy-mask" id="privacyMask">FinanceOS</div>
 
 <!-- ================= TOP BAR ================= -->
 <header class="topbar">
@@ -1002,19 +1183,70 @@ function fmtCompact(n) {
 }
 
 /* ---------- Theme ---------- */
+/* ---------- Material You accent palettes ---------- */
+const ACCENTS = {
+  indigo:     { name: 'Indigo',     light: { p: '#2d6bc6', c: '#d6e3ff', on: '#001945' }, dark: { p: '#adc6ff', c: '#1050a4', on: '#d6e3ff' }, dot: '#4f8ef7' },
+  emerald:    { name: 'Emerald',    light: { p: '#1a7f4b', c: '#b7f0d4', on: '#00210f' }, dark: { p: '#72dba4', c: '#0c5132', on: '#b7f0d4' }, dot: '#1a9b5a' },
+  terracotta: { name: 'Terracotta', light: { p: '#a23f1e', c: '#ffdbcf', on: '#3a0b00' }, dark: { p: '#ffb59b', c: '#7a2c10', on: '#ffdbcf' }, dot: '#c75b35' },
+  violet:     { name: 'Violet',     light: { p: '#6750a4', c: '#eaddff', on: '#21005d' }, dark: { p: '#d0bcff', c: '#4f378b', on: '#eaddff' }, dot: '#7c4dff' },
+  amber:      { name: 'Amber',      light: { p: '#8a5300', c: '#ffddb0', on: '#2c1600' }, dark: { p: '#ffb951', c: '#664300', on: '#ffddb0' }, dot: '#f5a623' }
+};
+
+function applyAccent(name) {
+  const a = ACCENTS[name] || ACCENTS.indigo;
+  const mode = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+  const v = a[mode];
+  const r = document.documentElement.style;
+  r.setProperty('--primary', v.p);
+  r.setProperty('--primary-cont', v.c);
+  r.setProperty('--on-prim-cont', v.on);
+}
+
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
-  document.getElementById('tpLight').classList.toggle('active', theme === 'light');
-  document.getElementById('tpDark').classList.toggle('active', theme === 'dark');
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', theme === 'dark' ? '#000000' : '#f8f9ff');
+  if (meta) meta.setAttribute('content', theme === 'dark' ? '#000000' : '#eef1fb');
+  applyAccent(localStorage.getItem('fos_accent') || 'indigo');
+  updateHeroMood();
+  syncSettingsControls();
+}
+function setMode(mode) {
+  localStorage.setItem(LS.theme, mode);
+  applyTheme(mode);
+}
+function setAccent(name) {
+  localStorage.setItem('fos_accent', name);
+  applyAccent(name);
+  updateHeroMood();
+  syncSettingsControls();
 }
 function toggleTheme() {
-  const cur = document.documentElement.getAttribute('data-theme');
-  const next = cur === 'dark' ? 'light' : 'dark';
-  localStorage.setItem(LS.theme, next);
-  applyTheme(next);
+  setMode(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
 }
+
+/* ---------- Time-sensitive dynamic hero graphics ---------- */
+function heroGradientForNow_() {
+  const h = new Date().getHours();
+  // soft, minimal day-cycle gradients (no animation, no glow blobs)
+  if (h >= 5 && h < 11)  return 'linear-gradient(140deg, #ffe7b8 0%, var(--primary-cont) 70%)';      // morning sun
+  if (h >= 11 && h < 17) return 'linear-gradient(140deg, var(--primary-cont) 0%, #cfe0ff 100%)';      // bright day
+  if (h >= 17 && h < 21) return 'linear-gradient(140deg, #ffd0b0 0%, var(--purple-cont) 90%)';         // dusk
+  return 'linear-gradient(140deg, #0b1f4d 0%, #1a0f3d 100%)';                                          // night
+}
+function updateHeroMood() {
+  const hero = document.querySelector('.hero-networth');
+  if (!hero) return;
+  const on = localStorage.getItem('fos_dyn_hero') !== 'off'; // default on
+  const isNight = (() => { const h = new Date().getHours(); return h >= 21 || h < 5; })();
+  if (on) {
+    hero.style.background = heroGradientForNow_();
+    hero.classList.toggle('hero-night', isNight);
+  } else {
+    hero.style.background = '';
+    hero.classList.remove('hero-night');
+  }
+}
+
 applyTheme(localStorage.getItem(LS.theme) || 'dark');
 
 /* ---------- Greeting / date ---------- */
@@ -2120,7 +2352,7 @@ function wizardFinish() {
   document.getElementById('wizard').classList.remove('show');
   manualRefresh(); // immediate feedback: success tick or a specific fix-it message
 }
-function openSettings() {
+function openDataWizard() {
   document.getElementById('wizSheetId').value =
     localStorage.getItem(LS.webapp) || localStorage.getItem(LS.sheetId) || '';
   document.getElementById('wizToken').value = localStorage.getItem(LS.appToken) || '';
@@ -2129,6 +2361,45 @@ function openSettings() {
   document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
   document.getElementById('wstep1').classList.add('active');
   document.getElementById('wizard').classList.add('show');
+}
+
+/* ---------- Settings modal ---------- */
+function openSettings() {
+  buildAccentDots_();
+  syncSettingsControls();
+  document.getElementById('settings').classList.add('show');
+}
+function closeSettings() { document.getElementById('settings').classList.remove('show'); }
+
+function buildAccentDots_() {
+  const cur = localStorage.getItem('fos_accent') || 'indigo';
+  document.getElementById('accentDots').innerHTML = Object.keys(ACCENTS).map(k =>
+    `<button class="accent-dot ${k === cur ? 'active' : ''}" data-accent="${k}" aria-label="${ACCENTS[k].name}" onclick="setAccent('${k}')"><i style="background:${ACCENTS[k].dot}"></i></button>`
+  ).join('');
+}
+
+function syncSettingsControls() {
+  const mode = document.documentElement.getAttribute('data-theme');
+  document.querySelectorAll('#settings .seg-opt[data-mode]').forEach(b =>
+    b.classList.toggle('active', b.dataset.mode === mode));
+  const acc = localStorage.getItem('fos_accent') || 'indigo';
+  document.querySelectorAll('#settings .accent-dot').forEach(b =>
+    b.classList.toggle('active', b.dataset.accent === acc));
+  document.getElementById('dynHeroSwitch').classList.toggle('on',
+    localStorage.getItem('fos_dyn_hero') !== 'off');
+  const lm = localStorage.getItem('fos_lock_mode') || 'off';
+  document.querySelectorAll('#settings .seg-opt[data-lock]').forEach(b =>
+    b.classList.toggle('active', b.dataset.lock === lm));
+  document.getElementById('lockModeSub').textContent =
+    lm === 'off' ? 'Off' : (lm === 'pin' ? 'PIN required' : 'Biometric + PIN fallback');
+  document.getElementById('changePinBtn').style.display = lm === 'off' ? 'none' : '';
+}
+
+function toggleDynHero() {
+  const on = localStorage.getItem('fos_dyn_hero') !== 'off';
+  localStorage.setItem('fos_dyn_hero', on ? 'off' : 'on');
+  updateHeroMood();
+  syncSettingsControls();
 }
 if (!localStorage.getItem('fos_setup_done')) {
   document.getElementById('wizard').classList.add('show');
@@ -2197,7 +2468,223 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
 // Universal fallback: refresh Sheet data every 30 min while the app is open
 setInterval(() => { if (navigator.onLine) refreshData(true); }, 30 * 60 * 1000);
 
+/* ============================================================
+   APP LOCK — WebAuthn biometric + PIN fallback + auto-lock
+   ============================================================ */
+const DORMANT_MS = 2 * 60 * 1000; // re-auth after 2 min in background
+let isLocked = false, hiddenAt = 0;
+let pinMode = 'unlock';   // 'unlock' | 'set' | 'confirm'
+let pinBuffer = '', pinFirst = '', pinTargetLen = 4;
+
+function lockMode_() { return localStorage.getItem('fos_lock_mode') || 'off'; }
+
+/* ----- PIN hashing (salted SHA-256) ----- */
+function buf2hex_(buf) { return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join(''); }
+async function hashPin_(pin, salt) {
+  const data = new TextEncoder().encode(salt + ':' + pin);
+  return buf2hex_(await crypto.subtle.digest('SHA-256', data));
+}
+async function savePin_(pin) {
+  const salt = buf2hex_(crypto.getRandomValues(new Uint8Array(16)));
+  localStorage.setItem('fos_pin_salt', salt);
+  localStorage.setItem('fos_pin_hash', await hashPin_(pin, salt));
+  localStorage.setItem('fos_pin_len', String(pin.length));
+}
+async function verifyPin_(pin) {
+  const salt = localStorage.getItem('fos_pin_salt');
+  const hash = localStorage.getItem('fos_pin_hash');
+  if (!salt || !hash) return false;
+  return (await hashPin_(pin, salt)) === hash;
+}
+
+/* ----- WebAuthn (platform biometric) ----- */
+function b64url_(buf) { return btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+function fromB64url_(s) { s = s.replace(/-/g, '+').replace(/_/g, '/'); const bin = atob(s); const a = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i); return a; }
+
+async function biometricAvailable_() {
+  try {
+    return !!window.PublicKeyCredential &&
+      await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+  } catch (e) { return false; }
+}
+async function registerBiometric_() {
+  if (!window.PublicKeyCredential) throw new Error('No WebAuthn');
+  const cred = await navigator.credentials.create({
+    publicKey: {
+      challenge: crypto.getRandomValues(new Uint8Array(32)),
+      rp: { name: 'FinanceOS', id: location.hostname },
+      user: { id: crypto.getRandomValues(new Uint8Array(16)), name: 'AB', displayName: 'AB' },
+      pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+      authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required' },
+      timeout: 60000
+    }
+  });
+  localStorage.setItem('fos_webauthn_id', b64url_(cred.rawId));
+}
+async function verifyBiometric_() {
+  const id = localStorage.getItem('fos_webauthn_id');
+  if (!id || !window.PublicKeyCredential) throw new Error('No credential');
+  await navigator.credentials.get({
+    publicKey: {
+      challenge: crypto.getRandomValues(new Uint8Array(32)),
+      allowCredentials: [{ id: fromB64url_(id), type: 'public-key' }],
+      userVerification: 'required',
+      timeout: 60000
+    }
+  });
+  return true; // resolves only if device verification passed
+}
+
+/* ----- Enabling a lock mode from Settings ----- */
+async function setLockMode(mode) {
+  if (mode === 'off') {
+    if (lockMode_() !== 'off' && !confirm('Turn off the app lock?')) { syncSettingsControls(); return; }
+    ['fos_lock_mode', 'fos_pin_salt', 'fos_pin_hash', 'fos_pin_len', 'fos_webauthn_id'].forEach(k => localStorage.removeItem(k));
+    syncSettingsControls();
+    return;
+  }
+  // PIN is the foundation for both modes (fallback for biometric)
+  if (!localStorage.getItem('fos_pin_hash')) {
+    pendingLockMode = mode;
+    startSetPin();
+    return;
+  }
+  if (mode === 'bio') {
+    try {
+      if (!await biometricAvailable_()) { alert('This device has no biometric/Face/fingerprint sensor available to the browser. Keeping PIN lock.'); mode = 'pin'; }
+      else await registerBiometric_();
+    } catch (e) { alert('Could not set up biometrics: ' + (e.message || e) + '. Keeping PIN lock.'); mode = 'pin'; }
+  }
+  localStorage.setItem('fos_lock_mode', mode);
+  syncSettingsControls();
+}
+let pendingLockMode = null;
+
+/* ----- PIN pad UI ----- */
+function renderPinPad_() {
+  const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'bio', '0', 'del'];
+  document.getElementById('pinPad').innerHTML = keys.map(k => {
+    if (k === 'bio') return `<button class="pin-key blank" data-k="bio" aria-hidden="true"></button>`;
+    if (k === 'del') return `<button class="pin-key" data-k="del" aria-label="Delete">⌫</button>`;
+    return `<button class="pin-key" data-k="${k}">${k}</button>`;
+  }).join('');
+  document.querySelectorAll('#pinPad .pin-key').forEach(b => {
+    if (b.dataset.k === 'bio') return;
+    b.onclick = () => pinPress_(b.dataset.k);
+  });
+}
+function renderPinDots_() {
+  let html = '';
+  for (let i = 0; i < pinTargetLen; i++) html += `<span class="pin-dot ${i < pinBuffer.length ? 'filled' : ''}"></span>`;
+  document.getElementById('pinDots').innerHTML = html;
+}
+function pinPress_(k) {
+  if (k === 'del') { pinBuffer = pinBuffer.slice(0, -1); renderPinDots_(); return; }
+  if (pinBuffer.length >= 6) return;
+  pinBuffer += k;
+  renderPinDots_();
+  // auto-submit at target length
+  if (pinBuffer.length >= pinTargetLen) setTimeout(onPinComplete_, 120);
+}
+
+async function onPinComplete_() {
+  if (pinMode === 'set') {
+    if (pinBuffer.length < 4) return;
+    pinFirst = pinBuffer; pinBuffer = ''; pinMode = 'confirm';
+    document.getElementById('lockSub').textContent = 'Re-enter to confirm';
+    renderPinDots_();
+    return;
+  }
+  if (pinMode === 'confirm') {
+    if (pinBuffer === pinFirst) {
+      await savePin_(pinFirst);
+      const mode = pendingLockMode || 'pin'; pendingLockMode = null;
+      if (mode === 'bio') {
+        try {
+          if (await biometricAvailable_()) await registerBiometric_();
+          else { alert('No biometric sensor available — using PIN.'); }
+        } catch (e) { alert('Biometric setup failed — using PIN.'); localStorage.setItem('fos_lock_mode', 'pin'); finishSetPin_(); return; }
+      }
+      localStorage.setItem('fos_lock_mode', localStorage.getItem('fos_webauthn_id') ? mode : 'pin');
+      finishSetPin_();
+    } else {
+      shakeLock_(); pinBuffer = ''; pinFirst = ''; pinMode = 'set';
+      document.getElementById('lockSub').textContent = 'PINs didn\'t match — set a new one';
+      renderPinDots_();
+    }
+    return;
+  }
+  // unlock mode
+  if (await verifyPin_(pinBuffer)) { unlockApp_(); }
+  else { shakeLock_(); pinBuffer = ''; renderPinDots_(); document.getElementById('lockSub').textContent = 'Wrong PIN — try again'; }
+}
+
+function shakeLock_() {
+  const l = document.getElementById('lockScreen');
+  l.classList.add('shake'); setTimeout(() => l.classList.remove('shake'), 450);
+}
+
+/* Set/Change PIN flow (opens the lock screen in 'set' mode) */
+function startSetPin() {
+  closeSettings();
+  pinMode = 'set'; pinBuffer = ''; pinFirst = '';
+  pinTargetLen = 4;
+  document.getElementById('lockTitle').textContent = 'Set a PIN';
+  document.getElementById('lockSub').textContent = 'Choose a 4-digit PIN';
+  document.getElementById('lockBioBtn').style.display = 'none';
+  renderPinPad_(); renderPinDots_();
+  document.getElementById('lockScreen').classList.add('show');
+}
+function finishSetPin_() {
+  document.getElementById('lockScreen').classList.remove('show');
+  openSettings();
+}
+
+/* ----- Lock / unlock ----- */
+function lockApp_() {
+  if (lockMode_() === 'off') return;
+  isLocked = true;
+  pinMode = 'unlock'; pinBuffer = '';
+  pinTargetLen = parseInt(localStorage.getItem('fos_pin_len') || '4', 10);
+  document.getElementById('lockTitle').textContent = 'FinanceOS locked';
+  document.getElementById('lockSub').textContent = 'Enter your PIN';
+  document.getElementById('lockBioBtn').style.display =
+    (lockMode_() === 'bio' && localStorage.getItem('fos_webauthn_id')) ? '' : 'none';
+  renderPinPad_(); renderPinDots_();
+  document.getElementById('lockScreen').classList.add('show');
+  if (lockMode_() === 'bio') tryBiometric();
+}
+function unlockApp_() {
+  isLocked = false;
+  document.getElementById('lockScreen').classList.remove('show');
+}
+async function tryBiometric() {
+  document.getElementById('lockSub').textContent = 'Verifying…';
+  try { await verifyBiometric_(); unlockApp_(); }
+  catch (e) { document.getElementById('lockSub').textContent = 'Use your PIN instead'; }
+}
+
+/* ----- Privacy mask + dormancy ----- */
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    hiddenAt = Date.now();
+    if (lockMode_() !== 'off' && !isLocked) document.getElementById('privacyMask').classList.add('show');
+  } else {
+    document.getElementById('privacyMask').classList.remove('show');
+    if (lockMode_() !== 'off' && !isLocked && hiddenAt && (Date.now() - hiddenAt > DORMANT_MS)) {
+      lockApp_();
+    }
+  }
+});
+window.addEventListener('blur', () => {
+  if (lockMode_() !== 'off' && !isLocked) document.getElementById('privacyMask').classList.add('show');
+});
+window.addEventListener('focus', () => { if (!document.hidden) document.getElementById('privacyMask').classList.remove('show'); });
+
 /* ---------- Boot ---------- */
+// Lock immediately on launch if enabled (before any data shows)
+if (lockMode_() !== 'off') lockApp_();
+
 // Try cached data instantly, then go live
 try {
   const cached = localStorage.getItem(LS.cachedData);
