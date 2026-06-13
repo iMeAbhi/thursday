@@ -1903,7 +1903,7 @@ function parseLiabilities_() {
       if (isNaN(limit) || limit <= 0) continue;
       const util = Math.round((outst / limit) * 100);
       const sev = util >= 60 ? 'red' : (util >= 30 ? 'gold' : 'green');
-      cards.push({ name, limit, util, sev, due: isNaN(days) ? null : days, outstanding: outst });
+      cards.push({ name, limit, util, sev, due: isNaN(days) ? null : days, outstanding: outst, lastPaid: (r[9] || '').trim() });
     } else if (section === 'loans') {
       const principal = toNum(r[2]);
       if (isNaN(principal) || principal <= 0) continue;
@@ -1936,12 +1936,14 @@ function parseLiabilities_() {
 function augmentCard_(c, emis) {
   const mine = emis.filter(e => e.card.toLowerCase() === (c.name || '').toLowerCase());
   c.emis = mine;
-  // This cycle's EMI installments (part of the current bill)
+  // One month's EMI installment(s) — what's billed THIS cycle
   c.emiInstallment = mine.reduce((s, e) => s + (e.monthsRemaining > 0 ? e.installment : 0), 0);
-  // Future EMI commitment still to be billed in coming months (informational only)
+  // Full remaining EMI balance — spread over the coming months, part of total outstanding
   c.emiRemaining = mine.reduce((s, e) => s + e.balance, 0);
-  // Of this cycle's bill, the discretionary "pay in full" part = bill − EMI installment
-  c.payInFull = Math.max(0, c.outstanding - c.emiInstallment);
+  // Outstanding INCLUDES the full EMI balance. Regular (pay-in-full now) = the non-EMI part.
+  c.payInFull = Math.max(0, c.outstanding - c.emiRemaining);
+  // This month's actual bill = regular pay-in-full + one EMI installment (not the whole balance)
+  c.billThisCycle = c.payInFull + c.emiInstallment;
   return c;
 }
 
@@ -2019,21 +2021,27 @@ function renderCardsSection_(cards) {
   const fillClass = { green: 'fill-green', gold: 'fill-gold', red: 'fill-red' };
   el.innerHTML = cards.length ? cards.map((c, i) => {
     const emis = c.emis || emisForCard_(c.name);
-    const dueTxt = c.due === null ? 'No dues' : (c.due <= 2 ? `Due in ${c.due}d !` : `Due in ${c.due}d`);
+    // "Paid on <date>" when paid within the last ~31 days
+    const paidDate = c.lastPaid ? new Date(c.lastPaid) : null;
+    const paidRecent = paidDate && !isNaN(paidDate.getTime()) && (Date.now() - paidDate.getTime()) < 32 * 86400000;
+    const paidStr = paidRecent ? paidDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '';
+    const dueTxt = paidRecent ? `✓ Paid on ${paidStr}`
+      : (c.due === null ? 'No dues' : (c.due <= 2 ? `Due in ${c.due}d !` : `Due in ${c.due}d`));
     const emiHtml = emis.length ? emis.map(e =>
       `<div class="drawer-row"><div><div>${escapeHtml(e.desc || 'EMI')}</div><div class="dr-sub">${fmtINR(e.installment)}/mo · ${e.monthsRemaining} of ${isNaN(e.total) ? '?' : e.total} left${isNaN(e.roi) ? '' : ' · ' + (e.roi * 100).toFixed(0) + '%'}</div></div><div class="dr-amt">${fmtINR(e.balance)}</div></div>`
     ).join('') : '<div class="drawer-empty">No active EMIs on this card</div>';
-    // This cycle's bill (= outstanding) split into EMI installment + regular spend
+    // Total outstanding = regular (pay-in-full) + full EMI balance.
+    // This month's bill = regular + ONE installment (you don't pay the whole EMI at once).
     const billHtml =
-      `<div class="drawer-row"><div><div>Regular spend (pay in full)</div><div class="dr-sub">your ${fmtINR(c.outstanding)} bill − ${fmtINR(c.emiInstallment || 0)} EMI</div></div><div class="dr-amt">${fmtINR(c.payInFull || 0)}</div></div>` +
-      (c.emiInstallment ? `<div class="drawer-row"><div><div>EMI installments this cycle</div><div class="dr-sub">${emis.filter(e => e.monthsRemaining > 0).length} active</div></div><div class="dr-amt">${fmtINR(c.emiInstallment)}</div></div>` : '') +
-      `<div class="drawer-row" style="font-weight:600"><div>Total bill this cycle</div><div class="dr-amt">${fmtINR(c.outstanding)}</div></div>` +
-      (c.emiRemaining ? `<div class="drawer-row"><div><div class="dr-sub">Future EMI commitment (coming months)</div></div><div class="dr-amt dr-sub">${fmtINR(c.emiRemaining)}</div></div>` : '');
+      `<div class="drawer-row"><div><div>Regular spend (pay in full)</div><div class="dr-sub">${fmtINR(c.outstanding)} outstanding − ${fmtINR(c.emiRemaining || 0)} EMI balance</div></div><div class="dr-amt">${fmtINR(c.payInFull || 0)}</div></div>` +
+      (c.emiRemaining ? `<div class="drawer-row"><div><div>EMI balance (spread over months)</div><div class="dr-sub">${fmtINR(c.emiInstallment)}/mo × remaining</div></div><div class="dr-amt">${fmtINR(c.emiRemaining)}</div></div>` : '') +
+      `<div class="drawer-row" style="font-weight:600"><div>Total outstanding</div><div class="dr-amt">${fmtINR(c.outstanding)}</div></div>` +
+      `<div class="drawer-row" style="font-weight:600;border-top:1px dashed var(--outline-strong);margin-top:4px;padding-top:8px"><div>Due this month <div class="dr-sub" style="font-weight:400">regular + 1 EMI installment</div></div><div class="dr-amt" style="color:var(--primary)">${fmtINR(c.billThisCycle || 0)}</div></div>`;
     return `<div class="li-card" id="cardItem${i}">
       <div class="li-head" onclick="toggleCardDrawer(${i})" style="cursor:pointer">
         <div class="li-icon">💳</div>
         <div class="li-main"><div class="li-name">${escapeHtml(c.name)}</div>
-          <div class="li-sub ${c.due !== null && c.due <= 2 ? 'u-red' : ''}">${dueTxt}</div></div>
+          <div class="li-sub ${paidRecent ? 'u-green' : (c.due !== null && c.due <= 2 ? 'u-red' : '')}">${dueTxt}</div></div>
         <div class="li-right"><div class="li-amt">${fmtINR(c.outstanding)}</div>
           <div class="li-sub ${sevClass[c.sev]}">${c.util}% utilisation <span class="li-chev">▾</span></div></div>
       </div>
@@ -2054,27 +2062,27 @@ function renderCardsSection_(cards) {
 
 function applyDebtAndAlerts_() {
   if (!sheetData.LIABILITIES) return null;
-  const { cards, loans } = parseLiabilities_();
+  const { cards, loans, emis } = parseLiabilities_();
   const subs = parseSubscriptions_();
   const alerts = [];
 
-  // ----- Debt hero: aggregate across all loans -----
+  // ----- Debt hero: total debt + true freedom date (loans + cards + EMI schedules) -----
   const totalLoanRem = loans.reduce((s, l) => s + (isNaN(l.remaining) ? l.principal : l.remaining), 0);
   const totalCardOut = cards.reduce((s, c) => s + c.outstanding, 0);
   setText('debtTotal', fmtINR(totalLoanRem + totalCardOut));
-  // progress / months-to-freedom from the loans (weighted by tenure)
-  const leadLoan = loans.slice().sort((a, b) => (b.remaining || 0) - (a.remaining || 0))[0];
-  if (leadLoan) {
-    const prog = leadLoan.tenure > 0 && !isNaN(leadLoan.paid)
-      ? Math.min(100, Math.round(leadLoan.paid / leadLoan.tenure * 100)) : 0;
-    document.getElementById('debtBar').style.width = prog + '%';
-    if (!isNaN(leadLoan.monthsLeft)) setText('debtMonths', String(Math.round(leadLoan.monthsLeft)));
-    if (leadLoan.freeDate) setText('debtFreedomDate', 'Freedom date · ' + leadLoan.freeDate);
+  const months = simulateDebtFreedom_(loans, cards, 'avalanche', getPrepay_(), emis).months;
+  const prog = debtScheduleProgress_(loans, emis);
+  document.getElementById('debtBar').style.width = prog + '%';
+  if (totalLoanRem + totalCardOut <= 0) {
+    setText('debtMonths', '0'); setText('debtFreedomDate', 'Debt-free 🎉'); setText('debtSub', 'No outstanding debt — beautiful.');
+  } else {
+    setText('debtMonths', String(months));
+    const fd = new Date(); fd.setMonth(fd.getMonth() + months);
+    setText('debtFreedomDate', 'Freedom date · ' + fd.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }));
     setText('debtSub',
-      prog >= 75 ? prog + '% cleared — the finish line is in sight.' :
-      prog >= 50 ? prog + '% cleared — more behind you than ahead. Keep going.' :
-      prog >= 25 ? prog + '% cleared — past the hardest stretch. Keep going.' :
-                   prog + '% cleared — every EMI from here builds momentum.');
+      months <= 6 ? months + ' months to go — the finish line is in sight.' :
+      months <= 18 ? months + ' months to freedom · ' + prog + '% of installments done. Keep going.' :
+                     months + ' months out · ' + prog + '% done. Steady wins this.');
   }
 
   // ----- Section 1: Loans -----
@@ -2454,17 +2462,21 @@ function bumpPrepay(d) {
   renderPredictions_();
 }
 
-// Month-by-month debt simulation (avalanche = highest rate first, snowball = lowest balance first)
-function simulateDebtFreedom_(loans, cards, track, extra) {
+// Month-by-month debt simulation. Revolving debts = loans + each card's non-EMI
+// (pay-in-full) balance. Card EMIs run a FIXED schedule, so you can't be debt-free
+// before the longest active EMI ends — that's the floor.
+function simulateDebtFreedom_(loans, cards, track, extra, emis) {
   let debts = [];
   loans.forEach(l => {
     const bal = isNaN(l.remaining) ? l.principal : l.remaining;
     if (bal > 0) debts.push({ bal, rate: (isNaN(l.roi) ? 0.14 : l.roi) / 12, min: isNaN(l.emi) ? bal * 0.02 : l.emi });
   });
-  // Cards are revolving, not amortizing — assume they're cleared within ~6 months
-  // (paying only the 5% minimum at 40% APR would take decades, which isn't a useful forecast)
-  cards.forEach(c => { if (c.outstanding > 0) debts.push({ bal: c.outstanding, rate: CARD_APR / 12, min: Math.max(cardMinDue_(c.outstanding), c.outstanding / 6) }); });
-  if (!debts.length) return { months: 0 };
+  // Only the revolving (non-EMI) part of each card is "payable faster"; the EMI part
+  // is handled by the floor below, so don't double-count it here.
+  cards.forEach(c => {
+    const rev = c.payInFull || 0;
+    if (rev > 0) debts.push({ bal: rev, rate: CARD_APR / 12, min: Math.max(cardMinDue_(rev), rev / 6) });
+  });
   let months = 0;
   while (debts.some(d => d.bal > 0.5) && months < 600) {
     months++;
@@ -2475,7 +2487,17 @@ function simulateDebtFreedom_(loans, cards, track, extra) {
       track === 'snowball' ? a.bal - b.bal : b.rate - a.rate);
     for (const d of order) { if (pool <= 0) break; const pay = Math.min(pool, d.bal); d.bal -= pay; pool -= pay; }
   }
-  return { months };
+  // Floor: active EMIs finish on their own schedule, you're not free until then
+  const emiFloor = (emis || []).reduce((m, e) => Math.max(m, e.monthsRemaining || 0), 0);
+  return { months: Math.max(months, emiFloor) };
+}
+
+// Overall schedule progress = installments paid ÷ total scheduled (loans + card EMIs)
+function debtScheduleProgress_(loans, emis) {
+  let paid = 0, total = 0;
+  loans.forEach(l => { if (!isNaN(l.paid) && !isNaN(l.tenure) && l.tenure > 0) { paid += l.paid; total += l.tenure; } });
+  (emis || []).forEach(e => { if (!isNaN(e.paid) && !isNaN(e.total) && e.total > 0) { paid += e.paid; total += e.total; } });
+  return total > 0 ? Math.min(100, Math.round(paid / total * 100)) : 0;
 }
 
 function renderPredictions_() {
@@ -2495,7 +2517,7 @@ function renderPredictions_() {
   // ---- Widget 2: debt freedom countdown ----
   const prepay = getPrepay_();
   setText('prepayAmt', fmtINR(prepay));
-  const sim = simulateDebtFreedom_(inp.loans, inp.cards, debtTrack, prepay);
+  const sim = simulateDebtFreedom_(inp.loans, inp.cards, debtTrack, prepay, inp.emis);
   if (sim.months > 0 && sim.months < 600) {
     const d = new Date(); d.setMonth(d.getMonth() + sim.months);
     setText('predFreedomDate', d.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' }));
