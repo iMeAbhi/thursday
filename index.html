@@ -445,6 +445,7 @@ html[data-theme="dark"] .debt-item.first .di-rank { background: rgba(173,198,255
 .ledger-input span { color: var(--text-2); font-size: 14px; }
 .ledger-input input { width: 100%; background: none; border: none; outline: none; color: var(--text); font-size: 15px; font-weight: 600; text-align: right; -moz-appearance: textfield; }
 .ledger-input input::-webkit-outer-spin-button, .ledger-input input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.bill-pay-row { display: flex; gap: 8px; align-items: center; margin-top: 4px; }
 .alert-split-sub { font-size: 12px; color: var(--text-2); margin: 6px 2px 12px; }
 
 /* ---------- Investment goal tag ---------- */
@@ -1013,7 +1014,7 @@ html[data-theme="dark"] .set-btn.danger { color: var(--red); }
       </svg>
       <div class="legend">
         <div class="legend-row" style="cursor:pointer" onclick="filterFromChart('equity')"><span class="legend-dot" style="background:var(--primary)"></span><span class="ln">Equity</span><span class="lp" id="lpEquity">45%</span></div>
-        <div class="legend-row" style="cursor:pointer" onclick="filterFromChart('fixed')"><span class="legend-dot" style="background:var(--green)"></span><span class="ln">Fixed</span><span class="lp" id="lpFixed">27%</span></div>
+        <div class="legend-row" style="cursor:pointer" onclick="filterFromChart('fixed')"><span class="legend-dot" style="background:var(--green)"></span><span class="ln">PPF · RD · FD</span><span class="lp" id="lpFixed">27%</span></div>
         <div class="legend-row" style="cursor:pointer" onclick="filterFromChart('gold')"><span class="legend-dot" style="background:var(--gold)"></span><span class="ln">Gold</span><span class="lp" id="lpGold">18%</span></div>
         <div class="legend-row" style="cursor:pointer" onclick="filterFromChart('all')"><span class="legend-dot" style="background:var(--purple)"></span><span class="ln">Cash</span><span class="lp" id="lpCash">10%</span></div>
       </div>
@@ -1129,71 +1130,82 @@ html[data-theme="dark"] .set-btn.danger { color: var(--red); }
   <h1 class="page-title">Predict</h1>
   <p class="page-sub">Forecasts from your live numbers</p>
 
-  <!-- Core Fixed Expenses Ledger (stored on this device) -->
-  <div class="card pred-card">
-    <div class="pred-head"><span class="pred-icon">🏠</span><div><div class="eyebrow">Core Fixed Expenses</div><div class="pred-sub">Your monthly living baseline · saved on this device</div></div></div>
-    <div class="ledger-row"><label>Rent & Housing</label><div class="ledger-input"><span>₹</span><input type="number" inputmode="numeric" id="ceRent" oninput="saveCoreExpense('rent',this.value)" placeholder="0"></div></div>
-    <div class="ledger-row"><label>Utilities <span class="pred-sub">(power, water, internet, mobile)</span></label><div class="ledger-input"><span>₹</span><input type="number" inputmode="numeric" id="ceUtilities" oninput="saveCoreExpense('utilities',this.value)" placeholder="0"></div></div>
-    <div class="ledger-row"><label>Transport <span class="pred-sub">(fuel, transit, cabs)</span></label><div class="ledger-input"><span>₹</span><input type="number" inputmode="numeric" id="ceTransport" oninput="saveCoreExpense('transport',this.value)" placeholder="0"></div></div>
-    <div class="ledger-row"><label>Groceries & Household</label><div class="ledger-input"><span>₹</span><input type="number" inputmode="numeric" id="ceGroceries" oninput="saveCoreExpense('groceries',this.value)" placeholder="0"></div></div>
-    <div class="pred-line total"><span>Total core fixed / month</span><span id="ceTotal">₹0</span></div>
-    <div class="pred-sub" id="ceSyncNote" style="text-align:right;min-height:14px;color:var(--green)"></div>
+  <div class="seg-toggle" style="margin-bottom:14px">
+    <button class="seg-opt active" data-view="forecasts" onclick="setPredictView('forecasts')">🔮 Forecasts</button>
+    <button class="seg-opt" data-view="cashflow" onclick="setPredictView('cashflow')">💸 Cash Flow</button>
   </div>
 
-  <!-- Widget: Pre-Flight Liquidity Check (Safe-to-Spend) -->
-  <div class="card pred-card">
-    <div class="pred-head"><span class="pred-icon">🛟</span><div><div class="eyebrow">Safe-to-Spend</div><div class="pred-sub">Checking balance minus what's still due this cycle</div></div></div>
-    <div class="display pred-big" id="predSafeSpend">₹0</div>
-    <div id="predSafeBreakdown"></div>
-  </div>
-
-  <!-- Widget 1: Credit Card Statement Projection -->
-  <div class="card pred-card">
-    <div class="pred-head"><span class="pred-icon">💳</span><div><div class="eyebrow">Next Statement Forecast</div><div class="pred-sub">Outstanding + EMIs + this-cycle swipes</div></div></div>
-    <div class="display pred-big" id="predBillTotal">₹0</div>
-    <div id="predBillBreakdown"></div>
-  </div>
-
-  <!-- Widget 2: Debt Freedom Countdown -->
-  <div class="card pred-card">
-    <div class="pred-head"><span class="pred-icon">🏁</span><div><div class="eyebrow">Debt Freedom Countdown</div><div class="pred-sub">With your current EMIs + extra prepayment</div></div></div>
-    <div class="seg-toggle" style="margin:6px 0 10px">
-      <button class="seg-opt active" data-track="avalanche" onclick="setDebtTrack('avalanche')">Avalanche</button>
-      <button class="seg-opt" data-track="snowball" onclick="setDebtTrack('snowball')">Snowball</button>
+  <!-- ===== VIEW A: FORECASTS ===== -->
+  <div id="predForecasts">
+    <!-- Card bill this cycle -->
+    <div class="card pred-card">
+      <div class="pred-head"><span class="pred-icon">💳</span><div><div class="eyebrow">Card bill due this cycle</div><div class="pred-sub">Regular spend + this month's EMI installments</div></div></div>
+      <div class="display pred-big" id="predBillTotal">₹0</div>
+      <div id="predBillBreakdown"></div>
     </div>
-    <div class="pred-row"><span>Extra / month</span>
-      <span><button class="step-btn" onclick="bumpPrepay(-1000)">−</button>
-      <b id="prepayAmt">₹0</b>
-      <button class="step-btn" onclick="bumpPrepay(1000)">+</button></span></div>
-    <div class="display pred-big" id="predFreedomDate">—</div>
-    <div class="pred-sub" id="predFreedomMonths"></div>
+
+    <!-- Debt Freedom Countdown -->
+    <div class="card pred-card">
+      <div class="pred-head"><span class="pred-icon">🏁</span><div><div class="eyebrow">Debt Freedom Countdown</div><div class="pred-sub">With your current EMIs + extra prepayment</div></div></div>
+      <div class="seg-toggle" style="margin:6px 0 10px">
+        <button class="seg-opt active" data-track="avalanche" onclick="setDebtTrack('avalanche')">Avalanche</button>
+        <button class="seg-opt" data-track="snowball" onclick="setDebtTrack('snowball')">Snowball</button>
+      </div>
+      <div class="pred-row"><span>Extra / month</span>
+        <span><button class="step-btn" onclick="bumpPrepay(-1000)">−</button>
+        <b id="prepayAmt">₹0</b>
+        <button class="step-btn" onclick="bumpPrepay(1000)">+</button></span></div>
+      <div class="display pred-big" id="predFreedomDate">—</div>
+      <div class="pred-sub" id="predFreedomMonths"></div>
+    </div>
+
+    <!-- Jobless Runway -->
+    <div class="card pred-card">
+      <div class="pred-head"><span class="pred-icon">🪂</span><div><div class="eyebrow">Jobless Runway</div><div class="pred-sub">If income stopped today</div></div></div>
+      <div class="display pred-big" id="predRunway">—</div>
+      <div class="bar" style="margin-top:8px"><i class="fill-prim" id="predRunwayBar" style="width:0%"></i></div>
+      <div class="pred-sub" id="predRunwaySub" style="margin-top:8px"></div>
+    </div>
   </div>
 
-  <!-- Widget 3: Jobless Runway -->
-  <div class="card pred-card">
-    <div class="pred-head"><span class="pred-icon">🪂</span><div><div class="eyebrow">Jobless Runway</div><div class="pred-sub">If income stopped today</div></div></div>
-    <div class="display pred-big" id="predRunway">—</div>
-    <div class="bar" style="margin-top:8px"><i class="fill-prim" id="predRunwayBar" style="width:0%"></i></div>
-    <div class="pred-sub" id="predRunwaySub" style="margin-top:8px"></div>
-  </div>
+  <!-- ===== VIEW B: CASH FLOW ===== -->
+  <div id="predCashflow" style="display:none">
+    <!-- Core Fixed Expenses Ledger -->
+    <div class="card pred-card">
+      <div class="pred-head"><span class="pred-icon">🏠</span><div><div class="eyebrow">Core Fixed Expenses</div><div class="pred-sub">Your monthly living baseline · synced to your Sheet</div></div></div>
+      <div class="ledger-row"><label>Rent & Housing</label><div class="ledger-input"><span>₹</span><input type="number" inputmode="numeric" id="ceRent" oninput="saveCoreExpense('rent',this.value)" placeholder="0"></div></div>
+      <div class="ledger-row"><label>Utilities <span class="pred-sub">(power, water, internet, mobile)</span></label><div class="ledger-input"><span>₹</span><input type="number" inputmode="numeric" id="ceUtilities" oninput="saveCoreExpense('utilities',this.value)" placeholder="0"></div></div>
+      <div class="ledger-row"><label>Transport <span class="pred-sub">(fuel, transit, cabs)</span></label><div class="ledger-input"><span>₹</span><input type="number" inputmode="numeric" id="ceTransport" oninput="saveCoreExpense('transport',this.value)" placeholder="0"></div></div>
+      <div class="ledger-row"><label>Groceries & Household</label><div class="ledger-input"><span>₹</span><input type="number" inputmode="numeric" id="ceGroceries" oninput="saveCoreExpense('groceries',this.value)" placeholder="0"></div></div>
+      <div class="pred-line total"><span>Total core fixed / month</span><span id="ceTotal">₹0</span></div>
+      <div class="pred-sub" id="ceSyncNote" style="text-align:right;min-height:14px;color:var(--green)"></div>
+    </div>
 
-  <!-- Widget 4: Next Month Expense Forecast -->
-  <div class="card pred-card">
-    <div class="pred-head"><span class="pred-icon">📅</span><div><div class="eyebrow">Next Month's Expense Forecast</div><div class="pred-sub">Pre-allocated from known commitments</div></div></div>
-    <div class="display pred-big" id="predExpenseTotal">₹0</div>
-    <div id="predExpenseBreakdown"></div>
-  </div>
+    <!-- Safe-to-Spend -->
+    <div class="card pred-card">
+      <div class="pred-head"><span class="pred-icon">🛟</span><div><div class="eyebrow">Safe-to-Spend</div><div class="pred-sub">Checking balance minus what's still due this cycle</div></div></div>
+      <div class="display pred-big" id="predSafeSpend">₹0</div>
+      <div id="predSafeBreakdown"></div>
+    </div>
 
-  <!-- Upcoming payments (kept) -->
-  <div class="section-label">Upcoming payments</div>
-  <p class="page-sub" id="alertsSub" style="margin:-2px 2px 8px">—</p>
-  <div class="banner red" id="alertsBanner" style="display:none">🚨&nbsp; A payment is due within 3 days — act now</div>
-  <div class="seg-toggle">
-    <button class="seg-opt active" data-mode="min" onclick="setAlertMode('min')">Minimum to stay healthy</button>
-    <button class="seg-opt" data-mode="full" onclick="setAlertMode('full')">Pay in full</button>
+    <!-- Next Month Expense Forecast -->
+    <div class="card pred-card">
+      <div class="pred-head"><span class="pred-icon">📅</span><div><div class="eyebrow">Next Month's Expense Forecast</div><div class="pred-sub">Pre-allocated from known commitments</div></div></div>
+      <div class="display pred-big" id="predExpenseTotal">₹0</div>
+      <div id="predExpenseBreakdown"></div>
+    </div>
+
+    <!-- Upcoming payments -->
+    <div class="section-label">Upcoming payments</div>
+    <p class="page-sub" id="alertsSub" style="margin:-2px 2px 8px">—</p>
+    <div class="banner red" id="alertsBanner" style="display:none">🚨&nbsp; A payment is due within 3 days — act now</div>
+    <div class="seg-toggle">
+      <button class="seg-opt active" data-mode="min" onclick="setAlertMode('min')">Minimum to stay healthy</button>
+      <button class="seg-opt" data-mode="full" onclick="setAlertMode('full')">Pay in full</button>
+    </div>
+    <p class="alert-split-sub" id="alertSplitSub"></p>
+    <div id="alertsList"><!-- populated by JS --></div>
   </div>
-  <p class="alert-split-sub" id="alertSplitSub"></p>
-  <div id="alertsList"><!-- populated by JS --></div>
 </section>
 
 <!-- ================= 6. TAX ================= -->
@@ -1754,10 +1766,11 @@ function applyHome_() {
     setText('chipLiab', fmtCompact(liabs));
     setText('debtTotal', fmtINR(liabs));
   }
-  if (!isNaN(liquid)) {
-    setText('chipLiquid', fmtCompact(liquid));
-    setText('efAmount', fmtINR(liquid));
-  }
+  if (!isNaN(liquid)) setText('chipLiquid', fmtCompact(liquid));
+  // Emergency fund headline = available-now money only (excludes FD)
+  let avail = availableNow_();
+  if (isNaN(avail)) avail = isNaN(liquid) ? NaN : liquid;
+  if (!isNaN(avail)) setText('efAmount', fmtINR(avail));
   // Donut from the four asset components
   const eqV = nwValue('Total Equity'), goldV = nwValue('Total Gold'), fixV = nwValue('Total Fixed Income');
   if (![eqV, goldV, fixV, liquid].some(isNaN)) {
@@ -1783,15 +1796,15 @@ function applyHome_() {
       });
     }
   }
-  // Emergency fund
+  // Emergency fund — scored on available-now money (savings + liquid funds, not FD)
   const efTarget = nwValue('Emergency Fund Target');
-  if (!isNaN(liquid) && !isNaN(efTarget) && efTarget > 0) {
-    const pctRaw = liquid / efTarget * 100;
+  if (!isNaN(avail) && !isNaN(efTarget) && efTarget > 0) {
+    const pctRaw = avail / efTarget * 100;
     const pct = Math.min(100, Math.round(pctRaw));
     document.getElementById('efBar').style.width = pct + '%';
-    const need = Math.max(0, efTarget - liquid);
+    const need = Math.max(0, efTarget - avail);
     document.getElementById('efSub').innerHTML =
-      `${pct}% of 6× monthly obligations · Need ${fmtCompact(need)} more <span class="li-chev">▾</span>`;
+      `${pct}% of 6× obligations · ${need > 0 ? 'Need ' + fmtCompact(need) + ' more' : 'fully funded'} · instant cash only <span class="li-chev">▾</span>`;
     const chip = document.getElementById('efChip');
     if (pctRaw >= 100) { chip.textContent = 'SAFE'; chip.className = 'tchip green'; }
     else if (pctRaw >= 50) { chip.textContent = 'VULNERABLE'; chip.className = 'tchip amber'; }
@@ -1850,20 +1863,27 @@ function renderEFBreakdown_() {
     { match: /\bfd\b|fixed deposit/i, time: '1–2 days (premature)' }
   ];
   const rows = sheetData.ACCOUNTS || [];
-  const items = [];
+  const now = [], backup = [];
   rows.forEach((r, i) => {
     if (i === 0) return;
     const name = (r[0] || '').trim();
     const bal = toNum(r[3]);
     if (!name || isNaN(bal) || bal <= 0) return;
     const type = (r[2] || '').trim();
+    const tag = type + ' ' + name;
+    const isFD = /\bfd\b|fixed deposit/i.test(tag);
     const liq = LIQUIDATION.find(l => l.match.test(type) || l.match.test(name));
-    items.push({ name, bank: (r[1] || '').trim(), bal, type, time: liq ? liq.time : '—' });
+    const item = { name, bank: (r[1] || '').trim(), bal, type, time: liq ? liq.time : '—' };
+    (isFD ? backup : now).push(item);
   });
-  if (!items.length) { el.innerHTML = '<div class="drawer-empty">Add accounts in your Sheet to see the breakdown</div>'; return; }
-  el.innerHTML = items.map(a =>
-    `<div class="drawer-row"><div><div>${escapeHtml(a.name)}${a.bank ? ' · ' + escapeHtml(a.bank) : ''}</div><div class="dr-sub">${escapeHtml(a.type)} · cash-out ${a.time}</div></div><div class="dr-amt">${fmtINR(a.bal)}</div></div>`
-  ).join('');
+  if (!now.length && !backup.length) { el.innerHTML = '<div class="drawer-empty">Add accounts in your Sheet to see the breakdown</div>'; return; }
+  const rowHtml = a => `<div class="drawer-row"><div><div>${escapeHtml(a.name)}${a.bank ? ' · ' + escapeHtml(a.bank) : ''}</div><div class="dr-sub">${escapeHtml(a.type)} · cash-out ${a.time}</div></div><div class="dr-amt">${fmtINR(a.bal)}</div></div>`;
+  let html = '<div class="drawer-label">Available now (counts toward fund)</div>';
+  html += now.length ? now.map(rowHtml).join('') : '<div class="drawer-empty">No instant cash — keep some in savings</div>';
+  if (backup.length) {
+    html += '<div class="drawer-label">Backup — not counted (1–2 day access)</div>' + backup.map(rowHtml).join('');
+  }
+  el.innerHTML = html;
 }
 
 /* ----- LIABILITIES parsing: cards section, then loans section ----- */
@@ -1916,9 +1936,12 @@ function parseLiabilities_() {
 function augmentCard_(c, emis) {
   const mine = emis.filter(e => e.card.toLowerCase() === (c.name || '').toLowerCase());
   c.emis = mine;
+  // This cycle's EMI installments (part of the current bill)
   c.emiInstallment = mine.reduce((s, e) => s + (e.monthsRemaining > 0 ? e.installment : 0), 0);
+  // Future EMI commitment still to be billed in coming months (informational only)
   c.emiRemaining = mine.reduce((s, e) => s + e.balance, 0);
-  c.payInFull = Math.max(0, c.outstanding - c.emiRemaining);
+  // Of this cycle's bill, the discretionary "pay in full" part = bill − EMI installment
+  c.payInFull = Math.max(0, c.outstanding - c.emiInstallment);
   return c;
 }
 
@@ -1944,6 +1967,23 @@ function parseSubscriptions_() {
   return subs;
 }
 function emisForCard_(name) { return parseLiabilities_().emis.filter(e => e.card.toLowerCase() === name.toLowerCase()); }
+
+// Log a bill payment → writes to the Sheet (private mode only), then re-pulls
+async function logCardPayment(name, outstanding, idx) {
+  const base = localStorage.getItem(LS.webapp), token = localStorage.getItem(LS.appToken);
+  if (!base || !token) { showDataNotice('Logging a payment writes to your Sheet — switch on private mode (web app) in ⚙️ Settings first.', true); return; }
+  const inp = document.getElementById('billPaid' + idx);
+  let paid = parseInt((inp && inp.value) || '', 10);
+  if (isNaN(paid) || paid <= 0) paid = outstanding;
+  if (!confirm(`Log ${fmtINR(paid)} paid on ${name}?\n\nThis subtracts it from the card's outstanding and advances any active EMI by one month — in your Sheet.`)) return;
+  const url = base + '?action=logPayment&token=' + encodeURIComponent(token) +
+    '&card=' + encodeURIComponent(name) + '&paid=' + paid;
+  try {
+    const r = await webAppJsonp_(url);
+    if (r && r.ok) { showDataNotice('Bill logged ✓ refreshing from your Sheet…'); await refreshData(true); }
+    else throw new Error((r && r.detail) || (r && r.error) || 'write failed');
+  } catch (e) { showDataNotice('Could not log payment — ' + (e.message || e), true); }
+}
 
 function nextDueDays_(dayOfMonth) {
   const now = new Date();
@@ -1983,10 +2023,12 @@ function renderCardsSection_(cards) {
     const emiHtml = emis.length ? emis.map(e =>
       `<div class="drawer-row"><div><div>${escapeHtml(e.desc || 'EMI')}</div><div class="dr-sub">${fmtINR(e.installment)}/mo · ${e.monthsRemaining} of ${isNaN(e.total) ? '?' : e.total} left${isNaN(e.roi) ? '' : ' · ' + (e.roi * 100).toFixed(0) + '%'}</div></div><div class="dr-amt">${fmtINR(e.balance)}</div></div>`
     ).join('') : '<div class="drawer-empty">No active EMIs on this card</div>';
-    // Pay-in-full is derived, not logged: outstanding − remaining EMI balance
-    const payHtml =
-      `<div class="drawer-row"><div><div>Pay in full now</div><div class="dr-sub">₹${fmtINR(c.outstanding).slice(1)} outstanding − ₹${fmtINR(c.emiRemaining || 0).slice(1)} on EMI</div></div><div class="dr-amt">${fmtINR(c.payInFull || 0)}</div></div>` +
-      (c.emiInstallment ? `<div class="drawer-row"><div><div>EMI installments this cycle</div><div class="dr-sub">${emis.filter(e=>e.monthsRemaining>0).length} active</div></div><div class="dr-amt">${fmtINR(c.emiInstallment)}</div></div>` : '');
+    // This cycle's bill (= outstanding) split into EMI installment + regular spend
+    const billHtml =
+      `<div class="drawer-row"><div><div>Regular spend (pay in full)</div><div class="dr-sub">your ${fmtINR(c.outstanding)} bill − ${fmtINR(c.emiInstallment || 0)} EMI</div></div><div class="dr-amt">${fmtINR(c.payInFull || 0)}</div></div>` +
+      (c.emiInstallment ? `<div class="drawer-row"><div><div>EMI installments this cycle</div><div class="dr-sub">${emis.filter(e => e.monthsRemaining > 0).length} active</div></div><div class="dr-amt">${fmtINR(c.emiInstallment)}</div></div>` : '') +
+      `<div class="drawer-row" style="font-weight:600"><div>Total bill this cycle</div><div class="dr-amt">${fmtINR(c.outstanding)}</div></div>` +
+      (c.emiRemaining ? `<div class="drawer-row"><div><div class="dr-sub">Future EMI commitment (coming months)</div></div><div class="dr-amt dr-sub">${fmtINR(c.emiRemaining)}</div></div>` : '');
     return `<div class="li-card" id="cardItem${i}">
       <div class="li-head" onclick="toggleCardDrawer(${i})" style="cursor:pointer">
         <div class="li-icon">💳</div>
@@ -1998,7 +2040,13 @@ function renderCardsSection_(cards) {
       <div class="li-bar-wrap"><div class="bar bar-thin"><i class="${fillClass[c.sev]}" style="width:${Math.max(c.util, 2)}%"></i></div></div>
       <div class="card-drawer"><div class="drawer-inner">
         <div class="drawer-label">Running EMIs</div>${emiHtml}
-        <div class="drawer-label">Pay in full this statement (derived)</div>${payHtml}
+        <div class="drawer-label">This statement's bill, split</div>${billHtml}
+        <div class="drawer-label">Log a bill payment</div>
+        <div class="bill-pay-row">
+          <div class="ledger-input" style="flex:1"><span>₹</span><input type="number" inputmode="numeric" id="billPaid${i}" placeholder="${c.outstanding}"></div>
+          <button class="set-btn" style="width:auto;padding:0 18px;min-height:42px;margin-top:0" onclick="logCardPayment('${escapeHtml(c.name).replace(/'/g, '&#39;')}', ${c.outstanding}, ${i})">Mark paid</button>
+        </div>
+        <div class="dr-sub" style="margin-top:6px">Subtracts from outstanding &amp; advances any EMI by a month — written to your Sheet.</div>
       </div></div>
     </div>`;
   }).join('') : '<p class="drawer-empty" style="text-align:center">No credit cards</p>';
@@ -2130,7 +2178,7 @@ function editGoal(name) {
 
 const BUCKETS = [
   { key: 'equity', label: 'MF SIPs & Stocks' },
-  { key: 'fixed',  label: 'PPF & Fixed Income / RDs' },
+  { key: 'fixed',  label: 'PPF · RD · Fixed Deposits' },
   { key: 'gold',   label: 'ETFs & Digital Gold' }
 ];
 let investFilter = 'all', lastInvestItems = null, lastInvestTotals = null, lastInvestDormant = false;
@@ -2341,19 +2389,22 @@ function syncCoreFromSheet_() {
   }
 }
 // Checking balance = sum of savings/current accounts (fallback to liquid / sample)
-function checkingBalance_() {
+// Emergency-fund "available now" = savings + liquid funds only (NOT fixed deposits,
+// which take a day+ to break). Investments are never here — only the ACCOUNTS tab.
+function availableNow_() {
   const rows = sheetData.ACCOUNTS;
-  if (rows && rows.length) {
-    let sum = 0, found = false;
-    rows.forEach((r, i) => {
-      if (i === 0) return;
-      if (/saving|current|checking|salary/i.test((r[2] || '') + (r[0] || ''))) { sum += toNum(r[3]) || 0; found = true; }
-    });
-    if (found) return sum;
-  }
-  return Object.keys(sheetData).length ? 0 : 95000; // sample checking on first run
+  if (!rows || !rows.length) return Object.keys(sheetData).length ? NaN : 182000; // sample
+  let sum = 0, found = false;
+  rows.forEach((r, i) => {
+    if (i === 0) return;
+    const tag = (r[2] || '') + ' ' + (r[0] || '');
+    const bal = toNum(r[3]) || 0;
+    if (/\bfd\b|fixed deposit/i.test(tag)) return;              // FD = backup, not "now"
+    if (/saving|current|checking|salary|liquid|wallet/i.test(tag)) { sum += bal; found = true; }
+  });
+  return found ? sum : NaN;
 }
-// Checking balance = sum of savings/current accounts (fallback to liquid / sample)
+// Checking balance = sum of savings/current accounts (fallback to sample)
 function checkingBalance_() {
   const rows = sheetData.ACCOUNTS;
   if (rows && rows.length) {
@@ -2382,6 +2433,14 @@ function predInputs_() {
     cards: SAMPLE_CARDS, loans: SAMPLE_LOANS, emis: SAMPLE_EMIS, subs: SAMPLE_SUBS,
     liquid: 182000, monthlyObligations: NaN
   };
+}
+
+function setPredictView(v) {
+  document.querySelectorAll('#screen-predict .seg-opt[data-view]').forEach(b =>
+    b.classList.toggle('active', b.dataset.view === v));
+  document.getElementById('predForecasts').style.display = v === 'forecasts' ? '' : 'none';
+  document.getElementById('predCashflow').style.display = v === 'cashflow' ? '' : 'none';
+  window.scrollTo({ top: 0 });
 }
 
 function setDebtTrack(t) {
@@ -2429,9 +2488,9 @@ function renderPredictions_() {
   const billTotal = payInFull + cardEmiInstall;
   setText('predBillTotal', fmtINR(billTotal));
   document.getElementById('predBillBreakdown').innerHTML =
-    `<div class="pred-line"><span class="pl-sub">Pay-in-full (swipes due) <span style="color:var(--text-3)">= outstanding − EMI balances</span></span><span class="pl-amt">${fmtINR(payInFull)}</span></div>` +
+    `<div class="pred-line"><span class="pl-sub">Regular spend (pay in full)</span><span class="pl-amt">${fmtINR(payInFull)}</span></div>` +
     `<div class="pred-line"><span class="pl-sub">EMI installments this cycle</span><span class="pl-amt">${fmtINR(cardEmiInstall)}</span></div>` +
-    `<div class="pred-line total"><span>Card bill this statement</span><span>${fmtINR(billTotal)}</span></div>`;
+    `<div class="pred-line total"><span>Total card bill this cycle</span><span>${fmtINR(billTotal)}</span></div>`;
 
   // ---- Widget 2: debt freedom countdown ----
   const prepay = getPrepay_();
