@@ -1058,7 +1058,8 @@ html[data-theme="dark"] .set-btn.danger { color: var(--red); }
   <p class="page-sub" style="margin:-2px 2px 10px">Tap a card to see its EMIs &amp; pay-in-full amount</p>
   <div id="cardsList"><!-- populated by JS --></div>
 
-  <div class="section-label">Recurring Subscriptions</div>
+  <div class="section-label">Subscriptions &amp; Recurring</div>
+  <p class="page-sub" style="margin:-2px 2px 10px">Subscriptions, insurance premiums, SIPs — anything that auto-debits monthly/yearly</p>
   <div class="card" id="subsBurnCard" style="display:none">
     <div style="display:flex;align-items:center;justify-content:space-between">
       <div>
@@ -1444,11 +1445,14 @@ const SAMPLE_EMIS = [
 ];
 SAMPLE_CARDS.forEach(c => augmentCard_(c, SAMPLE_EMIS));
 const SAMPLE_ALERTS = [
-  { name: 'Bajaj Card',        sub: 'Credit card due',  amt: 18400, days: 2,  icon: '💳' },
-  { name: 'Amex Card',         sub: 'Credit card due',  amt: 8200,  days: 5,  icon: '💳' },
-  { name: 'Parag Parikh SIP',  sub: 'Monthly deduction',amt: 5000,  days: 9,  icon: '📈' },
-  { name: 'IndMoney EMI',      sub: 'Loan EMI',         amt: 12400, days: 12, icon: '🏦' },
-  { name: 'Recurring Deposit', sub: 'Monthly RD',       amt: 4200,  days: 15, icon: '🏛️' }
+  { cat: 'card',  name: 'Bajaj Card',        sub: 'Credit card bill', amt: 5715,  days: 2,  icon: '💳' },
+  { cat: 'card',  name: 'Amex Card',         sub: 'Credit card bill', amt: 7303,  days: 5,  icon: '💳' },
+  { cat: 'fixed', name: 'Parag Parikh SIP',  sub: 'Investment · SIP', amt: 5000,  days: 9,  icon: '📈' },
+  { cat: 'fixed', name: 'IndMoney EMI',      sub: 'Loan EMI',         amt: 12400, days: 12, icon: '🏦' },
+  { cat: 'fixed', name: 'Term Life Insurance', sub: 'Insurance',      amt: 1800,  days: 14, icon: '🛡️' },
+  { cat: 'fixed', name: 'Recurring Deposit', sub: 'Monthly RD',       amt: 4200,  days: 15, icon: '🏛️' },
+  { cat: 'living', name: 'Rent & Housing',   sub: 'Monthly living cost', amt: 28000, days: null, icon: '🏠' },
+  { cat: 'living', name: 'Utilities',        sub: 'Monthly living cost', amt: 4500,  days: null, icon: '💡' }
 ];
 
 const CARD_APR = 0.40; // assumed revolving APR for cards (rates aren't in the sheet)
@@ -1475,7 +1479,7 @@ let lastAlerts = [], alertMode = 'min';
 function cardMinDue_(outstanding) {
   return Math.min(outstanding, Math.max(200, Math.round(outstanding * 0.05)));
 }
-function isCardAlert_(a) { return /credit card/i.test(a.sub || ''); }
+function isCardAlert_(a) { return a.cat === 'card'; }
 
 function setAlertMode(m) {
   alertMode = m;
@@ -1485,33 +1489,36 @@ function setAlertMode(m) {
 }
 
 function renderAlerts(alerts) {
-  lastAlerts = (alerts || []).slice().sort((a, b) => a.days - b.days);
+  // Dated items first (soonest), then undated living costs at the end
+  lastAlerts = (alerts || []).slice().sort((a, b) => (a.days ?? 999) - (b.days ?? 999));
   renderAlertsNow_();
 }
 
 function alertAmount_(a) {
-  // Cards can be paid minimum or in full; fixed obligations are always their full amount
-  if (isCardAlert_(a) && alertMode === 'min') return cardMinDue_(a.amt);
+  // Only card bills have a minimum-vs-full choice; everything else is its full amount
+  if (a.cat === 'card' && alertMode === 'min') return cardMinDue_(a.amt);
   return a.amt;
 }
 
 function renderAlertsNow_() {
   const alerts = lastAlerts;
-  const cards = alerts.filter(isCardAlert_);
-  const fixed = alerts.filter(a => !isCardAlert_(a));
+  const cards = alerts.filter(a => a.cat === 'card');
+  const fixed = alerts.filter(a => a.cat === 'fixed');
+  const living = alerts.filter(a => a.cat === 'living');
   const total = alerts.reduce((s, a) => s + alertAmount_(a), 0);
 
   document.getElementById('alertsSub').textContent =
-    `${alerts.length} payments · ${fmtINR(total)} ${alertMode === 'min' ? 'minimum' : 'in full'} this month`;
+    `${alerts.length} items · ${fmtINR(total)} ${alertMode === 'min' ? '(cards at minimum)' : 'this month'}`;
 
+  const cardShown = cards.reduce((s, a) => s + alertAmount_(a), 0);
   const cardFull = cards.reduce((s, a) => s + a.amt, 0);
-  const cardMin = cards.reduce((s, a) => s + cardMinDue_(a.amt), 0);
   const fixedTotal = fixed.reduce((s, a) => s + a.amt, 0);
+  const livingTotal = living.reduce((s, a) => s + a.amt, 0);
   document.getElementById('alertSplitSub').innerHTML =
-    `Fixed obligations <b>${fmtINR(fixedTotal)}</b> · Cards <b>${fmtINR(alertMode === 'min' ? cardMin : cardFull)}</b>` +
-    (cardFull > cardMin ? ` <span style="color:var(--text-3)">(full balance ${fmtINR(cardFull)})</span>` : '');
+    `Living <b>${fmtINR(livingTotal)}</b> · Recurring &amp; EMIs <b>${fmtINR(fixedTotal)}</b> · Card bills <b>${fmtINR(cardShown)}</b>`;
 
-  const minDays = alerts.length ? alerts[0].days : 99;
+  const dated = alerts.filter(a => a.days !== null);
+  const minDays = dated.length ? dated[0].days : 99;
   const banner = document.getElementById('alertsBanner');
   if (minDays <= 3) {
     banner.className = 'banner red';
@@ -1527,12 +1534,17 @@ function renderAlertsNow_() {
 
   const rowHtml = (a) => {
     let sev = '', chip = '';
-    if (a.days <= 3) { sev = 'sev-red'; chip = 'red'; }
-    else if (a.days <= 7) { sev = 'sev-gold'; chip = 'gold'; }
-    else if (a.days <= 10) { sev = 'sev-prim'; chip = ''; }
+    if (a.days !== null) {
+      if (a.days <= 3) { sev = 'sev-red'; chip = 'red'; }
+      else if (a.days <= 7) { sev = 'sev-gold'; chip = 'gold'; }
+      else if (a.days <= 10) { sev = 'sev-prim'; chip = ''; }
+    }
     const amt = alertAmount_(a);
-    const minTag = isCardAlert_(a) && alertMode === 'min' && a.amt > amt
+    const minTag = a.cat === 'card' && alertMode === 'min' && a.amt > amt
       ? `<div style="font-size:10.5px;color:var(--text-3)">min · full ${fmtINR(a.amt)}</div>` : '';
+    const dayChip = a.days === null
+      ? '<span class="days-chip">monthly</span>'
+      : `<span class="days-chip ${chip}">${a.days} day${a.days === 1 ? '' : 's'}</span>`;
     return `<div class="alert-row ${sev}">
       <div class="alert-icon">${a.icon}</div>
       <div class="alert-main">
@@ -1541,15 +1553,16 @@ function renderAlertsNow_() {
       </div>
       <div class="alert-right">
         <div class="alert-amt">${fmtINR(amt)}</div>${minTag}
-        <span class="days-chip ${chip}">${a.days} day${a.days === 1 ? '' : 's'}</span>
+        ${dayChip}
       </div>
     </div>`;
   };
 
   let html = '';
-  if (cards.length) html += '<div class="alert-section-label">Credit cards</div>' + cards.map(rowHtml).join('');
-  if (fixed.length) html += '<div class="alert-section-label">Fixed obligations · EMI · SIP · RD</div>' + fixed.map(rowHtml).join('');
-  document.getElementById('alertsList').innerHTML = html;
+  if (cards.length) html += '<div class="alert-section-label">Card bills (this month)</div>' + cards.map(rowHtml).join('');
+  if (fixed.length) html += '<div class="alert-section-label">Recurring &amp; EMIs · loans · subscriptions · insurance · SIP/RD</div>' + fixed.map(rowHtml).join('');
+  if (living.length) html += '<div class="alert-section-label">Monthly living costs</div>' + living.map(rowHtml).join('');
+  document.getElementById('alertsList').innerHTML = html || '<p class="drawer-empty" style="text-align:center">Nothing scheduled</p>';
 }
 
 // (first-run sample rendering happens in the boot block at the end,
@@ -2092,16 +2105,18 @@ function applyDebtAndAlerts_() {
   loans.forEach(l => {
     const d = new Date(l.start);
     if (!isNaN(l.emi) && l.emi > 0 && !isNaN(d.getTime())) {
-      alerts.push({ name: (l.lender || 'Loan') + ' EMI', sub: 'Loan EMI', amt: l.emi, days: nextDueDays_(d.getDate()), icon: '🏦' });
+      alerts.push({ cat: 'fixed', name: (l.lender || 'Loan') + ' EMI', sub: 'Loan EMI', amt: l.emi, days: nextDueDays_(d.getDate()), icon: '🏦' });
     }
   });
 
   // ----- Section 2: Credit cards (clickable drill-down) -----
   renderCardsSection_(cards);
 
+  // This month's card bill = regular + one EMI installment (NOT the full outstanding,
+  // which includes EMI balances spread over future months).
   cards.forEach(c => {
-    if (c.due !== null && c.due >= 0 && c.due <= 31 && c.outstanding > 0) {
-      alerts.push({ name: c.name + ' Card', sub: 'Credit card due', amt: c.outstanding, days: c.due, icon: '💳' });
+    if (c.due !== null && c.due >= 0 && c.due <= 31 && (c.billThisCycle || 0) > 0) {
+      alerts.push({ cat: 'card', name: c.name + ' Card', sub: 'Credit card bill', amt: c.billThisCycle, days: c.due, icon: '💳' });
     }
   });
 
@@ -2116,12 +2131,22 @@ function applyDebtAndAlerts_() {
     const d = new Date((r[4] || '').trim());
     const status = (r[10] || '').toUpperCase();
     if (!isNaN(amt) && amt > 0 && !isNaN(d.getTime()) && status.indexOf('MATURED') === -1) {
-      alerts.push({ name: 'Recurring Deposit', sub: 'Monthly RD', amt, days: nextDueDays_(d.getDate()), icon: '🏛️' });
+      alerts.push({ cat: 'fixed', name: 'Recurring Deposit', sub: 'Monthly RD', amt, days: nextDueDays_(d.getDate()), icon: '🏛️' });
     }
   });
 
+  // ----- Living costs: core fixed expenses (monthly, no fixed date) -----
+  const ce = getCoreExpenses_();
+  const CE_META = [
+    ['rent', 'Rent & Housing', '🏠'], ['utilities', 'Utilities', '💡'],
+    ['transport', 'Transport', '🚗'], ['groceries', 'Groceries & Household', '🛒']
+  ];
+  CE_META.forEach(([key, label, icon]) => {
+    if (ce[key] > 0) alerts.push({ cat: 'living', name: label, sub: 'Monthly living cost', amt: ce[key], days: null, icon });
+  });
+
   renderAlerts(alerts);
-  return leadLoan;
+  return loans[0] || null;
 }
 
 function toggleCardDrawer(i) {
@@ -2134,7 +2159,7 @@ function renderSubscriptions_(subs, alerts) {
   const list = document.getElementById('subsList');
   if (!subs.length) {
     burnCard.style.display = 'none';
-    list.innerHTML = '<p class="drawer-empty" style="text-align:center">No subscriptions yet — add a SUBSCRIPTIONS tab to your Sheet</p>';
+    list.innerHTML = '<p class="drawer-empty" style="text-align:center">Nothing yet — add subscriptions, insurance &amp; SIPs as rows in your SUBSCRIPTIONS tab</p>';
     return;
   }
   const monthly = subs.reduce((s, x) => s + x.monthly, 0);
@@ -2155,10 +2180,13 @@ function renderSubscriptions_(subs, alerts) {
     </div></div>`;
   }).join('');
 
-  // subscription billing reminders (within 31 days)
+  // recurring billing reminders (within 31 days) — subscriptions, insurance, SIPs…
   subs.forEach(s => {
     if (s.nextDays !== null && s.nextDays <= 31) {
-      alerts.push({ name: s.name, sub: 'Subscription', amt: /annual/i.test(s.cycle) ? s.amount : s.monthly, days: s.nextDays, icon: '🔁' });
+      const cat = (s.category || '').trim();
+      const isIns = /insur|premium|policy/i.test(cat + ' ' + s.name);
+      alerts.push({ cat: 'fixed', name: s.name, sub: cat || (isIns ? 'Insurance' : 'Subscription'),
+        amt: /annual/i.test(s.cycle) ? s.amount : s.monthly, days: s.nextDays, icon: isIns ? '🛡️' : '🔁' });
     }
   });
 }
@@ -2575,7 +2603,7 @@ function renderPredictions_() {
     `<div class="pred-line"><span class="pl-sub">Core fixed expenses</span><span class="pl-amt">${fmtINR(core)}</span></div>` +
     `<div class="pred-line"><span class="pl-sub">Loan EMIs</span><span class="pl-amt">${fmtINR(loanEmi)}</span></div>` +
     `<div class="pred-line"><span class="pl-sub">Card EMIs</span><span class="pl-amt">${fmtINR(cardEmi)}</span></div>` +
-    `<div class="pred-line"><span class="pl-sub">Subscriptions</span><span class="pl-amt">${fmtINR(subBurn)}</span></div>` +
+    `<div class="pred-line"><span class="pl-sub">Subscriptions, insurance &amp; SIPs</span><span class="pl-amt">${fmtINR(subBurn)}</span></div>` +
     varLine +
     `<div class="pred-line total"><span>Forecast total</span><span>${fmtINR(expTotal)}</span></div>`;
 }

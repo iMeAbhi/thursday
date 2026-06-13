@@ -404,13 +404,17 @@ function buildSubscriptions_(ss) {
   sh.getRange('A1:G1').setValues([[
     'Service', 'Amount', 'Cycle', 'Billing Day', 'Category', 'Monthly Cost', 'Notes'
   ]]).setFontWeight('bold').setBackground('#eaddff');
+  sh.getRange('A1').setNote('This tab tracks ALL recurring auto-debits: subscriptions, insurance premiums, ' +
+    'and SIPs. Use the Category column (Entertainment / Insurance / Investment / …). Annual plans are ' +
+    'auto-converted to a monthly burn. They flow into your Upcoming Payments and Next-Month forecast.');
   // Cycle = Monthly or Annual; Billing Day = day of month (1-31)
   var data = [
-    ['Netflix',          649,  'Monthly', 12, 'Entertainment', '', ''],
-    ['YouTube Premium',  149,  'Monthly', 5,  'Entertainment', '', ''],
-    ['ChatGPT Plus',     1700, 'Monthly', 20, 'Productivity',  '', ''],
-    ['Amazon Prime',     1499, 'Annual',  8,  'Shopping',      '', ''],
-    ['Spotify',          119,  'Monthly', 28, 'Entertainment', '', '']
+    ['Netflix',            649,  'Monthly', 12, 'Entertainment', '', ''],
+    ['ChatGPT Plus',       1700, 'Monthly', 20, 'Productivity',  '', ''],
+    ['Amazon Prime',       1499, 'Annual',  8,  'Shopping',      '', ''],
+    ['Medical Insurance',  2200, 'Monthly', 5,  'Insurance',     '', ''],
+    ['Term Life Insurance',1800, 'Monthly', 14, 'Insurance',     '', ''],
+    ['Parag Parikh SIP',   5000, 'Monthly', 1,  'Investment',    '', '']
   ];
   sh.getRange(2, 1, data.length, 7).setValues(data);
   for (var r = 2; r <= data.length + 1; r++) {
