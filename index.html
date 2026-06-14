@@ -105,6 +105,34 @@ html[data-theme="scenic"] {
   --shadow: 0 1px 2px rgba(0,0,0,0.4);
   --nav-bg: rgba(18,40,34,0.45);
 }
+/* ---------- Photo: frosted glass over a bundled day/night scene ---------- */
+html[data-theme="photo"] {
+  --bg: #0c1016;
+  --bg2: #0c1016;
+  --surface: rgba(255,255,255,0.14);
+  --surface-high: rgba(255,255,255,0.22);
+  --glass-edge: rgba(255,255,255,0.30);
+  --glass-blur: blur(24px) saturate(1.4);
+  --card-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  --primary: #adc6ff;
+  --primary-cont: rgba(173,198,255,0.22);
+  --on-prim-cont: #eaf0ff;
+  --green: #8be0b2;
+  --green-cont: rgba(139,224,178,0.18);
+  --red: #ffb4ab;
+  --red-cont: rgba(255,140,130,0.20);
+  --gold: #ffd089;
+  --gold-cont: rgba(255,208,137,0.16);
+  --purple: #d8c4ff;
+  --purple-cont: rgba(216,196,255,0.20);
+  --outline: rgba(255,255,255,0.16);
+  --outline-strong: rgba(255,255,255,0.26);
+  --text: #f3f6fb;
+  --text-2: rgba(243,246,251,0.76);
+  --text-3: rgba(243,246,251,0.52);
+  --shadow: 0 1px 2px rgba(0,0,0,0.5);
+  --nav-bg: rgba(12,16,22,0.42);
+}
 
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html { scroll-behavior: smooth; }
@@ -958,11 +986,12 @@ html[data-theme="dark"] .set-btn.danger { color: var(--red); }
 
     <div class="set-section">Appearance</div>
     <div class="sr-label" style="margin:0 4px 4px">Theme</div>
-    <div class="sr-sub" style="margin:0 4px 8px">AMOLED black · crisp light · scenic glass</div>
+    <div class="sr-sub" style="margin:0 4px 8px">Black · light · scenic glass (your accent) · photo scenes</div>
     <div class="seg-toggle" style="margin-bottom:12px">
       <button class="seg-opt" data-mode="dark" onclick="setMode('dark')">🌑 Dark</button>
       <button class="seg-opt" data-mode="light" onclick="setMode('light')">☀️ Light</button>
       <button class="seg-opt" data-mode="scenic" onclick="setMode('scenic')">🏞️ Scenic</button>
+      <button class="seg-opt" data-mode="photo" onclick="setMode('photo')">🖼️ Photo</button>
     </div>
     <div class="set-section">Accent colour</div>
     <div class="accent-dots" id="accentDots"><!-- populated by JS --></div>
@@ -1379,23 +1408,64 @@ function applyAccent(name) {
   r.setProperty('--on-prim-cont', v.on);
 }
 
+function hexToRgb_(hex) {
+  const h = hex.replace('#', '');
+  const f = h.length === 3 ? h.split('').map(c => c + c).join('') : h;
+  const n = parseInt(f, 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+/* Photo theme: 4 scenes × day/night, bundled as SVGs so it works offline.
+   A pseudo-random pick rotates the scene each day with no obvious pattern. */
+const PHOTO_SCENES = ['peaks', 'shore', 'pines', 'skyline'];
+function todayScene_() {
+  const d = new Date();
+  const seed = d.getFullYear() * 372 + d.getMonth() * 31 + d.getDate();
+  let x = Math.sin(seed * 12.9898) * 43758.5453; x -= Math.floor(x); // hash → 0..1
+  return PHOTO_SCENES[Math.floor(x * PHOTO_SCENES.length) % PHOTO_SCENES.length];
+}
+function isDaytime_() { const h = new Date().getHours(); return h >= 6 && h < 18; }
+
+// Scenic = accent-coloured gradient glass; Photo = today's bundled scene image
+function applyThemeBackdrop_() {
+  const t = document.documentElement.getAttribute('data-theme');
+  const b = document.body.style;
+  if (t === 'scenic') {
+    const acc = ACCENTS[localStorage.getItem('fos_accent') || 'indigo'] || ACCENTS.indigo;
+    const [r, g, bl] = hexToRgb_(acc.dot);
+    b.background =
+      `radial-gradient(130% 70% at 50% -10%, rgba(${r},${g},${bl},0.50), transparent 55%),` +
+      `radial-gradient(90% 55% at 16% 6%, rgba(${r},${g},${bl},0.26), transparent 60%),` +
+      `radial-gradient(120% 80% at 50% 116%, rgba(6,10,14,0.88), transparent 60%),` +
+      `linear-gradient(168deg, rgba(${r},${g},${bl},0.34) 0%, #131b1f 46%, #0b1114 100%)`;
+    b.backgroundAttachment = 'fixed'; b.backgroundSize = 'cover';
+  } else if (t === 'photo') {
+    const scene = todayScene_(), tod = isDaytime_() ? 'day' : 'night';
+    b.background = `linear-gradient(rgba(8,11,17,0.38), rgba(8,11,17,0.58)), url("scene-${scene}-${tod}.svg")`;
+    b.backgroundAttachment = 'fixed'; b.backgroundSize = 'cover'; b.backgroundPosition = 'center';
+  } else {
+    b.background = ''; b.backgroundAttachment = ''; b.backgroundSize = ''; b.backgroundPosition = '';
+  }
+}
+
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', theme === 'dark' ? '#000000' : (theme === 'scenic' ? '#16302a' : '#eef1fb'));
+  const metaC = theme === 'dark' ? '#000000' : theme === 'scenic' ? '#131b1f' : theme === 'photo' ? '#0c1016' : '#eef1fb';
+  if (meta) meta.setAttribute('content', metaC);
   applyAccent(localStorage.getItem('fos_accent') || 'indigo');
+  applyThemeBackdrop_();
   updateHeroMood();
   syncSettingsControls();
 }
 function setMode(mode) {
-  // First time picking Scenic with no accent chosen yet → default to Emerald (matches the look)
-  if (mode === 'scenic' && !localStorage.getItem('fos_accent')) localStorage.setItem('fos_accent', 'emerald');
   localStorage.setItem(LS.theme, mode);
   applyTheme(mode);
 }
 function setAccent(name) {
   localStorage.setItem('fos_accent', name);
   applyAccent(name);
+  applyThemeBackdrop_();   // scenic backdrop follows the accent colour
   updateHeroMood();
   syncSettingsControls();
 }
@@ -3468,8 +3538,11 @@ function handleHidden_() {
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
     handleHidden_();
-  } else if (isLocked && lockMode_() === 'bio' && localStorage.getItem('fos_webauthn_id')) {
-    tryBiometric(); // re-prompt biometric on return
+  } else {
+    if (isLocked && lockMode_() === 'bio' && localStorage.getItem('fos_webauthn_id')) {
+      tryBiometric(); // re-prompt biometric on return
+    }
+    applyThemeBackdrop_(); // refresh photo scene (day↔night, daily rotation) on return
   }
 });
 // Extra safety nets for platforms where visibilitychange is unreliable

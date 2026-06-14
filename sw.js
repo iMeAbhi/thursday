@@ -5,14 +5,19 @@
    - Tells open pages when a fetch was served from cache so they can show
      the "Offline — showing last data" banner.
 */
-const CACHE_NAME = 'financeos-v2'; // bump on app updates so old caches are dropped
+const CACHE_NAME = 'financeos-v3'; // bump on app updates so old caches are dropped
 
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.json',
   './icon-192.svg',
-  './icon-512.svg'
+  './icon-512.svg',
+  // Photo-theme scenes (bundled so the theme works fully offline)
+  './scene-peaks-day.svg', './scene-peaks-night.svg',
+  './scene-shore-day.svg', './scene-shore-night.svg',
+  './scene-pines-day.svg', './scene-pines-night.svg',
+  './scene-skyline-day.svg', './scene-skyline-night.svg'
 ];
 
 self.addEventListener('install', (event) => {
