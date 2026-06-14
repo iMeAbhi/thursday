@@ -1459,8 +1459,6 @@ function applyTheme(theme) {
   syncSettingsControls();
 }
 function setMode(mode) {
-  // First time picking Scenic with no accent chosen yet → default to Emerald (matches the look)
-  if (mode === 'scenic' && !localStorage.getItem('fos_accent')) localStorage.setItem('fos_accent', 'emerald');
   localStorage.setItem(LS.theme, mode);
   applyTheme(mode);
 }
