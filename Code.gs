@@ -512,6 +512,32 @@ function writeBillPayment_(params) {
   return newOut;
 }
 
+/* Adjusts a card's outstanding (called by doGet?action=cardAdjust&op=add|set).
+   op='add' → new purchase (outstanding += amount); op='set' → set to the billed amount.
+   Utilisation recalculates from the sheet formula automatically. EMIs are untouched. */
+function writeCardAdjust_(params) {
+  var ss = getSS_();
+  var sh = ss.getSheetByName('LIABILITIES');
+  if (!sh) throw new Error('no LIABILITIES');
+  var card = String(params.card || '').trim();
+  var amount = Number(params.amount) || 0;
+  var op = String(params.op || 'add');
+  if (!card) throw new Error('no card');
+
+  var cardNames = sh.getRange('A2:A7').getValues();
+  var row = -1;
+  for (var i = 0; i < cardNames.length; i++) {
+    if (String(cardNames[i][0]).trim().toLowerCase() === card.toLowerCase()) { row = 2 + i; break; }
+  }
+  if (row === -1) throw new Error('card not found');
+
+  var cur = Number(sh.getRange(row, 4).getValue()) || 0; // col D Outstanding
+  var newOut = op === 'set' ? amount : cur + amount;
+  newOut = Math.max(0, newOut);
+  sh.getRange(row, 4).setValue(newOut);
+  return newOut;
+}
+
 /* ──────────────────────────────────────────────
    TAB: NET_WORTH  (all pulled from named ranges)
    ────────────────────────────────────────────── */
@@ -859,6 +885,10 @@ function doGet(e) {
   } else if (params.action === 'logPayment') {
     // App is logging a credit-card bill payment
     try { var no = writeBillPayment_(params); payload = { ok: true, outstanding: no }; }
+    catch (err) { payload = { error: 'write_failed', detail: String(err) }; }
+  } else if (params.action === 'cardAdjust') {
+    // App is adding a purchase or setting the statement balance on a card
+    try { var na = writeCardAdjust_(params); payload = { ok: true, outstanding: na }; }
     catch (err) { payload = { error: 'write_failed', detail: String(err) }; }
   } else {
     var ss = getSS_();

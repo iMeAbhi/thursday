@@ -512,6 +512,11 @@ html[data-theme="dark"] .debt-item.first .di-rank { background: rgba(173,198,255
 .ledger-input input { width: 100%; background: none; border: none; outline: none; color: var(--text); font-size: 15px; font-weight: 600; text-align: right; -moz-appearance: textfield; }
 .ledger-input input::-webkit-outer-spin-button, .ledger-input input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .bill-pay-row { display: flex; gap: 8px; align-items: center; margin-top: 4px; }
+.card-act-row { display: flex; gap: 8px; margin-top: 8px; }
+.card-act { flex: 1; min-height: 42px; border-radius: 100px; font-size: 13px; font-weight: 600;
+  background: var(--surface-high); border: 1px solid var(--glass-edge); color: var(--text); }
+.card-act.paid { background: var(--primary); color: var(--bg); }
+html[data-theme="light"] .card-act.paid { color: #fff; }
 .alert-split-sub { font-size: 12px; color: var(--text-2); margin: 6px 2px 12px; }
 
 /* ---------- Investment goal tag ---------- */
@@ -2093,19 +2098,41 @@ function parseSubscriptions_() {
 }
 function emisForCard_(name) { return parseLiabilities_().emis.filter(e => e.card.toLowerCase() === name.toLowerCase()); }
 
+function needsPrivateMode_() {
+  const base = localStorage.getItem(LS.webapp), token = localStorage.getItem(LS.appToken);
+  if (!base || !token) { showDataNotice('Writing to your Sheet needs private mode (web app) — set it up in ⚙️ Settings first.', true); return null; }
+  return { base, token };
+}
+
+// Add a purchase (op='add') or set this month's statement balance (op='set')
+async function cardAdjust(name, op, idx) {
+  const creds = needsPrivateMode_(); if (!creds) return;
+  const inp = document.getElementById('cardAmt' + idx);
+  const amt = parseInt((inp && inp.value) || '', 10);
+  if (isNaN(amt) || amt <= 0) { showDataNotice('Enter an amount first.', true); return; }
+  const verb = op === 'set' ? `Set ${name}'s balance to ${fmtINR(amt)}` : `Add a ${fmtINR(amt)} purchase to ${name}`;
+  if (!confirm(`${verb}?\n\nUtilisation updates automatically; EMIs are untouched — written to your Sheet.`)) return;
+  const url = creds.base + '?action=cardAdjust&token=' + encodeURIComponent(creds.token) +
+    '&card=' + encodeURIComponent(name) + '&op=' + op + '&amount=' + amt;
+  try {
+    const r = await webAppJsonp_(url);
+    if (r && r.ok) { if (inp) inp.value = ''; showDataNotice('Saved ✓ refreshing from your Sheet…'); await refreshData(true); }
+    else throw new Error((r && r.detail) || (r && r.error) || 'write failed');
+  } catch (e) { showDataNotice('Could not save — ' + (e.message || e), true); }
+}
+
 // Log a bill payment → writes to the Sheet (private mode only), then re-pulls
 async function logCardPayment(name, outstanding, idx) {
-  const base = localStorage.getItem(LS.webapp), token = localStorage.getItem(LS.appToken);
-  if (!base || !token) { showDataNotice('Logging a payment writes to your Sheet — switch on private mode (web app) in ⚙️ Settings first.', true); return; }
-  const inp = document.getElementById('billPaid' + idx);
+  const creds = needsPrivateMode_(); if (!creds) return;
+  const inp = document.getElementById('cardAmt' + idx);
   let paid = parseInt((inp && inp.value) || '', 10);
   if (isNaN(paid) || paid <= 0) paid = outstanding;
   if (!confirm(`Log ${fmtINR(paid)} paid on ${name}?\n\nThis subtracts it from the card's outstanding and advances any active EMI by one month — in your Sheet.`)) return;
-  const url = base + '?action=logPayment&token=' + encodeURIComponent(token) +
+  const url = creds.base + '?action=logPayment&token=' + encodeURIComponent(creds.token) +
     '&card=' + encodeURIComponent(name) + '&paid=' + paid;
   try {
     const r = await webAppJsonp_(url);
-    if (r && r.ok) { showDataNotice('Bill logged ✓ refreshing from your Sheet…'); await refreshData(true); }
+    if (r && r.ok) { if (inp) inp.value = ''; showDataNotice('Bill logged ✓ refreshing from your Sheet…'); await refreshData(true); }
     else throw new Error((r && r.detail) || (r && r.error) || 'write failed');
   } catch (e) { showDataNotice('Could not log payment — ' + (e.message || e), true); }
 }
@@ -2172,12 +2199,16 @@ function renderCardsSection_(cards) {
       <div class="card-drawer"><div class="drawer-inner">
         <div class="drawer-label">Running EMIs</div>${emiHtml}
         <div class="drawer-label">This statement's bill, split</div>${billHtml}
-        <div class="drawer-label">Log a bill payment</div>
+        <div class="drawer-label">Update this card · writes to your Sheet</div>
         <div class="bill-pay-row">
-          <div class="ledger-input" style="flex:1"><span>₹</span><input type="number" inputmode="numeric" id="billPaid${i}" placeholder="${c.outstanding}"></div>
-          <button class="set-btn" style="width:auto;padding:0 18px;min-height:42px;margin-top:0" onclick="logCardPayment('${escapeHtml(c.name).replace(/'/g, '&#39;')}', ${c.outstanding}, ${i})">Mark paid</button>
+          <div class="ledger-input" style="flex:1"><span>₹</span><input type="number" inputmode="numeric" id="cardAmt${i}" placeholder="amount"></div>
         </div>
-        <div class="dr-sub" style="margin-top:6px">Subtracts from outstanding &amp; advances any EMI by a month — written to your Sheet.</div>
+        <div class="card-act-row">
+          <button class="card-act" onclick="cardAdjust('${escapeHtml(c.name).replace(/'/g, '&#39;')}','add',${i})">＋ Purchase</button>
+          <button class="card-act" onclick="cardAdjust('${escapeHtml(c.name).replace(/'/g, '&#39;')}','set',${i})">Set bill</button>
+          <button class="card-act paid" onclick="logCardPayment('${escapeHtml(c.name).replace(/'/g, '&#39;')}', ${c.outstanding}, ${i})">Mark paid</button>
+        </div>
+        <div class="dr-sub" style="margin-top:6px"><b>＋ Purchase</b> adds to your balance · <b>Set bill</b> overwrites it with this month's statement · <b>Mark paid</b> clears it &amp; advances EMIs.</div>
       </div></div>
     </div>`;
   }).join('') : '<p class="drawer-empty" style="text-align:center">No credit cards</p>';
