@@ -32,6 +32,7 @@ function setupFinanceOS() {
   buildLiabilities_(ss);   // includes the Card EMIs section
   buildSubscriptions_(ss);
   buildCoreExpenses_(ss);
+  buildTransactions_(ss);
   buildNetWorth_(ss);
   buildTax_(ss);
 
@@ -72,6 +73,8 @@ function addNewModules() {
   var ss = getSS_();
   if (!ss.getSheetByName('SUBSCRIPTIONS')) buildSubscriptions_(ss);
   if (!ss.getSheetByName('CORE_EXPENSES')) buildCoreExpenses_(ss);
+  if (!ss.getSheetByName('TRANSACTIONS')) buildTransactions_(ss);
+  addMatchColumns_(ss);     // optional account/card match hints for auto-apply
   addCardEmiSection_(ss);   // adds the EMI section into the existing LIABILITIES tab
 
   // Retire the old standalone tabs — EMIs now live in LIABILITIES, swipes are derived
@@ -79,6 +82,11 @@ function addNewModules() {
     var old = ss.getSheetByName(n);
     if (old) { try { ss.deleteSheet(old); } catch (e) {} }
   });
+
+  // Ensure the 3-hourly transaction sync trigger exists (without disturbing others)
+  var hasSync = false;
+  ScriptApp.getProjectTriggers().forEach(function (t) { if (t.getHandlerFunction() === 'syncTransactions') hasSync = true; });
+  if (!hasSync) ScriptApp.newTrigger('syncTransactions').timeBased().everyHours(3).create();
 
   // Fold subscription burn into Monthly Obligations (if not already)
   try {
@@ -538,6 +546,182 @@ function writeCardAdjust_(params) {
   return newOut;
 }
 
+/* ════════════════════════════════════════════════════════════════
+   LIVE TRANSACTION SYNC — Gmail alerts → Gemini → TRANSACTIONS tab
+   Runs every 3 hours (and on demand). Auto-updates balances when an
+   account/card can be confidently matched; otherwise flags for review.
+   ════════════════════════════════════════════════════════════════ */
+function buildTransactions_(ss) {
+  var sh = ss.insertSheet('TRANSACTIONS');
+  sh.getRange('A1:I1').setValues([[
+    'Date', 'Merchant / Description', 'Amount', 'Direction', 'Account', 'Category', 'Applied', 'Msg ID', 'Note'
+  ]]).setFontWeight('bold').setBackground('#d6e3ff');
+  sh.getRange('A2:A2000').setNumberFormat('yyyy-mm-dd hh:mm');
+  sh.getRange('C2:C2000').setNumberFormat('₹#,##,##0');
+  sh.setColumnWidths(1, 9, 130); sh.setColumnWidth(2, 240);
+  sh.getRange('A1').setNote('Auto-filled by the 3-hourly sync (Gmail → Gemini). Edit Category/Note freely; the app reads this as your activity log. "Applied = Yes" means a balance was updated.');
+}
+
+/* Optional match hints so emailed transactions link to the right account/card */
+function addMatchColumns_(ss) {
+  var a = ss.getSheetByName('ACCOUNTS');
+  if (a && String(a.getRange('F1').getValue()).toLowerCase().indexOf('match') === -1) {
+    a.getRange('F1').setValue('Match (last4/keyword)').setFontWeight('bold')
+      .setNote('Optional: last 4 digits or a keyword (e.g. HDFC) so emailed transactions auto-link to this account.');
+  }
+  var l = ss.getSheetByName('LIABILITIES');
+  if (l && String(l.getRange('P1').getValue()).toLowerCase().indexOf('match') === -1) {
+    l.getRange('P1').setValue('Card Match (last4/keyword)').setFontWeight('bold')
+      .setNote('Optional: last 4 digits or a keyword so emailed card transactions auto-link to this card.');
+  }
+}
+
+function getGeminiKey_() {
+  try { var v = getSS_().getSheetByName('CONFIG').getRange('B6').getValue(); return v ? String(v).trim() : ''; }
+  catch (e) { return ''; }
+}
+
+var TXN_PROMPT =
+  'You are a precise bank/credit-card transaction parser for an Indian user. ' +
+  'For EACH input message decide if it reports a real money movement (card spend, UPI, debit, credit, refund). ' +
+  'Return ONLY a JSON array — one object per input id — no prose, no code fences. Fields per object: ' +
+  'id (echo input id), isTxn (boolean), datetime (ISO8601 or ""), merchant (short payee/description), ' +
+  'amount (number, rupees, no symbol/commas), direction ("debit" or "credit"), ' +
+  'accountHint (bank/card name and/or last 4 digits if present, else ""), ' +
+  'category (one of: Food, Groceries, Shopping, Bills, Transport, Entertainment, Health, Travel, Transfer, Income, Other). ' +
+  'If a message is an OTP, promo, statement summary, or not a transaction, set isTxn=false.';
+
+function geminiParseTxns_(key, items) {
+  var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=' + encodeURIComponent(key);
+  var payload = {
+    contents: [{ role: 'user', parts: [{ text: TXN_PROMPT + '\nMessages:\n' + JSON.stringify(items) }] }],
+    generationConfig: { maxOutputTokens: 4096, temperature: 0.1 }
+  };
+  var res = UrlFetchApp.fetch(url, { method: 'post', contentType: 'application/json', muteHttpExceptions: true, payload: JSON.stringify(payload) });
+  if (res.getResponseCode() !== 200) { Logger.log('Gemini ' + res.getResponseCode() + ': ' + res.getContentText().slice(0, 300)); return []; }
+  var data = JSON.parse(res.getContentText());
+  var text = data && data.candidates && data.candidates[0] && data.candidates[0].content &&
+    data.candidates[0].content.parts && data.candidates[0].content.parts[0].text || '';
+  text = text.replace(/```json|```/g, '').trim();
+  var s = text.indexOf('['), e = text.lastIndexOf(']');
+  if (s !== -1 && e !== -1) text = text.slice(s, e + 1);
+  try { return JSON.parse(text); } catch (err) { Logger.log('Txn parse fail: ' + text.slice(0, 300)); return []; }
+}
+
+/* Find which account/card an emailed transaction belongs to */
+function matchAccount_(ss, hint) {
+  hint = (' ' + (hint || '') + ' ').toLowerCase();
+  var digits = (hint.match(/\d{4}/g) || []);
+  // Credit cards (LIABILITIES rows 2-7): name + optional P-col match hint
+  var liab = ss.getSheetByName('LIABILITIES');
+  if (liab) {
+    var cards = liab.getRange('A2:A7').getValues(), hints = liab.getRange('P2:P7').getValues();
+    for (var i = 0; i < 6; i++) {
+      var nm = String(cards[i][0]).trim(); if (!nm) continue;
+      var mh = String(hints[i][0] || '').trim().toLowerCase();
+      if (mh && (hint.indexOf(mh) !== -1 || digits.indexOf(mh) !== -1)) return { type: 'card', row: 2 + i, name: nm, sheet: liab };
+      if (hint.indexOf(nm.toLowerCase()) !== -1) return { type: 'card', row: 2 + i, name: nm, sheet: liab };
+    }
+  }
+  // Bank accounts (ACCOUNTS): name + bank + optional F-col match
+  var acc = ss.getSheetByName('ACCOUNTS');
+  if (acc) {
+    var rows = acc.getRange('A2:F100').getValues();
+    for (var j = 0; j < rows.length; j++) {
+      var an = String(rows[j][0]).trim(); if (!an) continue;
+      var bank = String(rows[j][1] || '').toLowerCase(), mh2 = String(rows[j][5] || '').trim().toLowerCase();
+      if (mh2 && (hint.indexOf(mh2) !== -1 || digits.indexOf(mh2) !== -1)) return { type: 'account', row: 2 + j, name: an, sheet: acc };
+      if (hint.indexOf(an.toLowerCase()) !== -1 || (bank && hint.indexOf(bank) !== -1)) return { type: 'account', row: 2 + j, name: an, sheet: acc };
+    }
+  }
+  return null;
+}
+
+/* Apply (or reverse) a transaction's effect on the matched balance */
+function applyTxnBalance_(match, amount, direction, reverse) {
+  if (!match) return;
+  var sign = (direction === 'Credit' ? 1 : -1);   // credit adds to a bank balance
+  if (match.type === 'card') sign = -sign;          // a card debit *increases* what you owe
+  if (reverse) sign = -sign;
+  var cell = match.sheet.getRange(match.row, 4);    // col D = Balance (accounts) / Outstanding (cards)
+  var cur = Number(cell.getValue()) || 0;
+  cell.setValue(Math.max(0, cur + sign * amount));
+}
+
+function syncTransactions() {
+  var ss = getSS_();
+  var key = getGeminiKey_();
+  if (!key) { toast_('Add your Gemini key in CONFIG B6 to sync transactions'); return 0; }
+  var sh = ss.getSheetByName('TRANSACTIONS');
+  if (!sh) { buildTransactions_(ss); sh = ss.getSheetByName('TRANSACTIONS'); }
+
+  // Existing message IDs (dedup)
+  var ids = {}, last = sh.getLastRow();
+  if (last > 1) sh.getRange(2, 8, last - 1, 1).getValues().forEach(function (r) { if (r[0]) ids[String(r[0])] = true; });
+
+  var q = 'newer_than:4d (debited OR credited OR spent OR transaction OR txn OR UPI OR purchase OR received) -category:promotions -category:social';
+  var threads = GmailApp.search(q, 0, 30), msgs = [];
+  threads.forEach(function (t) {
+    t.getMessages().forEach(function (m) { if (!ids[m.getId()]) msgs.push(m); });
+  });
+  if (!msgs.length) { toast_('No new transaction emails'); return 0; }
+  msgs = msgs.slice(0, 25);
+
+  var items = msgs.map(function (m) {
+    return { id: m.getId(), from: m.getFrom(), subject: m.getSubject(),
+      date: m.getDate().toISOString(), body: m.getPlainBody().replace(/\s+/g, ' ').slice(0, 700) };
+  });
+  var byId = {}; msgs.forEach(function (m) { byId[m.getId()] = m; });
+
+  var parsed = geminiParseTxns_(key, items), added = 0;
+  parsed.forEach(function (p) {
+    if (!p || !p.isTxn || !(Number(p.amount) > 0) || ids[p.id]) return;
+    var dir = /credit|received|refund/i.test(p.direction || '') ? 'Credit' : 'Debit';
+    var match = matchAccount_(ss, (p.accountHint || '') + ' ' + (p.merchant || ''));
+    var applied = 'No', note = match ? '' : 'unmatched — review';
+    if (match) { applyTxnBalance_(match, Number(p.amount), dir, false); applied = 'Yes'; }
+    var when = p.datetime ? new Date(p.datetime) : (byId[p.id] ? byId[p.id].getDate() : new Date());
+    if (isNaN(when.getTime())) when = byId[p.id] ? byId[p.id].getDate() : new Date();
+    sh.appendRow([when, p.merchant || '(unknown)', Number(p.amount), dir, match ? match.name : (p.accountHint || ''), p.category || '', applied, p.id, note]);
+    ids[p.id] = true; added++;
+  });
+  toast_(added + ' transaction(s) synced');
+  return added;
+}
+
+/* Web-app: edit a logged transaction's category/note (by Msg ID) */
+function editTxn_(params) {
+  var ss = getSS_(); var sh = ss.getSheetByName('TRANSACTIONS'); if (!sh) throw new Error('no TRANSACTIONS');
+  var id = String(params.id || ''); var last = sh.getLastRow();
+  var idCol = sh.getRange(2, 8, last - 1, 1).getValues();
+  for (var i = 0; i < idCol.length; i++) {
+    if (String(idCol[i][0]) === id) {
+      if (params.category !== undefined) sh.getRange(2 + i, 6).setValue(params.category);
+      if (params.note !== undefined) sh.getRange(2 + i, 9).setValue(params.note);
+      return true;
+    }
+  }
+  throw new Error('txn not found');
+}
+
+/* Web-app: delete a logged transaction and reverse its balance effect if applied */
+function deleteTxn_(params) {
+  var ss = getSS_(); var sh = ss.getSheetByName('TRANSACTIONS'); if (!sh) throw new Error('no TRANSACTIONS');
+  var id = String(params.id || ''); var last = sh.getLastRow();
+  var rows = sh.getRange(2, 1, last - 1, 9).getValues();
+  for (var i = 0; i < rows.length; i++) {
+    if (String(rows[i][7]) === id) {
+      if (String(rows[i][6]) === 'Yes') { // was applied → reverse on the matched account/card
+        var match = matchAccount_(ss, String(rows[i][4]));
+        if (match) applyTxnBalance_(match, Number(rows[i][2]) || 0, rows[i][3], true);
+      }
+      sh.deleteRow(2 + i);
+      return true;
+    }
+  }
+  throw new Error('txn not found');
+}
+
 /* ──────────────────────────────────────────────
    TAB: NET_WORTH  (all pulled from named ranges)
    ────────────────────────────────────────────── */
@@ -660,6 +844,7 @@ function installTriggers_(ss) {
   ScriptApp.newTrigger('onOpenTrigger').forSpreadsheet(ss).onOpen().create();
   ScriptApp.newTrigger('onEditTrigger').forSpreadsheet(ss).onEdit().create();
   ScriptApp.newTrigger('sendMorningBriefing').timeBased().everyDays(1).atHour(7).nearMinute(45).create();
+  ScriptApp.newTrigger('syncTransactions').timeBased().everyHours(3).create(); // live txn sync
 }
 
 /** Adds the custom menu when the sheet opens */
@@ -672,6 +857,7 @@ function onOpenTrigger(e) {
     .addItem('📸 Export Monthly Snapshot', 'exportMonthlySnapshot')
     .addItem('🔐 Generate App Token', 'generateAppToken')
     .addItem('➕ Add new data tabs', 'addNewModules')
+    .addItem('🔄 Sync transactions now', 'syncTransactions')
     .addToUi();
 }
 
@@ -890,11 +1076,20 @@ function doGet(e) {
     // App is adding a purchase or setting the statement balance on a card
     try { var na = writeCardAdjust_(params); payload = { ok: true, outstanding: na }; }
     catch (err) { payload = { error: 'write_failed', detail: String(err) }; }
+  } else if (params.action === 'sync') {
+    try { var n = syncTransactions(); payload = { ok: true, added: n }; }
+    catch (err) { payload = { error: 'sync_failed', detail: String(err) }; }
+  } else if (params.action === 'editTxn') {
+    try { editTxn_(params); payload = { ok: true }; }
+    catch (err) { payload = { error: 'write_failed', detail: String(err) }; }
+  } else if (params.action === 'deleteTxn') {
+    try { deleteTxn_(params); payload = { ok: true }; }
+    catch (err) { payload = { error: 'write_failed', detail: String(err) }; }
   } else {
     var ss = getSS_();
     var tabs = {};
     ['CONFIG', 'ACCOUNTS', 'EQUITY_MF', 'GOLD', 'FIXED_INCOME', 'LIABILITIES',
-     'SUBSCRIPTIONS', 'CORE_EXPENSES', 'NET_WORTH', 'TAX']
+     'SUBSCRIPTIONS', 'CORE_EXPENSES', 'TRANSACTIONS', 'NET_WORTH', 'TAX']
       .forEach(function (name) {
         var sh = ss.getSheetByName(name);
         if (!sh) return;

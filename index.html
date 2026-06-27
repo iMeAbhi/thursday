@@ -517,6 +517,25 @@ html[data-theme="dark"] .debt-item.first .di-rank { background: rgba(173,198,255
   background: var(--surface-high); border: 1px solid var(--glass-edge); color: var(--text); }
 .card-act.paid { background: var(--primary); color: var(--bg); }
 html[data-theme="light"] .card-act.paid { color: #fff; }
+/* Activity log */
+.act-summary { display: flex; gap: 8px; margin-bottom: 10px; }
+.act-tile { flex: 1; background: var(--surface); border: 1px solid var(--glass-edge); border-radius: 14px; padding: 10px 12px; }
+.act-tile .at-l { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-2); }
+.act-tile .at-v { font-size: 15px; font-weight: 700; margin-top: 2px; }
+.act-row { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--glass-edge);
+  -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+  border-radius: 14px; padding: 11px 14px; margin-bottom: 8px; box-shadow: var(--shadow); }
+.act-main { flex: 1; min-width: 0; }
+.act-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.act-sub { font-size: 11.5px; color: var(--text-2); margin-top: 2px; }
+.act-right { text-align: right; }
+.act-amt { font-size: 15px; font-weight: 700; }
+.act-acts { margin-top: 3px; display: flex; gap: 8px; justify-content: flex-end; }
+.act-acts button { font-size: 13px; color: var(--text-3); min-height: 28px; min-width: 28px; }
+.act-flag { display: inline-block; margin-left: 6px; font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;
+  padding: 1px 6px; border-radius: 100px; background: var(--gold-cont); color: var(--gold); }
+.act-flag.review { background: var(--gold-cont); color: var(--gold); }
+.act-flag.dup { background: var(--red-cont); color: var(--red); }
 .alert-split-sub { font-size: 12px; color: var(--text-2); margin: 6px 2px 12px; }
 
 /* ---------- Investment goal tag ---------- */
@@ -1206,6 +1225,7 @@ html[data-theme="dark"] .set-btn.danger { color: var(--red); }
   <div class="seg-toggle" style="margin-bottom:14px">
     <button class="seg-opt active" data-view="forecasts" onclick="setPredictView('forecasts')">🔮 Forecasts</button>
     <button class="seg-opt" data-view="cashflow" onclick="setPredictView('cashflow')">💸 Cash Flow</button>
+    <button class="seg-opt" data-view="activity" onclick="setPredictView('activity')">📒 Activity</button>
   </div>
 
   <!-- ===== VIEW A: FORECASTS ===== -->
@@ -1279,6 +1299,21 @@ html[data-theme="dark"] .set-btn.danger { color: var(--red); }
     <p class="alert-split-sub" id="alertSplitSub"></p>
     <div id="alertsList"><!-- populated by JS --></div>
   </div>
+
+  <!-- ===== VIEW C: ACTIVITY (synced transactions log) ===== -->
+  <div id="predActivity" style="display:none">
+    <div class="card pred-card">
+      <div class="pred-head"><span class="pred-icon">📒</span><div><div class="eyebrow">Activity</div><div class="pred-sub" id="actSyncSub">Auto-synced from your bank emails every 3 hours</div></div></div>
+      <div class="seg-toggle" style="margin:4px 0 10px">
+        <button class="seg-opt active" data-group="day" onclick="setActGroup('day')">Day</button>
+        <button class="seg-opt" data-group="week" onclick="setActGroup('week')">Week</button>
+        <button class="seg-opt" data-group="month" onclick="setActGroup('month')">Month</button>
+      </div>
+      <div class="act-summary" id="actSummary"></div>
+      <button class="set-btn" id="actSyncBtn" onclick="syncNow()" style="margin-top:4px">🔄 Sync now</button>
+    </div>
+    <div id="actList"><!-- populated by JS --></div>
+  </div>
 </section>
 
 <!-- ================= 6. TAX ================= -->
@@ -1351,7 +1386,7 @@ const GEMINI_FALLBACK_MODELS = [
   'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-3.5-flash', 'gemini-2.5-flash-lite'
 ];
 
-const SHEET_TABS = ['CONFIG','ACCOUNTS','EQUITY_MF','GOLD','FIXED_INCOME','LIABILITIES','SUBSCRIPTIONS','CORE_EXPENSES','NET_WORTH','TAX'];
+const SHEET_TABS = ['CONFIG','ACCOUNTS','EQUITY_MF','GOLD','FIXED_INCOME','LIABILITIES','SUBSCRIPTIONS','CORE_EXPENSES','TRANSACTIONS','NET_WORTH','TAX'];
 
 const GEMINI_SYSTEM_PROMPT =
 `You are a personal finance advisor for AB, an Indian professional.
@@ -1848,6 +1883,7 @@ function applyLiveData() {
   applyInvest_();
   applyTax_();
   renderPredictions_();
+  renderActivity_();
   captureNetWorthHistory_();
 }
 
@@ -2119,6 +2155,124 @@ async function cardAdjust(name, op, idx) {
     if (r && r.ok) { if (inp) inp.value = ''; showDataNotice('Saved ✓ refreshing from your Sheet…'); await refreshData(true); }
     else throw new Error((r && r.detail) || (r && r.error) || 'write failed');
   } catch (e) { showDataNotice('Could not save — ' + (e.message || e), true); }
+}
+
+/* ----- Activity log (synced transactions) ----- */
+let actGroup = 'day';
+function parseTransactions_() {
+  const rows = sheetData.TRANSACTIONS || [];
+  const tx = [];
+  rows.forEach((r, i) => {
+    if (i === 0) return;
+    const id = (r[7] || '').trim(); const amt = toNum(r[2]);
+    if (!id || isNaN(amt)) return;
+    const d = new Date(r[0]);
+    tx.push({
+      date: isNaN(d.getTime()) ? null : d, merchant: (r[1] || '').trim(), amount: amt,
+      dir: /credit/i.test(r[3] || '') ? 'Credit' : 'Debit', account: (r[4] || '').trim(),
+      category: (r[5] || '').trim(), applied: /yes/i.test(r[6] || ''), id, note: (r[8] || '').trim()
+    });
+  });
+  tx.sort((a, b) => (b.date ? b.date.getTime() : 0) - (a.date ? a.date.getTime() : 0));
+  return tx;
+}
+function setActGroup(g) {
+  actGroup = g;
+  document.querySelectorAll('#predActivity .seg-opt[data-group]').forEach(b => b.classList.toggle('active', b.dataset.group === g));
+  renderActivity_();
+}
+function actInPeriod_(d, g) {
+  if (!d) return false;
+  const now = new Date();
+  if (g === 'day') return d.toDateString() === now.toDateString();
+  if (g === 'month') return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  return (now - d) < 7 * 86400000 && d <= now; // week = last 7 days
+}
+function actBucket_(d, g) {
+  if (!d) return 'Undated';
+  const now = new Date();
+  if (g === 'day') {
+    const yd = new Date(now.getTime() - 86400000);
+    if (d.toDateString() === now.toDateString()) return 'Today';
+    if (d.toDateString() === yd.toDateString()) return 'Yesterday';
+    return d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
+  }
+  if (g === 'month') return d.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+  const off = (d.getDay() + 6) % 7; const s = new Date(d); s.setDate(d.getDate() - off);
+  return 'Week of ' + s.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+}
+function renderActivity_() {
+  const tx = parseTransactions_();
+  const sumEl = document.getElementById('actSummary'), listEl = document.getElementById('actList');
+  if (!sumEl || !listEl) return;
+  // current-period summary for the selected grouping
+  const period = tx.filter(t => actInPeriod_(t.date, actGroup));
+  const spent = period.filter(t => t.dir === 'Debit').reduce((s, t) => s + t.amount, 0);
+  const recd = period.filter(t => t.dir === 'Credit').reduce((s, t) => s + t.amount, 0);
+  const label = actGroup === 'day' ? 'Today' : actGroup === 'week' ? 'This week' : 'This month';
+  sumEl.innerHTML =
+    `<div class="act-tile"><div class="at-l">${label} spent</div><div class="at-v" style="color:var(--red)">${fmtINR(spent)}</div></div>` +
+    `<div class="act-tile"><div class="at-l">Received</div><div class="at-v" style="color:var(--green)">${fmtINR(recd)}</div></div>` +
+    `<div class="act-tile"><div class="at-l">Net</div><div class="at-v">${recd - spent >= 0 ? '+' : '−'}${fmtINR(Math.abs(recd - spent))}</div></div>`;
+
+  if (!tx.length) { listEl.innerHTML = '<p class="drawer-empty" style="text-align:center">No transactions yet — tap Sync now, or wait for the 3-hourly sync</p>'; return; }
+
+  // duplicate heuristic: same amount + account within 2 days
+  tx.forEach((t, i) => {
+    t.dup = tx.some((o, j) => j !== i && o.amount === t.amount && o.account === t.account && o.dir === t.dir &&
+      t.date && o.date && Math.abs(t.date - o.date) < 2 * 86400000);
+  });
+
+  let html = '', lastBucket = null;
+  tx.slice(0, 200).forEach(t => {
+    const b = actBucket_(t.date, actGroup);
+    if (b !== lastBucket) { html += `<div class="alert-section-label">${escapeHtml(b)}</div>`; lastBucket = b; }
+    const sign = t.dir === 'Credit' ? '+' : '−';
+    const col = t.dir === 'Credit' ? 'var(--green)' : 'var(--red)';
+    const flags = (t.note && /review/i.test(t.note) ? '<span class="act-flag review">review</span>' : '') +
+      (t.dup ? '<span class="act-flag dup">possible dup</span>' : '') +
+      (!t.applied ? '<span class="act-flag">not applied</span>' : '');
+    html += `<div class="act-row">
+      <div class="act-main">
+        <div class="act-name">${escapeHtml(t.merchant)}</div>
+        <div class="act-sub">${escapeHtml(t.category || 'Uncategorised')}${t.account ? ' · ' + escapeHtml(t.account) : ''}${flags}</div>
+      </div>
+      <div class="act-right">
+        <div class="act-amt" style="color:${col}">${sign}${fmtINR(t.amount)}</div>
+        <div class="act-acts"><button onclick="editTxnCat('${t.id}')">✎</button><button onclick="deleteTxn('${t.id}')">🗑</button></div>
+      </div>
+    </div>`;
+  });
+  listEl.innerHTML = html;
+}
+
+async function syncNow() {
+  const creds = needsPrivateMode_(); if (!creds) return;
+  const btn = document.getElementById('actSyncBtn'); if (btn) { btn.disabled = true; btn.textContent = 'Syncing…'; }
+  try {
+    const r = await webAppJsonp_(creds.base + '?action=sync&token=' + encodeURIComponent(creds.token));
+    if (r && r.ok) { await refreshData(true); renderActivity_(); showDataNotice(`Synced ✓ ${r.added || 0} new transaction${r.added === 1 ? '' : 's'}`); }
+    else throw new Error((r && r.detail) || (r && r.error) || 'sync failed');
+  } catch (e) { showDataNotice('Sync failed — ' + (e.message || e), true); }
+  finally { if (btn) { btn.disabled = false; btn.textContent = '🔄 Sync now'; } }
+}
+async function editTxnCat(id) {
+  const creds = needsPrivateMode_(); if (!creds) return;
+  const tx = parseTransactions_().find(t => t.id === id); if (!tx) return;
+  const v = prompt('What was this for? (category / note)', tx.category || '');
+  if (v === null) return;
+  try {
+    const r = await webAppJsonp_(creds.base + '?action=editTxn&token=' + encodeURIComponent(creds.token) + '&id=' + encodeURIComponent(id) + '&category=' + encodeURIComponent(v.trim()));
+    if (r && r.ok) { await refreshData(true); renderActivity_(); } else throw new Error((r && r.detail) || 'failed');
+  } catch (e) { showDataNotice('Could not save — ' + (e.message || e), true); }
+}
+async function deleteTxn(id) {
+  const creds = needsPrivateMode_(); if (!creds) return;
+  if (!confirm('Delete this transaction? If it changed a balance, that change is reversed in your Sheet.')) return;
+  try {
+    const r = await webAppJsonp_(creds.base + '?action=deleteTxn&token=' + encodeURIComponent(creds.token) + '&id=' + encodeURIComponent(id));
+    if (r && r.ok) { await refreshData(true); renderActivity_(); showDataNotice('Deleted ✓'); } else throw new Error((r && r.detail) || 'failed');
+  } catch (e) { showDataNotice('Could not delete — ' + (e.message || e), true); }
 }
 
 // Log a bill payment → writes to the Sheet (private mode only), then re-pulls
@@ -2617,6 +2771,8 @@ function setPredictView(v) {
     b.classList.toggle('active', b.dataset.view === v));
   document.getElementById('predForecasts').style.display = v === 'forecasts' ? '' : 'none';
   document.getElementById('predCashflow').style.display = v === 'cashflow' ? '' : 'none';
+  document.getElementById('predActivity').style.display = v === 'activity' ? '' : 'none';
+  if (v === 'activity') renderActivity_();
   window.scrollTo({ top: 0 });
 }
 
