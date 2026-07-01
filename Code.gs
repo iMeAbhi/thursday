@@ -655,23 +655,56 @@ function syncTransactions() {
   var ss = getSS_();
   var key = getGeminiKey_();
   if (!key) { toast_('Add your Gemini key in CONFIG B6 to sync transactions'); return { added: 0, scanned: 0, note: 'no_key' }; }
+
+  // Serialize runs — syncing from phone and laptop at once must not double-log
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(5000)) return { added: 0, scanned: 0, note: 'busy' };
+  try { return doSync_(ss, key); }
+  finally { lock.releaseLock(); }
+}
+
+function doSync_(ss, key) {
   var sh = ss.getSheetByName('TRANSACTIONS');
   if (!sh) { buildTransactions_(ss); sh = ss.getSheetByName('TRANSACTIONS'); }
 
-  // Existing message IDs (dedup)
+  // Existing rows: build the id map AND auto-heal duplicates (same Msg ID logged
+  // twice by older concurrent syncs). Keep the first; reverse balance + delete the rest.
   var ids = {}, last = sh.getLastRow();
-  if (last > 1) sh.getRange(2, 8, last - 1, 1).getValues().forEach(function (r) { if (r[0]) ids[String(r[0])] = true; });
+  if (last > 1) {
+    var rows = sh.getRange(2, 1, last - 1, 9).getValues(), toDelete = [];
+    for (var i = 0; i < rows.length; i++) {
+      var rid = String(rows[i][7] || ''); if (!rid) continue;
+      if (ids[rid]) {
+        toDelete.push(2 + i);
+        if (String(rows[i][6]) === 'Yes') {
+          var m0 = matchAccount_(ss, String(rows[i][4]));
+          if (m0) applyTxnBalance_(m0, Number(rows[i][2]) || 0, rows[i][3], true);
+        }
+      } else ids[rid] = true;
+    }
+    for (var k = toDelete.length - 1; k >= 0; k--) sh.deleteRow(toDelete[k]);
+  }
 
-  // Broad net: bank/card alert wording. Gemini filters out non-transactions.
-  var q = 'newer_than:10d (debited OR credited OR spent OR paid OR payment OR transaction OR txn OR UPI OR ' +
-    'purchase OR received OR withdrawn OR "has been" OR "your account" OR "your card") -category:promotions -category:social';
+  // Skip messages already scanned in past runs that turned out NOT to be transactions
+  // (otherwise they clog every batch and newer emails never get reached)
+  var props = PropertiesService.getScriptProperties();
+  var seenArr = []; try { seenArr = JSON.parse(props.getProperty('FOS_SEEN_IDS') || '[]'); } catch (e) {}
+  var seen = {}; seenArr.forEach(function (x) { seen[x] = true; });
+
+  // Broad net: bank/card alert wording incl. debit/NACH/IMPS etc. Gemini filters the rest.
+  var q = 'newer_than:10d (debit OR debited OR credit OR credited OR spent OR paid OR payment OR transaction ' +
+    'OR txn OR UPI OR NACH OR IMPS OR NEFT OR RTGS OR autopay OR mandate OR purchase OR received OR withdrawn ' +
+    'OR deposited OR "A/C" OR "Avl Bal" OR "your account" OR "your card") -category:promotions -category:social';
   var threads = GmailApp.search(q, 0, 40), msgs = [];
   threads.forEach(function (t) {
-    t.getMessages().forEach(function (m) { if (!ids[m.getId()]) msgs.push(m); });
+    t.getMessages().forEach(function (m) {
+      var mid = m.getId();
+      if (!ids[mid] && !seen[mid]) msgs.push(m);
+    });
   });
   var scanned = msgs.length;
-  if (!msgs.length) { toast_('No matching bank emails found'); return { added: 0, scanned: 0 }; }
-  msgs = msgs.slice(0, 15); // cap per run so it finishes within the app's wait; re-run clears the rest
+  if (!msgs.length) { toast_('No new bank emails found'); return { added: 0, scanned: 0 }; }
+  msgs = msgs.slice(0, 15); // cap per run; the seen-list guarantees later runs reach the rest
 
   var items = msgs.map(function (m) {
     return { id: m.getId(), from: m.getFrom(), subject: m.getSubject(),
@@ -692,7 +725,16 @@ function syncTransactions() {
     sh.appendRow([when, p.merchant || '(unknown)', Number(p.amount), dir, match ? match.name : (p.accountHint || ''), p.category || '', applied, p.id, note]);
     ids[p.id] = true; added++;
   });
-  toast_(added + ' transaction(s) synced (' + scanned + ' emails scanned)');
+
+  // Remember every message scanned this run (txn or not) so it's never re-fetched.
+  // Skipped when Gemini errored, so a hiccup can't permanently hide messages.
+  if (!gemErr) {
+    msgs.forEach(function (m) { if (!seen[m.getId()]) seenArr.push(m.getId()); });
+    if (seenArr.length > 800) seenArr = seenArr.slice(seenArr.length - 800);
+    props.setProperty('FOS_SEEN_IDS', JSON.stringify(seenArr));
+  }
+
+  toast_(added + ' transaction(s) synced (' + msgs.length + ' emails processed)');
   return { added: added, scanned: scanned, batch: msgs.length, gemErr: gemErr };
 }
 

@@ -530,12 +530,13 @@ html[data-theme="light"] .card-act.paid { color: #fff; }
 .act-sub { font-size: 11.5px; color: var(--text-2); margin-top: 2px; }
 .act-right { text-align: right; }
 .act-amt { font-size: 15px; font-weight: 700; }
-.act-acts { margin-top: 3px; display: flex; gap: 8px; justify-content: flex-end; }
-.act-acts button { font-size: 13px; color: var(--text-3); min-height: 28px; min-width: 28px; }
+.act-acts { margin-top: 5px; display: flex; gap: 6px; justify-content: flex-end; }
+.act-acts button { font-size: 13px; color: var(--text-2); min-height: 32px; min-width: 32px;
+  border-radius: 100px; background: var(--surface-high); border: 1px solid var(--outline); }
 .act-flag { display: inline-block; margin-left: 6px; font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;
   padding: 1px 6px; border-radius: 100px; background: var(--gold-cont); color: var(--gold); }
 .act-flag.review { background: var(--gold-cont); color: var(--gold); }
-.act-flag.dup { background: var(--red-cont); color: var(--red); }
+.act-flag.dup { background: var(--red-cont); color: var(--red); cursor: pointer; border: 1px solid var(--red); padding: 2px 8px; }
 .alert-split-sub { font-size: 12px; color: var(--text-2); margin: 6px 2px 12px; }
 
 /* ---------- Investment goal tag ---------- */
@@ -2230,7 +2231,7 @@ function renderActivity_() {
     const sign = t.dir === 'Credit' ? '+' : '−';
     const col = t.dir === 'Credit' ? 'var(--green)' : 'var(--red)';
     const flags = (t.note && /review/i.test(t.note) ? '<span class="act-flag review">review</span>' : '') +
-      (t.dup ? '<span class="act-flag dup">possible dup</span>' : '') +
+      (t.dup ? `<button class="act-flag dup" onclick="deleteTxn('${t.id}')">possible dup — tap to remove</button>` : '') +
       (!t.applied ? '<span class="act-flag">not applied</span>' : '');
     html += `<div class="act-row">
       <div class="act-main">
@@ -2256,6 +2257,8 @@ async function syncNow() {
       await refreshData(true); renderActivity_();
       if (r.added > 0) {
         showDataNotice(`Synced ✓ ${r.added} new transaction${r.added === 1 ? '' : 's'} (from ${r.scanned} emails)`);
+      } else if (r.note === 'busy') {
+        showDataNotice('Another sync is already running (phone or laptop) — wait a minute, then pull to refresh.', true);
       } else if (r.note === 'no_key') {
         showDataNotice('Add your Gemini key in CONFIG cell B6 of your Sheet — the parser needs it.', true);
       } else if (!r.scanned) {
