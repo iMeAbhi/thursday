@@ -654,7 +654,7 @@ function applyTxnBalance_(match, amount, direction, reverse) {
 function syncTransactions() {
   var ss = getSS_();
   var key = getGeminiKey_();
-  if (!key) { toast_('Add your Gemini key in CONFIG B6 to sync transactions'); return 0; }
+  if (!key) { toast_('Add your Gemini key in CONFIG B6 to sync transactions'); return { added: 0, scanned: 0, note: 'no_key' }; }
   var sh = ss.getSheetByName('TRANSACTIONS');
   if (!sh) { buildTransactions_(ss); sh = ss.getSheetByName('TRANSACTIONS'); }
 
@@ -662,12 +662,15 @@ function syncTransactions() {
   var ids = {}, last = sh.getLastRow();
   if (last > 1) sh.getRange(2, 8, last - 1, 1).getValues().forEach(function (r) { if (r[0]) ids[String(r[0])] = true; });
 
-  var q = 'newer_than:4d (debited OR credited OR spent OR transaction OR txn OR UPI OR purchase OR received) -category:promotions -category:social';
-  var threads = GmailApp.search(q, 0, 30), msgs = [];
+  // Broad net: bank/card alert wording. Gemini filters out non-transactions.
+  var q = 'newer_than:10d (debited OR credited OR spent OR paid OR payment OR transaction OR txn OR UPI OR ' +
+    'purchase OR received OR withdrawn OR "has been" OR "your account" OR "your card") -category:promotions -category:social';
+  var threads = GmailApp.search(q, 0, 40), msgs = [];
   threads.forEach(function (t) {
     t.getMessages().forEach(function (m) { if (!ids[m.getId()]) msgs.push(m); });
   });
-  if (!msgs.length) { toast_('No new transaction emails'); return 0; }
+  var scanned = msgs.length;
+  if (!msgs.length) { toast_('No matching bank emails found'); return { added: 0, scanned: 0 }; }
   msgs = msgs.slice(0, 15); // cap per run so it finishes within the app's wait; re-run clears the rest
 
   var items = msgs.map(function (m) {
@@ -677,6 +680,7 @@ function syncTransactions() {
   var byId = {}; msgs.forEach(function (m) { byId[m.getId()] = m; });
 
   var parsed = geminiParseTxns_(key, items), added = 0;
+  var gemErr = (parsed.length === 0); // messages found but parser returned nothing
   parsed.forEach(function (p) {
     if (!p || !p.isTxn || !(Number(p.amount) > 0) || ids[p.id]) return;
     var dir = /credit|received|refund/i.test(p.direction || '') ? 'Credit' : 'Debit';
@@ -688,8 +692,8 @@ function syncTransactions() {
     sh.appendRow([when, p.merchant || '(unknown)', Number(p.amount), dir, match ? match.name : (p.accountHint || ''), p.category || '', applied, p.id, note]);
     ids[p.id] = true; added++;
   });
-  toast_(added + ' transaction(s) synced');
-  return added;
+  toast_(added + ' transaction(s) synced (' + scanned + ' emails scanned)');
+  return { added: added, scanned: scanned, batch: msgs.length, gemErr: gemErr };
 }
 
 /* Web-app: edit a logged transaction's category/note (by Msg ID) */
@@ -1080,7 +1084,10 @@ function doGet(e) {
     try { var na = writeCardAdjust_(params); payload = { ok: true, outstanding: na }; }
     catch (err) { payload = { error: 'write_failed', detail: String(err) }; }
   } else if (params.action === 'sync') {
-    try { var n = syncTransactions(); payload = { ok: true, added: n }; }
+    try {
+      var sres = syncTransactions();
+      payload = { ok: true, added: sres.added || 0, scanned: sres.scanned || 0, batch: sres.batch || 0, gemErr: !!sres.gemErr, note: sres.note || '' };
+    }
     catch (err) { payload = { error: 'sync_failed', detail: String(err) }; }
   } else if (params.action === 'editTxn') {
     try { editTxn_(params); payload = { ok: true }; }

@@ -2252,7 +2252,20 @@ async function syncNow() {
   try {
     // Reading Gmail + Gemini parsing is slow, especially the first run — wait up to 2 min
     const r = await webAppJsonp_(creds.base + '?action=sync&token=' + encodeURIComponent(creds.token), 120000);
-    if (r && r.ok) { await refreshData(true); renderActivity_(); showDataNotice(`Synced ✓ ${r.added || 0} new transaction${r.added === 1 ? '' : 's'}`); }
+    if (r && r.ok) {
+      await refreshData(true); renderActivity_();
+      if (r.added > 0) {
+        showDataNotice(`Synced ✓ ${r.added} new transaction${r.added === 1 ? '' : 's'} (from ${r.scanned} emails)`);
+      } else if (r.note === 'no_key') {
+        showDataNotice('Add your Gemini key in CONFIG cell B6 of your Sheet — the parser needs it.', true);
+      } else if (!r.scanned) {
+        showDataNotice('Gmail has no bank-alert emails from the last 10 days. Your banks likely alert by SMS only — enable email alerts in each bank\'s app, or forward SMS to Gmail.', true);
+      } else if (r.gemErr) {
+        showDataNotice(`Found ${r.scanned} emails but the parser returned nothing — likely a Gemini hiccup. Try Sync again in a minute.`, true);
+      } else {
+        showDataNotice(`Scanned ${r.scanned} emails — none were actual transactions (OTPs/promos/statements are skipped).`, true);
+      }
+    }
     else throw new Error((r && r.detail) || (r && r.error) || 'sync failed');
   } catch (e) {
     if (e.message === 'TIMEOUT') {
