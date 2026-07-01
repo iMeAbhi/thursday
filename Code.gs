@@ -593,11 +593,14 @@ var TXN_PROMPT =
 
 function geminiParseTxns_(key, items) {
   var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=' + encodeURIComponent(key);
-  var payload = {
-    contents: [{ role: 'user', parts: [{ text: TXN_PROMPT + '\nMessages:\n' + JSON.stringify(items) }] }],
-    generationConfig: { maxOutputTokens: 4096, temperature: 0.1 }
-  };
-  var res = UrlFetchApp.fetch(url, { method: 'post', contentType: 'application/json', muteHttpExceptions: true, payload: JSON.stringify(payload) });
+  var body = { contents: [{ role: 'user', parts: [{ text: TXN_PROMPT + '\nMessages:\n' + JSON.stringify(items) }] }] };
+  function call(gen) {
+    body.generationConfig = gen;
+    return UrlFetchApp.fetch(url, { method: 'post', contentType: 'application/json', muteHttpExceptions: true, payload: JSON.stringify(body) });
+  }
+  // Disable "thinking" for speed; retry without it if the model rejects that field
+  var res = call({ maxOutputTokens: 2048, temperature: 0.1, thinkingConfig: { thinkingBudget: 0 } });
+  if (res.getResponseCode() === 400) res = call({ maxOutputTokens: 2048, temperature: 0.1 });
   if (res.getResponseCode() !== 200) { Logger.log('Gemini ' + res.getResponseCode() + ': ' + res.getContentText().slice(0, 300)); return []; }
   var data = JSON.parse(res.getContentText());
   var text = data && data.candidates && data.candidates[0] && data.candidates[0].content &&
@@ -665,7 +668,7 @@ function syncTransactions() {
     t.getMessages().forEach(function (m) { if (!ids[m.getId()]) msgs.push(m); });
   });
   if (!msgs.length) { toast_('No new transaction emails'); return 0; }
-  msgs = msgs.slice(0, 25);
+  msgs = msgs.slice(0, 15); // cap per run so it finishes within the app's wait; re-run clears the rest
 
   var items = msgs.map(function (m) {
     return { id: m.getId(), from: m.getFrom(), subject: m.getSubject(),

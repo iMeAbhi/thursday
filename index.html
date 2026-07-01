@@ -1794,11 +1794,11 @@ async function fetchTab_(tab) {
 }
 
 /* ----- Private mode: personal Apps Script web app ----- */
-function webAppJsonp_(url) {
+function webAppJsonp_(url, timeoutMs) {
   return new Promise((resolve, reject) => {
     const cbName = 'fosWa_' + Date.now();
     const script = document.createElement('script');
-    const timer = setTimeout(() => { cleanup(); reject(new Error('TIMEOUT')); }, 20000);
+    const timer = setTimeout(() => { cleanup(); reject(new Error('TIMEOUT')); }, timeoutMs || 20000);
     function cleanup() { try { delete window[cbName]; } catch (e) {} script.remove(); clearTimeout(timer); }
     window[cbName] = (resp) => { cleanup(); resolve(resp); };
     script.src = url + '&callback=' + cbName;
@@ -2248,12 +2248,21 @@ function renderActivity_() {
 
 async function syncNow() {
   const creds = needsPrivateMode_(); if (!creds) return;
-  const btn = document.getElementById('actSyncBtn'); if (btn) { btn.disabled = true; btn.textContent = 'Syncing…'; }
+  const btn = document.getElementById('actSyncBtn'); if (btn) { btn.disabled = true; btn.textContent = 'Syncing… (up to a minute)'; }
   try {
-    const r = await webAppJsonp_(creds.base + '?action=sync&token=' + encodeURIComponent(creds.token));
+    // Reading Gmail + Gemini parsing is slow, especially the first run — wait up to 2 min
+    const r = await webAppJsonp_(creds.base + '?action=sync&token=' + encodeURIComponent(creds.token), 120000);
     if (r && r.ok) { await refreshData(true); renderActivity_(); showDataNotice(`Synced ✓ ${r.added || 0} new transaction${r.added === 1 ? '' : 's'}`); }
     else throw new Error((r && r.detail) || (r && r.error) || 'sync failed');
-  } catch (e) { showDataNotice('Sync failed — ' + (e.message || e), true); }
+  } catch (e) {
+    if (e.message === 'TIMEOUT') {
+      // The server may still be finishing — pull fresh data anyway
+      showDataNotice('Sync is still running on the server — pull down to refresh in a minute to see new transactions.', true);
+      setTimeout(() => { refreshData(true).then(renderActivity_); }, 8000);
+    } else {
+      showDataNotice('Sync failed — ' + (e.message || e), true);
+    }
+  }
   finally { if (btn) { btn.disabled = false; btn.textContent = '🔄 Sync now'; } }
 }
 async function editTxnCat(id) {
